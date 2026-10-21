@@ -18,19 +18,28 @@ public final class CocoonStageSyncPacket {
     private final boolean reversed;
     private final boolean trialsUnlocked;
     private final int completedTrialMask;
+    private final int thunderStrikes;
+    private final int thunderKills;
+    private final int earthExplosions;
 
     public CocoonStageSyncPacket(
             int stage,
             int acquiredCoreMask,
             boolean reversed,
             boolean trialsUnlocked,
-            int completedTrialMask
+            int completedTrialMask,
+            int thunderStrikes,
+            int thunderKills,
+            int earthExplosions
     ) {
         this.stage = Math.max(0, Math.min(12, stage));
         this.acquiredCoreMask = acquiredCoreMask & 0x1FFF;
         this.reversed = reversed;
         this.trialsUnlocked = trialsUnlocked;
         this.completedTrialMask = completedTrialMask & 0xFFF;
+        this.thunderStrikes = Math.max(0, Math.min(5, thunderStrikes));
+        this.thunderKills = Math.max(0, Math.min(20, thunderKills));
+        this.earthExplosions = Math.max(0, Math.min(10, earthExplosions));
     }
 
     public int getStage() {
@@ -53,6 +62,18 @@ public final class CocoonStageSyncPacket {
         return completedTrialMask;
     }
 
+    public int getThunderStrikes() {
+        return thunderStrikes;
+    }
+
+    public int getThunderKills() {
+        return thunderKills;
+    }
+
+    public int getEarthExplosions() {
+        return earthExplosions;
+    }
+
     public static void encode(
             CocoonStageSyncPacket message,
             FriendlyByteBuf buffer
@@ -62,6 +83,9 @@ public final class CocoonStageSyncPacket {
         buffer.writeBoolean(message.reversed);
         buffer.writeBoolean(message.trialsUnlocked);
         buffer.writeVarInt(message.completedTrialMask);
+        buffer.writeVarInt(message.thunderStrikes);
+        buffer.writeVarInt(message.thunderKills);
+        buffer.writeVarInt(message.earthExplosions);
     }
 
     public static CocoonStageSyncPacket decode(FriendlyByteBuf buffer) {
@@ -70,6 +94,9 @@ public final class CocoonStageSyncPacket {
                 buffer.readVarInt(),
                 buffer.readBoolean(),
                 buffer.readBoolean(),
+                buffer.readVarInt(),
+                buffer.readVarInt(),
+                buffer.readVarInt(),
                 buffer.readVarInt()
         );
     }

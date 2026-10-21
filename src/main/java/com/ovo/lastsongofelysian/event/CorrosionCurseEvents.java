@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.dimension.ModDimensions;
 import com.ovo.lastsongofelysian.entity.CorrosionMirrorEntity;
 import com.ovo.lastsongofelysian.lastsongofelysian;
@@ -8,6 +10,7 @@ import com.ovo.lastsongofelysian.network.ModNetwork;
 import com.ovo.lastsongofelysian.registry.ModEntities;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -61,6 +64,7 @@ import java.util.UUID;
 )
 public final class CorrosionCurseEvents {
 
+
     private static final String NBT_PLAYER_PERSISTED = "PlayerPersisted";
     private static final String NBT_ACQUIRED = "LSECorrosionCurseAcquired";
     private static final String NBT_CLEARED_BY_ORIGIN = "LSECorrosionCurseClearedByOrigin";
@@ -101,6 +105,9 @@ public final class CorrosionCurseEvents {
     public static boolean hasCurse(Player player) {
         CompoundTag data = getData(player);
         return data.getBoolean(NBT_ACQUIRED)
+                && !FenghuangDownSystem.isCocoonConnectionSevered(player)
+                && !CocoonCoreProgress.hasAcquiredCore(
+                player, ModItems.CORE_OF_CORROSION.get())
                 && !CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION);
     }
 
@@ -198,6 +205,8 @@ public final class CorrosionCurseEvents {
 
         if (event.getTo().equals(ModDimensions.ELYSIAN_REALM)
                 && !hasCurse(player)
+                && !CocoonCoreProgress.hasAcquiredCore(
+                player, ModItems.CORE_OF_CORROSION.get())
                 && !CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)) {
             CompoundTag data = getData(player);
             long now = player.level().getGameTime();
@@ -276,13 +285,6 @@ public final class CorrosionCurseEvents {
         if (player.tickCount % 20 == 0) {
             syncToClient(player);
         }
-    }
-
-    public static void restoreForTrials(Player player) {
-        CompoundTag data = getData(player);
-        data.putBoolean(NBT_ACQUIRED, true);
-        data.remove(NBT_CLEARED_BY_ORIGIN);
-        syncToClient(player);
     }
 
     public static void clearCurseAfterTrial(Player player) {
@@ -385,7 +387,6 @@ public final class CorrosionCurseEvents {
         if (!(event.getSource().getEntity() instanceof Player player)) return;
         if (!mirror.belongsTo(player)) return;
 
-        CocoonTrialProgress.recordCorrosionMirrorKill(player);
         SignetEffects.reduceCorruptionByPercent(player, 0.05F);
     }
 
@@ -501,7 +502,7 @@ public final class CorrosionCurseEvents {
             }
 
             player.displayClientMessage(
-                    Component.literal("附近检测到 " + dangers.size() + " 个敌对目标")
+                    ModText.literal("附近检测到 " + dangers.size() + " 个敌对目标")
                             .withStyle(ChatFormatting.AQUA),
                     true
             );
@@ -532,7 +533,7 @@ public final class CorrosionCurseEvents {
                 0.65F + player.getRandom().nextFloat() * 0.70F
         );
         player.displayClientMessage(
-                Component.literal("……")
+                ModText.literal("……")
                         .withStyle(ChatFormatting.DARK_PURPLE),
                 true
         );
@@ -821,7 +822,7 @@ public final class CorrosionCurseEvents {
                 friendly ? 1.35F : 0.70F
         );
         player.displayClientMessage(
-                Component.literal(friendly
+                ModText.literal(friendly
                                 ? "镜像已出现"
                                 : "侵蚀镜像已出现")
                         .withStyle(friendly ? ChatFormatting.AQUA : ChatFormatting.DARK_PURPLE),
@@ -904,7 +905,7 @@ public final class CorrosionCurseEvents {
         if (!data.getBoolean(NBT_PULSE_WARNED) && now >= next - 60L) {
             data.putBoolean(NBT_PULSE_WARNED, true);
             player.displayClientMessage(
-                    Component.literal(reversed ? "净化脉冲正在聚集" : "终末脉冲正在聚集")
+                    ModText.literal(reversed ? "净化脉冲正在聚集" : "终末脉冲正在聚集")
                             .withStyle(reversed ? ChatFormatting.AQUA : ChatFormatting.DARK_PURPLE),
                     true
             );
@@ -951,7 +952,8 @@ public final class CorrosionCurseEvents {
                 player.getBoundingBox().inflate(16.0D),
                 entity -> entity instanceof Enemy && entity.isAlive()
         )) {
-            enemy.hurt(player.damageSources().playerAttack(player), 6.0F + ratio * 8.0F);
+            PlayerControlledAllies.hurt(player, enemy,
+                    player.damageSources().playerAttack(player), 6.0F + ratio * 8.0F);
         }
 
         List<MobEffect> harmful = new ArrayList<>();

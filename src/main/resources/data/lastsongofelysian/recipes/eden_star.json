@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "combat",
+  "pattern": [
+    "DSE",
+    "NFG",
+    "LIR"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond_block"
+    },
+    "S": {
+      "item": "lastsongofelysian:soul_steel_block"
+    },
+    "E": {
+      "item": "minecraft:emerald_block"
+    },
+    "N": {
+      "item": "minecraft:netherite_block"
+    },
+    "F": {
+      "item": "lastsongofelysian:core_of_earth"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "L": {
+      "item": "minecraft:lapis_block"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "item": "lastsongofelysian:eden_star"
+  },
+  "show_notification": true
+}

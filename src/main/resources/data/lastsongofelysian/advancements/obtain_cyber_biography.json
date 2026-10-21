@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:open_history_book",
+  "display": {
+    "icon": { "item": "lastsongofelysian:cyber_character_biography" },
+    "title": { "translate": "advancement.lastsongofelysian.obtain_cyber_biography.title" },
+    "description": { "translate": "advancement.lastsongofelysian.obtain_cyber_biography.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:cyber_character_biography"] }] } } }
+}

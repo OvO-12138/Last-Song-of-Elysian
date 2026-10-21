@@ -1,0 +1,17 @@
+{
+  "name": "休伯利安日志",
+  "icon": "lastsongofelysian:hyperion_log",
+  "category": "lastsongofelysian:getting_started",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "欢迎登舰",
+      "text": "建议先认识饰品栏与技能操作，再准备银币和往世乐土入口，前往乐土。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:hyperion_log"
+    }
+  ]
+}

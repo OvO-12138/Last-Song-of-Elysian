@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.screen;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.network.ModNetwork;
 import com.ovo.lastsongofelysian.network.SilverPouchActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +20,7 @@ public class SilverPouchScreen extends Screen {
     private Button customWithdrawButton;
 
     public SilverPouchScreen(long balance) {
-        super(Component.literal("银币袋"));
+        super(ModText.literal("银币袋"));
         this.balance = balance;
     }
 
@@ -28,7 +30,7 @@ public class SilverPouchScreen extends Screen {
         int cy = height / 2;
 
         addRenderableWidget(Button.builder(
-                Component.literal("存入所有银币"),
+                ModText.literal("存入所有银币"),
                 btn -> {
                     ModNetwork.CHANNEL.sendToServer(
                             new SilverPouchActionPacket(SilverPouchActionPacket.Action.DEPOSIT_ALL));
@@ -37,7 +39,7 @@ public class SilverPouchScreen extends Screen {
         ).bounds(cx - 75, cy + 5, 150, 20).build());
 
         addRenderableWidget(Button.builder(
-                Component.literal("取出 64 枚"),
+                ModText.literal("取出 64 枚"),
                 btn -> {
                     ModNetwork.CHANNEL.sendToServer(
                             new SilverPouchActionPacket(SilverPouchActionPacket.Action.WITHDRAW_64));
@@ -51,15 +53,15 @@ public class SilverPouchScreen extends Screen {
                 cy + 55,
                 95,
                 20,
-                Component.literal("取出数量")
+                ModText.literal("取出数量")
         );
         amountInput.setMaxLength(19);
         amountInput.setFilter(SilverPouchScreen::isValidNumberInput);
-        amountInput.setHint(Component.literal("输入数量"));
+        amountInput.setHint(ModText.literal("输入数量"));
         addRenderableWidget(amountInput);
 
         customWithdrawButton = addRenderableWidget(Button.builder(
-                Component.literal("取出"),
+                ModText.literal("取出"),
                 btn -> withdrawCustomAmount()
         ).bounds(cx + 25, cy + 55, 50, 20).build());
         customWithdrawButton.active = false;
@@ -107,9 +109,8 @@ public class SilverPouchScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(guiGraphics);
-        guiGraphics.drawCenteredString(font, "✦ 银币袋 ✦", width / 2, height / 2 - 35, 0xFFD700);
-        guiGraphics.drawCenteredString(font,
-                "余额：" + balance + " 枚", width / 2, height / 2 - 12, 0xFFEE88);
+        guiGraphics.drawCenteredString(font, ModText.display("✦ 银币袋 ✦"), width / 2, height / 2 - 35, 0xFFD700);
+        guiGraphics.drawCenteredString(font, ModText.display("余额：" + balance + " 枚"), width / 2, height / 2 - 12, 0xFFEE88);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 

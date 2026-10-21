@@ -1,0 +1,42 @@
+{
+  "parent": "lastsongofelysian:signet_ego",
+  "display": {
+    "icon": { "item": "lastsongofelysian:core_of_origin" },
+    "title": { "translate": "advancement.lastsongofelysian.core_origin.title" },
+    "description": { "translate": "advancement.lastsongofelysian.core_origin.description" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "ego": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_ego"] }] } },
+    "reason": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_reason"] }] } },
+    "void": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_void"] }] } },
+    "thunder": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_thunder"] }] } },
+    "wind": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_wind"] }] } },
+    "ice": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_ice"] }] } },
+    "death": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_death"] }] } },
+    "fire": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_fire"] }] } },
+    "sentience": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_sentience"] }] } },
+    "earth": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_earth"] }] } },
+    "dominance": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_dominance"] }] } },
+    "binding": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_binding"] }] } },
+    "corrosion": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_corrosion"] }] } }
+  },
+  "requirements": [
+    ["ego"],
+    ["reason"],
+    ["void"],
+    ["thunder"],
+    ["wind"],
+    ["ice"],
+    ["death"],
+    ["fire"],
+    ["sentience"],
+    ["earth"],
+    ["dominance"],
+    ["binding"],
+    ["corrosion"]
+  ]
+}

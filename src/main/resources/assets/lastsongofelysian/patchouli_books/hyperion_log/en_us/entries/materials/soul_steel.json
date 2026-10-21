@@ -1,0 +1,27 @@
+{
+  "name": "魂钢",
+  "icon": "lastsongofelysian:soul_steel_ingot",
+  "category": "lastsongofelysian:materials",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "魂钢",
+      "text": "魂钢是制作多种特殊武器的重要材料。$(br2)合成魂钢锭时可使用任意律者核心，核心在合成后保留。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:soul_steel_ingot"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:soul_steel_block",
+      "recipe2": "lastsongofelysian:soul_steel_ingots_from_block"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:soul_steel_ingot_from_nuggets",
+      "recipe2": "lastsongofelysian:soul_steel_nuggets_from_ingot"
+    }
+  ]
+}

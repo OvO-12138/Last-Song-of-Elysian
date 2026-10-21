@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:core_origin",
+  "display": {
+    "icon": { "item": "lastsongofelysian:cocoon_of_finality" },
+    "title": { "translate": "advancement.lastsongofelysian.start_finality_trials.title" },
+    "description": { "translate": "advancement.lastsongofelysian.start_finality_trials.description" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "started": { "trigger": "minecraft:impossible" } }
+}

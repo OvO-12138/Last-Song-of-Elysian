@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -41,7 +43,7 @@ public class RemembranceSigilItem extends Item implements ICurioItem {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("星级：" + "★".repeat(stars))
+        tooltip.add(ModText.literal("星级：" + "★".repeat(stars))
                 .withStyle(ChatFormatting.GOLD));
 
         String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
@@ -63,7 +65,7 @@ public class RemembranceSigilItem extends Item implements ICurioItem {
                 }
                 tooltip.add(line.isEmpty()
                         ? Component.empty()
-                        : Component.literal(line).withStyle(
+                        : ModText.literal(line).withStyle(
                                 i == 0 ? deep : inDialogue ? dialogue : light));
             }
         }

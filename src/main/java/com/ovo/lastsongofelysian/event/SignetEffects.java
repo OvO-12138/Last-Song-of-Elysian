@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.network.ComboSyncPacket;
 import com.ovo.lastsongofelysian.network.CorruptionSyncPacket;
@@ -8,8 +10,15 @@ import com.ovo.lastsongofelysian.network.PreceptSyncPacket;
 import com.ovo.lastsongofelysian.network.SakuraDodgeEffectPacket;
 import com.ovo.lastsongofelysian.registry.ModEffects;
 import com.ovo.lastsongofelysian.registry.ModItems;
+import com.ovo.lastsongofelysian.util.EgoSignetAmplification;
+import com.ovo.lastsongofelysian.util.FenghuangDownEnergy;
+import com.ovo.lastsongofelysian.util.AbyssFlowerEnergy;
 import com.ovo.lastsongofelysian.util.FlawlessWeaponEnergy;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
+import com.ovo.lastsongofelysian.util.SkyfireGreatswordEnergy;
+import com.ovo.lastsongofelysian.util.EdenStarEnergy;
+import com.ovo.lastsongofelysian.util.ElysianHeroExplosionProtection;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData.Skill;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -21,7 +30,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -40,7 +51,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -49,6 +59,7 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent;
 import net.minecraftforge.event.TickEvent;
@@ -72,6 +83,25 @@ public class SignetEffects {
 
     private static final Random RAND = new Random();
 
+
+    private static final ThreadLocal<Deque<PenetrationContext>> PENETRATION_CONTEXTS =
+            ThreadLocal.withInitial(ArrayDeque::new);
+
+    private static final class PenetrationContext {
+        private final LivingEntity target;
+        private final DamageSource source;
+        private float penetration;
+
+        private PenetrationContext(LivingEntity target, DamageSource source) {
+            this.target = target;
+            this.source = source;
+        }
+
+        private boolean matches(LivingEntity target, DamageSource source) {
+            return this.target == target && this.source == source;
+        }
+    }
+
     @SubscribeEvent
     public static void onMobKill(LivingDropsEvent event) {
         if (!(event.getSource().getEntity() instanceof Player player)) {
@@ -92,21 +122,10 @@ public class SignetEffects {
             return;
         }
 
-        boolean hasReverie = CuriosApi.getCuriosHelper()
-                .findFirstCurio(
-                        player,
-                        stack -> stack.is(ModItems.SIGNET_OF_REVERIE.get())
-                )
-                .isPresent();
-
-        if (hasReverie) {
-            int bonus = Math.max(
-                    1,
-                    (int) Math.ceil(
-                            amount * signetBoost(player, Skill.REVERIE_SILVER, 0.10F)
-                    )
-            );
-
+        if (hasItem(player, ModItems.SIGNET_OF_REVERIE.get())) {
+            int bonus = Math.max(1, (int) Math.ceil(amount
+                    * signetBoost(player, Skill.REVERIE_SILVER, 0.10F)
+                    * ReverieSignetSystem.ordinaryBonusMultiplier(player)));
             amount = Math.min(10, amount + bonus);
         }
 
@@ -157,7 +176,9 @@ public class SignetEffects {
 
     @SubscribeEvent
     public static void onInkDamage(LivingDamageEvent event) {
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
         LivingEntity target = event.getEntity();
+        if (PlayerControlledAllies.isElysianHero(target)) return;
         MobEffectInstance redInk = target.getEffect(ModEffects.RED_INK.get());
         if (redInk != null) {
             float bonus = 0.10F * SignetUpgradeData.factorForLevel(redInk.getAmplifier());
@@ -173,13 +194,66 @@ public class SignetEffects {
         }
     }
 
+    private static PenetrationContext findPenetrationContext(
+            LivingEntity target,
+            DamageSource source
+    ) {
+        for (PenetrationContext context : PENETRATION_CONTEXTS.get()) {
+            if (context.matches(target, source)) return context;
+        }
+        return null;
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
+    public static void beginPenetrationContext(LivingHurtEvent event) {
+        if (event.getEntity().level().isClientSide()) return;
+        PENETRATION_CONTEXTS.get().push(
+                new PenetrationContext(event.getEntity(), event.getSource())
+        );
+    }
+
+    private static void discardPenetrationContext(LivingEntity target, DamageSource source) {
+        Deque<PenetrationContext> contexts = PENETRATION_CONTEXTS.get();
+        Iterator<PenetrationContext> iterator = contexts.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().matches(target, source)) {
+                iterator.remove();
+                break;
+            }
+        }
+        if (contexts.isEmpty()) PENETRATION_CONTEXTS.remove();
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    public static void discardCanceledPenetrationContext(LivingHurtEvent event) {
+        if (event.isCanceled() || event.getAmount() <= 0.0F) {
+            discardPenetrationContext(event.getEntity(), event.getSource());
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    public static void finishPenetrationContext(LivingDamageEvent event) {
+        discardPenetrationContext(event.getEntity(), event.getSource());
+    }
+
+    public static boolean hasActivePenetration(LivingEntity target, DamageSource source) {
+        PenetrationContext context = findPenetrationContext(target, source);
+        return context != null && context.penetration > 0.0F;
+    }
+
+    public static float activePenetration(LivingEntity target, DamageSource source) {
+        PenetrationContext context = findPenetrationContext(target, source);
+        return context == null ? 0.0F : context.penetration;
+    }
+
     @SubscribeEvent
     public static void onReverieExperience(PlayerXpEvent.XpChange event) {
         Player player = event.getEntity();
-        if (event.getAmount() <= 0 || !hasItem(player, ModItems.SIGNET_OF_REVERIE.get())) return;
-        int bonus = Math.max(1, Math.round(
-                event.getAmount() * signetBoost(player, Skill.REVERIE_EXPERIENCE, 1.0F)
-        ));
+        if (player.level().isClientSide() || event.getAmount() <= 0
+                || !hasItem(player, ModItems.SIGNET_OF_REVERIE.get())) return;
+        int bonus = Math.max(1, Math.round(event.getAmount()
+                * signetBoost(player, Skill.REVERIE_EXPERIENCE, 1.0F)
+                * ReverieSignetSystem.ordinaryBonusMultiplier(player)));
         event.setAmount(event.getAmount() + bonus);
     }
 
@@ -232,6 +306,20 @@ public class SignetEffects {
     private static final int PRECEPT_MAX = 100;
     private static final double PRECEPT_DAMAGE_BONUS = 0.003, PRECEPT_DEFENSE_BONUS = 0.0015;
     private static final float PRECEPT_DEFENSE_CAP = 0.30F;
+    private static final Map<UUID, Long> disciplineUltimateEnd = new HashMap<>();
+    private static final Map<UUID, Long> disciplineUltimatePenetrationEnd = new HashMap<>();
+    private static final Map<UUID, Long> disciplineUnyieldingEnd = new HashMap<>();
+    private static final Map<UUID, Long> disciplineMountainNext = new HashMap<>();
+    private static final Map<UUID, Long> disciplineMountainDamageEnd = new HashMap<>();
+    private static final Map<UUID, Float> disciplineMountainDamageBonus = new HashMap<>();
+    private static final Map<UUID, Map<UUID, Integer>> disciplineMountainHits = new HashMap<>();
+    private static final Map<UUID, Long> disciplineVirtuePenetrationEnd = new HashMap<>();
+    private static final Map<UUID, Float> disciplineVirtuePenetration = new HashMap<>();
+    private static final Map<UUID, Long> disciplinePunishmentEnd = new HashMap<>();
+    private static final Map<UUID, Long> disciplineRetaliationNext = new HashMap<>();
+    private static final Set<UUID> disciplineRetaliationGuard = new HashSet<>();
+    private static final Map<UUID, Long> disciplineFalseSpeechEnd = new HashMap<>();
+    private static final Map<UUID, Float> disciplineFalseSpeechPower = new HashMap<>();
 
     public static int getPreceptCount(Player player) {
         return player == null ? 0 : preceptCount.getOrDefault(player.getUUID(), 0);
@@ -245,6 +333,10 @@ public class SignetEffects {
     private static final Map<UUID, Float> deliveranceHolyShieldAmount = new HashMap<>();
     private static final Map<UUID, Long> deliveranceSeekersRobeEnd = new HashMap<>();
     private static final Map<UUID, Long> deliveranceSeekersRobeNextPulse = new HashMap<>();
+    private static final Set<UUID> deliveranceFenghuangEnergyTargets = new HashSet<>();
+    private static final Set<UUID> deliveranceAbyssEnergyTargets = new HashSet<>();
+    private static final Set<UUID> deliveranceSkyfireEnergyTargets = new HashSet<>();
+    private static final Set<UUID> deliveranceEdenEnergyTargets = new HashSet<>();
     private static final UUID DELIVERANCE_ANTI_STAGGER_UUID =
             UUID.fromString("861f501d-9f9a-4b7d-bb8c-0eb34b74029a");
     private static final UUID DELIVERANCE_ULTIMATE_BUFF_UUID =
@@ -257,9 +349,13 @@ public class SignetEffects {
     private static final Map<UUID, Float> deliveranceDecisionDamageBonus = new HashMap<>();
     private static final Map<UUID, Long> deliveranceTriumphIgnoreDefenseEnd = new HashMap<>();
     private static final Set<UUID> deliveranceTriumphTriggered = new HashSet<>();
-    private static final Map<UUID, Long> deliveranceTriumphVulnerabilityEnd = new HashMap<>();
-    private static final Map<UUID, Float> deliveranceTriumphVulnerability = new HashMap<>();
+    private static final Map<UUID, Map<UUID, DeliveranceTriumphVulnerability>>
+            deliveranceTriumphVulnerabilities = new HashMap<>();
+    private static final Set<UUID> deliveranceTriumphOwners = new HashSet<>();
     private static final Set<UUID> deliveranceFinalBurstGuard = new HashSet<>();
+
+    private record DeliveranceTriumphVulnerability(float amount, long end) {
+    }
 
     private static final UUID EGO_SPEED_UUID = UUID.fromString("e1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6d");
     private static final UUID EGO_ATTACK_UUID = UUID.fromString("f1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6e");
@@ -282,7 +378,6 @@ public class SignetEffects {
     private static final float COCOON_CORRUPTION_CAPACITY_MULTIPLIER = 0.40f;
     private static final String NBT_HIDDEN_ATTRIBUTE_SLOT = "CocoonHiddenAttributeSlot";
     private static final int HIDDEN_ATTRIBUTE_SLOT_COUNT = 6;
-    private static final Map<Long, Long> goldFurnaceLastBoostTick = new HashMap<>();
     private static final Set<UUID> effectDurationRescaleGuard = new HashSet<>();
     private static final String NBT_PLAYER_PERSISTED = "PlayerPersisted";
     private static CompoundTag getPersistedData(Player player) {
@@ -358,26 +453,26 @@ public class SignetEffects {
         };
 
         player.displayClientMessage(
-                Component.literal("崩坏能抗性测试完成：评级 " + rank + "，崩坏能容量 " + Math.round(capacity))
+                ModText.literal("崩坏能抗性测试完成：评级 " + rank + "，崩坏能容量 " + Math.round(capacity))
                         .withStyle(color),
                 false
         );
 
         if ("E".equals(rank)) {
             player.displayClientMessage(
-                    Component.literal("检测结果异常：崩坏能适应性极低，反应失控。")
+                    ModText.literal("检测结果异常：崩坏能适应性极低，反应失控。")
                             .withStyle(ChatFormatting.DARK_RED),
                     false
             );
 
-            player.level().explode(
+            ElysianHeroExplosionProtection.run(() -> player.level().explode(
                     player,
                     player.getX(),
                     player.getY(),
                     player.getZ(),
                     4.0F,
                     Level.ExplosionInteraction.MOB
-            );
+            ));
         }
     }
 
@@ -409,7 +504,8 @@ public class SignetEffects {
     private static final int SPAWN_INVINCIBILITY_DURATION = 2400;
 
     private static boolean isWearingCocoon(Player player) {
-        return hasItem(player, ModItems.COCOON_OF_FINALITY.get());
+        return !FenghuangDownSystem.isCocoonConnectionSevered(player)
+                && hasItem(player, ModItems.COCOON_OF_FINALITY.get());
     }
 
     private static boolean hasCocoon(Player player) {
@@ -418,7 +514,12 @@ public class SignetEffects {
 
     private static boolean hasCorrosionCocoonCurse(Player player) {
         return isWearingCocoon(player)
-                && !CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION);
+                && !isCorrosionCleared(player);
+    }
+
+    private static boolean isCorrosionCleared(Player player) {
+        return CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)
+                || CocoonCoreProgress.hasAcquiredCore(player, ModItems.CORE_OF_CORROSION.get());
     }
 
     private static boolean hasItem(Player player, Item item) {
@@ -428,18 +529,34 @@ public class SignetEffects {
     }
 
     private static boolean hasEgoAnd(Player player, Item item) {
-        return hasItem(player, ModItems.SIGNET_OF_EGO.get()) && hasItem(player, item);
+        return EgoSignetAmplification.isEnabledFor(player, item);
     }
 
     private static boolean hasEgo(Player player) {
         return hasItem(player, ModItems.SIGNET_OF_EGO.get());
     }
 
+    private static boolean hasFlawlessBenediction(Player player) {
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            if (inventory.getItem(slot).is(ModItems.FLAWLESS_BENEDICTION_LEGACY.get())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static float egoBoost(Player player, float baseValue) {
+        if (hasFlawlessBenediction(player)) {
+            return baseValue * 14.14F;
+        }
         return hasEgo(player) ? baseValue * SignetUpgradeData.egoMultiplier(player) : baseValue;
     }
 
     private static double egoBoost(Player player, double baseValue) {
+        if (hasFlawlessBenediction(player)) {
+            return baseValue * 14.14D;
+        }
         return hasEgo(player) ? baseValue * SignetUpgradeData.egoMultiplier(player) : baseValue;
     }
 
@@ -535,22 +652,7 @@ public class SignetEffects {
     }
 
     private static float compensateArmorForStarsIgnoreDefense(LivingEntity target, DamageSource source, float desiredDamage) {
-        if (desiredDamage <= 0.0F) return desiredDamage;
-        if (source.is(DamageTypeTags.BYPASSES_ARMOR)) return desiredDamage;
-
-        float armor = target.getArmorValue();
-        float toughness = (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-        if (armor <= 0.0F && toughness <= 0.0F) return desiredDamage;
-
-        float compensated = desiredDamage;
-        for (int i = 0; i < 8; i++) {
-            float afterArmor = getDamageAfterArmorAbsorb(compensated, armor, toughness);
-            if (afterArmor <= 0.0001F) break;
-            float ratio = desiredDamage / afterArmor;
-            if (Math.abs(1.0F - ratio) < 0.001F) break;
-            compensated *= ratio;
-        }
-        return Math.max(desiredDamage, compensated);
+        return applyArmorPenetration(target, source, desiredDamage, 1.0F);
     }
 
     private static float getDamageAfterArmorAbsorb(float damage, float armor, float toughness) {
@@ -562,6 +664,53 @@ public class SignetEffects {
         return damage * (1.0F - armorReduction / 25.0F);
     }
 
+    public static float getDamageAfterArmorWithPenetration(
+            LivingEntity target,
+            DamageSource source,
+            float damage
+    ) {
+        if (!hasActivePenetration(target, source)
+                || source.is(DamageTypeTags.BYPASSES_ARMOR)) {
+            return damage;
+        }
+        float penetration = activePenetration(target, source);
+        float armor = target.getArmorValue() * (1.0F - penetration);
+        float toughness = (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+        return getDamageAfterArmorAbsorb(damage, Math.max(0.0F, armor), toughness);
+    }
+
+    public static float getDamageAfterMagicWithPenetration(
+            LivingEntity target,
+            DamageSource source,
+            float damage
+    ) {
+        if (!hasActivePenetration(target, source)
+                || source.is(DamageTypeTags.BYPASSES_EFFECTS)) {
+            return damage;
+        }
+
+        float penetration = activePenetration(target, source);
+        MobEffectInstance resistance = target.getEffect(MobEffects.DAMAGE_RESISTANCE);
+        if (resistance != null && !source.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
+            float reduction = Mth.clamp(
+                    (resistance.getAmplifier() + 1) * 5.0F / 25.0F,
+                    0.0F,
+                    1.0F
+            );
+            damage *= 1.0F - reduction * (1.0F - penetration);
+        }
+
+        if (damage <= 0.0F || source.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
+            return Math.max(0.0F, damage);
+        }
+        int protection = EnchantmentHelper.getDamageProtection(
+                target.getArmorSlots(), source
+        );
+        return protection > 0
+                ? CombatRules.getDamageAfterMagicAbsorb(damage, protection)
+                : damage;
+    }
+
     private static CompoundTag getPermanentPlayerData(Player player) {
         CompoundTag root = player.getPersistentData();
         CompoundTag persisted = root.getCompound(NBT_PLAYER_PERSISTED);
@@ -570,7 +719,7 @@ public class SignetEffects {
     }
 
     public static float getCorruptionEnergy(Player player) {
-        if (CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)) return 0.0F;
+        if (isCorrosionCleared(player)) return 0.0F;
         return corruptionEnergy.computeIfAbsent(
                 player.getUUID(),
                 ignored -> loadCorruptionEnergy(player)
@@ -584,7 +733,8 @@ public class SignetEffects {
     }
 
     public static float getCorruptionCapacity(Player player) {
-        float capacity = getInnateCorruptionCapacity(player);
+        float capacity = getInnateCorruptionCapacity(player)
+                * VicissitudeSignetSystem.corruptionCapacityMultiplier(player);
 
         if (!hasCorrosionCocoonCurse(player)) {
             return capacity;
@@ -639,7 +789,7 @@ public class SignetEffects {
         if (
                 player.level().isClientSide() ||
                 basePercent <= 0.0F ||
-                CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)
+                isCorrosionCleared(player)
         ) {
             return false;
         }
@@ -699,7 +849,7 @@ public class SignetEffects {
 
     public static boolean reduceCorruptionByPercent(Player player, float percentOfMax) {
         if (player.level().isClientSide()
-                || CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)) return false;
+                || isCorrosionCleared(player)) return false;
 
         UUID uuid = player.getUUID();
         float maxCorruption = getCorruptionCapacity(player);
@@ -1096,10 +1246,10 @@ public class SignetEffects {
             }
         }
 
-        boolean hasVicissitude = CuriosApi.getCuriosHelper()
-                .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_VICISSITUDE.get())).isPresent();
+        boolean hasVicissitude = false;
 
-        boolean hasEgoVicissitude = hasVicissitude && hasEgo(player);
+        boolean hasEgoVicissitude = hasVicissitude
+                && EgoSignetAmplification.isEnabled(player);
         AttributeInstance knockbackResistance =
                 player.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
 
@@ -1182,18 +1332,28 @@ public class SignetEffects {
 
         handleHelixMagic(player);
 
-        handleGoldFurnaceBoost(player);
-
         boolean hasDiscipline = CuriosApi.getCuriosHelper()
                 .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_DISCIPLINE.get())).isPresent();
         if (hasDiscipline) {
-            boolean hasEgoSignet = hasEgo(player);
+            boolean hasEgoSignet = EgoSignetAmplification.isEnabled(player);
             int currentMax = PRECEPT_MAX + (hasEgoSignet ? 30 : 0);
-            int preceptGain = 5;
+            if (SignetUpgradeData.hasDisciplineCoreSignet(player, Skill.DISCIPLINE_ASCETIC_LIFE)) {
+                currentMax += Math.round(SignetUpgradeData.scaleBonus(
+                        player, Skill.DISCIPLINE_ASCETIC_LIFE, 20.0F));
+            }
+            int preceptGain = SignetUpgradeData.getDisciplineCore(player)
+                    == SignetUpgradeData.DisciplineCore.BLESSING ? 10 : 5;
             if (player.tickCount % 20 == 0) {
                 int current = preceptCount.getOrDefault(uuid, 0);
                 if (current < currentMax) preceptCount.put(uuid, Math.min(current + preceptGain, currentMax));
             }
+            int current = preceptCount.getOrDefault(uuid, 0);
+            if (SignetUpgradeData.hasDisciplineCoreSignet(player, Skill.DISCIPLINE_ASCETIC_LIFE)
+                    && current < 60) {
+                preceptCount.put(uuid, 60);
+                current = 60;
+            }
+            handleDisciplineCoreTick(player, current);
             ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
                     new PreceptSyncPacket(preceptCount.getOrDefault(uuid, 0)));
         } else {
@@ -1203,6 +1363,9 @@ public class SignetEffects {
                         PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
                         new PreceptSyncPacket(0));
             }
+            updateDisciplineCoreEffects(player, false, false);
+            player.removeEffect(ModEffects.DISCIPLINE_PUNISHMENT.get());
+            clearDisciplineRuntime(uuid);
         }
 
         boolean hasDeliverance = hasItem(player, ModItems.SIGNET_OF_DELIVERANCE.get());
@@ -1219,8 +1382,6 @@ public class SignetEffects {
             }
         }
         handleDeliveranceSecondaryTick(player);
-
-        boolean hasEgo = hasItem(player, ModItems.SIGNET_OF_EGO.get());
 
         AttributeInstance egoSpeedAttr = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (egoSpeedAttr != null) {
@@ -1372,7 +1533,7 @@ public class SignetEffects {
     private static void handleCorruptionSystem(Player player) {
         UUID uuid = player.getUUID();
 
-        if (CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)) {
+        if (isCorrosionCleared(player)) {
             if (corruptionEnergy.getOrDefault(uuid, loadCorruptionEnergy(player)) > 0.0F) {
                 clearCorruption(player);
             }
@@ -1420,14 +1581,14 @@ public class SignetEffects {
             player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, overflowEffectDuration, 0, false, false));
 
             if (player.getHealth() <= 1.0f) {
-                player.level().explode(
+                ElysianHeroExplosionProtection.run(() -> player.level().explode(
                         player,
                         player.getX(),
                         player.getY(),
                         player.getZ(),
                         4.0f,
                         Level.ExplosionInteraction.MOB
-                );
+                ));
 
                 corruptionEnergy.put(uuid, 0.0f);
                 saveCorruptionEnergy(player, 0.0f);
@@ -1462,7 +1623,7 @@ public class SignetEffects {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onInfinityFatalDamage(LivingDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (player.level().isClientSide()) return;
@@ -1517,6 +1678,7 @@ public class SignetEffects {
 
     @SubscribeEvent
     public static void onDaybreakDamage(LivingDamageEvent event) {
+        if (DaybreakSignetSystem.isInternalDamage()) return;
         if (!(event.getSource().getEntity() instanceof Player player)) return;
         if (player.level().isClientSide() || event.getAmount() <= 0) return;
 
@@ -1526,6 +1688,7 @@ public class SignetEffects {
         if (!hasDaybreak) return;
 
         LivingEntity target = event.getEntity();
+        if (PlayerControlledAllies.isProtectedEffectTarget(player, target)) return;
         MobEffectInstance existing = target.getEffect(ModEffects.LACERATION.get());
         int preStacks = existing != null ? existing.getAmplifier() + 1 : 0;
 
@@ -1551,20 +1714,17 @@ public class SignetEffects {
 
         event.setAmount(amount);
 
-        int maxStacks = LACERATION_MAX_STACKS;
-        if (hasEgoAnd(player, ModItems.SIGNET_OF_DAYBREAK.get())) maxStacks += 18;
-        int newStacks = Math.min(preStacks + 1, maxStacks);
-        target.getPersistentData().putFloat(
-                NBT_LACERATION_POWER,
-                signetBoost(player, Skill.DAYBREAK_CLAW, 0.5F)
-        );
-        target.addEffect(new MobEffectInstance(ModEffects.LACERATION.get(), LACERATION_DURATION, newStacks - 1, false, true));
+        DaybreakSignetSystem.addLaceration(player, target, 1);
     }
 
     @SubscribeEvent
     public static void onLacerationTick(LivingEvent.LivingTickEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide()) return;
+        if (PlayerControlledAllies.isElysianHero(entity)) {
+            entity.removeEffect(ModEffects.LACERATION.get());
+            return;
+        }
         if (entity.tickCount % 20 != 0) return;
 
         MobEffectInstance instance = entity.getEffect(ModEffects.LACERATION.get());
@@ -1574,7 +1734,10 @@ public class SignetEffects {
         float power = entity.getPersistentData().contains(NBT_LACERATION_POWER)
                 ? entity.getPersistentData().getFloat(NBT_LACERATION_POWER)
                 : 0.5F;
-        entity.hurt(entity.damageSources().magic(), power * stacks);
+        float damage = power * stacks;
+        if (!DaybreakSignetSystem.applySelfLacerationTick(entity, damage)) {
+            entity.hurt(entity.damageSources().magic(), damage);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -1592,9 +1755,11 @@ public class SignetEffects {
 
         long gameTime = player.level().getGameTime();
         Long cooldownEnd = EVADE_COOLDOWNS.get(player.getUUID());
-        if (cooldownEnd != null && gameTime < cooldownEnd) return;
+        boolean usingExtraCharge = cooldownEnd != null && gameTime < cooldownEnd;
+        if (usingExtraCharge && !SetsunaSignetSystem.hasExtraEvasionCharge(player)) return;
 
         if (RAND.nextFloat() < signetChance(player, Skill.SETSURA_DODGE, 0.2F)) {
+            if (usingExtraCharge && !SetsunaSignetSystem.consumeExtraEvasionCharge(player)) return;
             event.setAmount(0);
             applyEvadeBuffs(player, gameTime);
 
@@ -1602,39 +1767,85 @@ public class SignetEffects {
                     PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
                     new SakuraDodgeEffectPacket());
 
-            int cooldown = Math.max(
-                    20,
-                    Math.round(
-                            EVADE_COOLDOWN_TICKS * SignetUpgradeData.setsuraCooldownMultiplier(player)
-                    )
-            );
-            if (hasEgoAnd(player, ModItems.SIGNET_OF_SETSURA.get())) cooldown = Math.max(20, Math.round(cooldown * 0.68F));
-            EVADE_COOLDOWNS.put(player.getUUID(), gameTime + cooldown);
+            if (!usingExtraCharge) {
+                int cooldown = Math.max(
+                        20,
+                        Math.round(
+                                EVADE_COOLDOWN_TICKS
+                                        * SignetUpgradeData.setsuraCooldownMultiplier(player)
+                                        * SetsunaSignetSystem.cooldownMultiplier(player)
+                        )
+                );
+                if (hasEgoAnd(player, ModItems.SIGNET_OF_SETSURA.get())) cooldown = Math.max(20, Math.round(cooldown * 0.68F));
+                EVADE_COOLDOWNS.put(player.getUUID(), gameTime + cooldown);
+                SetsunaSignetSystem.resetExtraEvasionCharge(player);
+            }
+            SetsunaSignetSystem.onSuccessfulEvasion(player);
+            DaybreakSignetSystem.onSuccessfulEvasion(player);
+            StarsSignetSystem.onEvasion(player);
+            ReverieSignetSystem.onEvasion(player);
         }
 
         if (event.getAmount() == 0) {
             if (CuriosApi.getCuriosHelper()
                     .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_DISCIPLINE.get()))
                     .isPresent()) {
-                int current = preceptCount.getOrDefault(player.getUUID(), 0);
-                if (current > 0) {
-                    boolean hasEgo = CuriosApi.getCuriosHelper()
-                            .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_EGO.get()))
-                            .isPresent();
-                    float removeRatio = hasEgo ? 0.25f : 0.5f;
-                    int removeAmount = (int)(current * removeRatio);
-                    int updated = current - removeAmount;
-                    preceptCount.put(player.getUUID(), updated);
-                    ModNetwork.CHANNEL.send(
-                            PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                            new PreceptSyncPacket(updated));
-                }
+                reducePrecept(player);
             }
         }
     }
 
+    public static boolean hasSetsunaEvasion(Player player) {
+        return player != null && CuriosApi.getCuriosHelper()
+                .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_SETSURA.get()))
+                .isPresent();
+    }
+
+    public static int getSetsunaEvasionCooldown(Player player) {
+        if (player == null) return 0;
+        long remaining = EVADE_COOLDOWNS.getOrDefault(player.getUUID(), 0L)
+                - player.level().getGameTime();
+        return (int) Mth.clamp(remaining, 0L, Integer.MAX_VALUE);
+    }
+
+    public static int getSetsunaEvasionCooldownMaximum(Player player) {
+        if (player == null) return EVADE_COOLDOWN_TICKS;
+        int cooldown = Math.max(20, Math.round(
+                EVADE_COOLDOWN_TICKS
+                        * SignetUpgradeData.setsuraCooldownMultiplier(player)
+                        * SetsunaSignetSystem.cooldownMultiplier(player)));
+        if (hasEgoAnd(player, ModItems.SIGNET_OF_SETSURA.get())) {
+            cooldown = Math.max(20, Math.round(cooldown * 0.68F));
+        }
+        return cooldown;
+    }
+
+    public static int getSetsunaEvasionMaximumUses(Player player) {
+        return SignetUpgradeData.isSetsuraSecondarySkillUnlocked(
+                player, SignetUpgradeData.Skill.SETSURA_WISTERIA) ? 2 : 1;
+    }
+
+    public static int getSetsunaEvasionUses(Player player) {
+        if (player == null) return 0;
+        int uses = getSetsunaEvasionCooldown(player) <= 0 ? 1 : 0;
+        if (SetsunaSignetSystem.hasExtraEvasionCharge(player)) uses++;
+        return Math.min(getSetsunaEvasionMaximumUses(player), uses);
+    }
+
     private static boolean isInstakill(DamageSource source) {
         return source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
+    }
+
+    public static void reduceSetsunaEvadeCooldown(Player player, float fraction) {
+        if (player == null) return;
+        long now = player.level().getGameTime();
+        Long until = EVADE_COOLDOWNS.get(player.getUUID());
+        if (until == null || until <= now) return;
+        float reduction = Mth.clamp(fraction, 0.0F, 0.95F);
+        EVADE_COOLDOWNS.put(
+                player.getUUID(),
+                now + Math.max(1L, Math.round((until - now) * (1.0F - reduction)))
+        );
     }
 
     private static void applyEvadeBuffs(Player player, long gameTime) {
@@ -1665,6 +1876,8 @@ public class SignetEffects {
     @SubscribeEvent
     public static void onDecimationEffect(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) return;
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
 
         if (event.getEntity() instanceof Player player) {
             boolean has = CuriosApi.getCuriosHelper()
@@ -1705,17 +1918,13 @@ public class SignetEffects {
 
     @SubscribeEvent
     public static void onVicissitudeResistance(LivingHurtEvent event) {
-        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
-        if (!hasItem(player, ModItems.SIGNET_OF_VICISSITUDE.get())) return;
-        int stacks = resistanceStacks.getOrDefault(player.getUUID(), 0);
-        if (stacks > 0) {
-            event.setAmount(applyIndependentReduction(event.getAmount(), 0.20F * stacks));
-        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBodhiDamageBonus(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) return;
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
 
         if (event.getSource().getEntity() instanceof Player attacker) {
             if (hasItem(attacker, ModItems.SIGNET_OF_BODHI.get())
@@ -1742,40 +1951,50 @@ public class SignetEffects {
     @SubscribeEvent
     public static void onBodhiCombo(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) return;
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
+        if (EdenStarSystem.isBlackHoleComboDamage(event.getSource())) return;
         if (!(event.getSource().getEntity() instanceof Player player)) return;
+        if (BodhiSignetSystem.isInternalDamage(player)) return;
+
+        addCombo(player, 1);
+    }
+
+    public static int getComboCount(Player player) {
+        return player == null ? 0 : comboCount.getOrDefault(player.getUUID(), 0);
+    }
+
+    public static int addCombo(Player player, int amount) {
+        if (player == null || player.level().isClientSide() || amount <= 0) {
+            return getComboCount(player);
+        }
 
         boolean hasBodhi = CuriosApi.getCuriosHelper()
                 .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_BODHI.get()))
                 .isPresent();
         boolean hasDiscipline = hasItem(player, ModItems.SIGNET_OF_DISCIPLINE.get());
-        if (!hasBodhi && !hasDiscipline) return;
+        if (!hasBodhi && !hasDiscipline) return 0;
 
         UUID uuid = player.getUUID();
-        int combo = comboCount.merge(uuid, 1, Integer::sum);
+        int previous = comboCount.getOrDefault(uuid, 0);
+        int combo = Math.min(15, previous + amount);
+        comboCount.put(uuid, combo);
         comboResetTimer.put(uuid, 60);
+
+        if (hasBodhi) {
+            BodhiSignetSystem.onComboAdvanced(player, previous, combo);
+        }
 
         if (combo >= 15) {
             comboCount.put(uuid, 0);
             if (hasBodhi) {
                 bodhiDmgTicks.put(uuid, 100);
                 bodhiDefTicks.put(uuid, 100);
+                BodhiSignetSystem.onComboFifteen(player);
             }
             combo = 0;
 
             if (hasDiscipline) {
-                int current = preceptCount.getOrDefault(uuid, 0);
-                if (current > 0) {
-                    boolean hasEgo = CuriosApi.getCuriosHelper()
-                            .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_EGO.get()))
-                            .isPresent();
-                    float removeRatio = hasEgo ? 0.25f : 0.5f;
-                    int removeAmount = (int)(current * removeRatio);
-                    int updated = current - removeAmount;
-                    preceptCount.put(uuid, updated);
-                    ModNetwork.CHANNEL.send(
-                            PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
-                            new PreceptSyncPacket(updated));
-                }
+                reducePrecept(player);
             }
         }
 
@@ -1783,17 +2002,118 @@ public class SignetEffects {
         ModNetwork.CHANNEL.send(
                 PacketDistributor.PLAYER.with(() -> (ServerPlayer) player),
                 new ComboSyncPacket(displayCombo));
+        return combo;
+    }
+
+    private static void reducePrecept(Player player) {
+        UUID uuid = player.getUUID();
+        long now = player.level().getGameTime();
+        if (disciplineUnyieldingEnd.getOrDefault(uuid, 0L) >= now) return;
+        int current = preceptCount.getOrDefault(uuid, 0);
+        if (current <= 0) return;
+        float removeRatio = EgoSignetAmplification.isEnabled(player) ? 0.25F : 0.50F;
+        int minimum = SignetUpgradeData.hasDisciplineCoreSignet(
+                player, Skill.DISCIPLINE_ASCETIC_LIFE) ? 60 : 0;
+        int updated = Math.max(minimum, current - Math.max(1, (int) (current * removeRatio)));
+        if (updated >= current) return;
+        preceptCount.put(uuid, updated);
+        if (SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                player, Skill.DISCIPLINE_FIVE)) {
+            triggerFalseSpeech(player);
+        }
+        if (player instanceof ServerPlayer serverPlayer) {
+            ModNetwork.CHANNEL.send(
+                    PacketDistributor.PLAYER.with(() -> serverPlayer),
+                    new PreceptSyncPacket(updated));
+        }
+    }
+
+    private static void triggerFalseSpeech(Player player) {
+        float power = SignetUpgradeData.scaleBonus(player, Skill.DISCIPLINE_FIVE, 0.20F);
+        long end = player.level().getGameTime() + 100L;
+        player.level().getEntitiesOfClass(
+                LivingEntity.class,
+                player.getBoundingBox().inflate(64.0D),
+                entity -> PlayerControlledAllies.isValidEnemy(player, entity)
+        ).forEach(entity -> {
+            UUID targetId = entity.getUUID();
+            disciplineFalseSpeechEnd.put(targetId, end);
+            disciplineFalseSpeechPower.put(
+                    targetId,
+                    Math.max(power, disciplineFalseSpeechPower.getOrDefault(targetId, 0.0F))
+            );
+        });
+    }
+
+    public static void onWeaponUltimateActivated(Player player, int durationTicks) {
+        if (player == null || player.level().isClientSide()) return;
+        DaybreakSignetSystem.onWeaponUltimateActivated(player);
+        StarsSignetSystem.onUltimate(player);
+        ReverieSignetSystem.onUltimate(player);
+        if (!hasItem(player, ModItems.SIGNET_OF_DISCIPLINE.get())) return;
+        disciplineUltimateEnd.put(
+                player.getUUID(),
+                player.level().getGameTime() + Math.max(1, durationTicks)
+        );
+    }
+
+    public static float getDisciplineUltimateDamageMultiplier(Player player) {
+        if (player == null || !hasItem(player, ModItems.SIGNET_OF_DISCIPLINE.get())) return 1.0F;
+        long now = player.level().getGameTime();
+        if (disciplineUltimateEnd.getOrDefault(player.getUUID(), 0L) < now) return 1.0F;
+        int count = preceptCount.getOrDefault(player.getUUID(), 0);
+        float multiplier = SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                player, Skill.DISCIPLINE_FOUR)
+                ? 1.0F + count * SignetUpgradeData.scaleBonus(
+                player, Skill.DISCIPLINE_FOUR, 0.003F)
+                : 1.0F;
+        if (SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                player, Skill.DISCIPLINE_SIX)
+                && disciplineUnyieldingEnd.getOrDefault(player.getUUID(), 0L) >= now) {
+            multiplier *= 1.0F + SignetUpgradeData.scaleBonus(
+                    player, Skill.DISCIPLINE_SIX, 0.40F);
+        }
+        if (SignetUpgradeData.getDisciplineCore(player)
+                == SignetUpgradeData.DisciplineCore.ASCETICISM && count >= 90) {
+            int signetCount = getDisciplineSignetCount(player);
+            multiplier *= 1.25F + signetCount * 0.05F;
+            if (SignetUpgradeData.hasDisciplineCoreSignet(
+                    player, Skill.DISCIPLINE_ASCETIC_PROOF)) {
+                multiplier *= 1.0F + SignetUpgradeData.scaleBonus(
+                        player, Skill.DISCIPLINE_ASCETIC_PROOF, 0.20F);
+            }
+        }
+        multiplier *= 1.0F + disciplineMountainDamageBonus.getOrDefault(
+                player.getUUID(), 0.0F);
+        if (disciplinePunishmentEnd.getOrDefault(player.getUUID(), 0L) >= now
+                && SignetUpgradeData.hasDisciplineCoreSignet(
+                player, Skill.DISCIPLINE_BLESSING_RETURN)) {
+            multiplier *= 1.0F + disciplineAugmentValue(
+                    player, Skill.DISCIPLINE_BLESSING_RETURN, 0.26F);
+        }
+        return multiplier;
     }
 
     public static void onWeaponSkillActivated(Player player) {
+        if (player == null || player.level().isClientSide()) return;
+        DaybreakSignetSystem.onWeaponSkillActivated(player);
+        StarsSignetSystem.onWeaponSkill(player);
         UUID uuid = player.getUUID();
-        int stacks = helixMagicStacks.getOrDefault(uuid, 0);
-        if (stacks < HELIX_MAGIC_MAX_STACKS) {
-            stacks++;
-            helixMagicStacks.put(uuid, stacks);
+        if (hasItem(player, ModItems.SIGNET_OF_HELIX.get())) {
+            int stacks = helixMagicStacks.getOrDefault(uuid, 0);
+            if (stacks < HELIX_MAGIC_MAX_STACKS) {
+                stacks++;
+                helixMagicStacks.put(uuid, stacks);
+            }
+            helixMagicTimer.put(uuid, player.level().getGameTime() + HELIX_MAGIC_DURATION_TICKS);
+            onWeaponSkillActivatedPendulum(player);
         }
-        helixMagicTimer.put(uuid, player.level().getGameTime() + HELIX_MAGIC_DURATION_TICKS);
-        onWeaponSkillActivatedPendulum(player);
+        if (hasItem(player, ModItems.SIGNET_OF_DISCIPLINE.get())
+                && SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                player, Skill.DISCIPLINE_FOUR)) {
+            reducePrecept(player);
+        }
+        HelixSignetSystem.onWeaponSkillActivated(player);
     }
 
     private static void handleHelixMagic(Player player) {
@@ -1811,7 +2131,8 @@ public class SignetEffects {
         float power = signetBoost(player, Skill.HELIX_PENDULUM, 0.20F);
         player.level().getEntitiesOfClass(LivingEntity.class,
                         player.getBoundingBox().inflate(16.0),
-                        e -> e instanceof Enemy && e.isAlive())
+                        e -> e instanceof Enemy
+                                && PlayerControlledAllies.isValidEnemy(player, e))
                 .forEach(target -> {
                     target.addEffect(new MobEffectInstance(MobEffects.GLOWING, 90, 0, false, false));
                     helixPendulumTimer.put(target.getUUID(), expire);
@@ -1822,6 +2143,7 @@ public class SignetEffects {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onHelixDamage(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) return;
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
 
         if (event.getSource().getEntity() instanceof Player player
                 && hasItem(player, ModItems.SIGNET_OF_HELIX.get())) {
@@ -1856,9 +2178,202 @@ public class SignetEffects {
         }
     }
 
+    private static void handleDisciplineCoreTick(Player player, int precept) {
+        UUID uuid = player.getUUID();
+        long now = player.level().getGameTime();
+        SignetUpgradeData.DisciplineCore core = SignetUpgradeData.getDisciplineCore(player);
+        boolean asceticism = core == SignetUpgradeData.DisciplineCore.ASCETICISM
+                && precept >= 90;
+        boolean blessing = core == SignetUpgradeData.DisciplineCore.BLESSING
+                && precept > 80;
+        updateDisciplineCoreEffects(player, asceticism, blessing);
+        if (blessing) {
+            long next = disciplineMountainNext.getOrDefault(uuid, 0L);
+            if (now >= next) {
+                disciplineMountainNext.put(uuid, now + 100L);
+                triggerDisciplineMountain(player, precept);
+            }
+        } else {
+            disciplineMountainNext.remove(uuid);
+        }
+        if (disciplineMountainDamageEnd.getOrDefault(uuid, 0L) < now) {
+            disciplineMountainDamageBonus.remove(uuid);
+        }
+        if (disciplineVirtuePenetrationEnd.getOrDefault(uuid, 0L) < now) {
+            disciplineVirtuePenetration.remove(uuid);
+        }
+    }
+
+    private static void updateDisciplineCoreEffects(
+            Player player,
+            boolean asceticism,
+            boolean blessing
+    ) {
+        if (asceticism) {
+            if (!player.hasEffect(ModEffects.DISCIPLINE_ASCETICISM.get())) {
+                player.addEffect(new MobEffectInstance(
+                        ModEffects.DISCIPLINE_ASCETICISM.get(), -1, 0, false, false, true));
+            }
+        } else {
+            player.removeEffect(ModEffects.DISCIPLINE_ASCETICISM.get());
+        }
+        if (blessing) {
+            if (!player.hasEffect(ModEffects.DISCIPLINE_BLESSING.get())) {
+                player.addEffect(new MobEffectInstance(
+                        ModEffects.DISCIPLINE_BLESSING.get(), -1, 0, false, false, true));
+            }
+        } else {
+            player.removeEffect(ModEffects.DISCIPLINE_BLESSING.get());
+        }
+    }
+
+    private static int getDisciplineSignetCount(Player player) {
+        int ordinary = 3 + Integer.bitCount(
+                SignetUpgradeData.getDisciplineSecondaryUnlockMask(player) & 0b111);
+        int core = SignetUpgradeData.getDisciplineCore(player) == null ? 0 : 1;
+        int augments = Integer.bitCount(
+                SignetUpgradeData.getDisciplineCoreSignetMask(player) & 0b111111);
+        return ordinary + core + augments;
+    }
+
+    private static void triggerDisciplineMountain(Player player, int precept) {
+        boolean virtue = SignetUpgradeData.hasDisciplineCoreSignet(
+                player, Skill.DISCIPLINE_BLESSING_VIRTUE);
+        boolean punishment = SignetUpgradeData.hasDisciplineCoreSignet(
+                player, Skill.DISCIPLINE_BLESSING_PUNISHMENT);
+        boolean returnSignet = SignetUpgradeData.hasDisciplineCoreSignet(
+                player, Skill.DISCIPLINE_BLESSING_RETURN);
+        float damage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE) * 10.0F;
+        if (virtue) {
+            damage *= 1.0F + disciplineAugmentValue(
+                    player, Skill.DISCIPLINE_BLESSING_VIRTUE, 0.30F);
+            disciplineVirtuePenetration.put(
+                    player.getUUID(),
+                    Math.min(0.95F, precept * disciplineAugmentValue(
+                            player, Skill.DISCIPLINE_BLESSING_VIRTUE, 0.0013F))
+            );
+            disciplineVirtuePenetrationEnd.put(
+                    player.getUUID(), player.level().getGameTime() + 120L);
+        }
+        if (returnSignet) {
+            disciplinePunishmentEnd.put(player.getUUID(), player.level().getGameTime() + 160L);
+            player.addEffect(new MobEffectInstance(
+                    ModEffects.DISCIPLINE_PUNISHMENT.get(),
+                    160,
+                    0,
+                    false,
+                    false,
+                    true
+            ));
+        }
+        List<LivingEntity> targets = player.level().getEntitiesOfClass(
+                LivingEntity.class,
+                player.getBoundingBox().inflate(10.0D),
+                entity -> PlayerControlledAllies.isValidEnemy(player, entity)
+        );
+        Map<UUID, Integer> hitCounts = disciplineMountainHits.computeIfAbsent(
+                player.getUUID(), ignored -> new HashMap<>());
+        int hitEnemies = 0;
+        for (LivingEntity target : targets) {
+            if (PlayerControlledAllies.hurt(player, target,
+                    player.damageSources().playerAttack(player), damage)) {
+                hitCounts.merge(target.getUUID(), 1, Integer::sum);
+                hitEnemies++;
+                if (punishment) {
+                    addHeldWeaponEnergy(player, Math.max(1, Math.round(
+                            disciplineAugmentValue(
+                                    player, Skill.DISCIPLINE_BLESSING_PUNISHMENT, 5.0F))));
+                }
+            }
+        }
+        if (hitEnemies > 0) {
+            float current = disciplineMountainDamageBonus.getOrDefault(player.getUUID(), 0.0F);
+            disciplineMountainDamageBonus.put(
+                    player.getUUID(), Math.min(0.40F, current + hitEnemies * 0.10F));
+            disciplineMountainDamageEnd.put(
+                    player.getUUID(), player.level().getGameTime() + 200L);
+        }
+    }
+
+    private static float disciplineAugmentValue(Player player, Skill skill, float base) {
+        float value = SignetUpgradeData.scaleBonus(player, skill, base);
+        int mask = SignetUpgradeData.getDisciplineCoreSignetMask(player);
+        int relevantMask = skill.disciplineCore() == SignetUpgradeData.DisciplineCore.ASCETICISM
+                ? 0b000111 : 0b111000;
+        return Integer.bitCount(mask & relevantMask) == 1 ? value * 1.5F : value;
+    }
+
+    private static void addHeldWeaponEnergy(Player player, int amount) {
+        ItemStack weapon = player.getMainHandItem();
+        if (weapon.is(ModItems.FLAWLESS_BENEDICTION_LEGACY.get())) {
+            FlawlessWeaponEnergy.addEnergy(player, weapon, amount);
+        } else if (weapon.is(ModItems.FENGHUANG_DOWN.get())) {
+            FenghuangDownEnergy.addEnergy(player, weapon, amount);
+        } else if (weapon.is(ModItems.ABYSS_FLOWER.get())) {
+            AbyssFlowerEnergy.add(player, weapon, amount);
+        } else if (weapon.is(ModItems.SKYFIRE_GREATSWORD.get())) {
+            SkyfireGreatswordEnergy.add(player, weapon, amount);
+        } else if (weapon.is(ModItems.EDEN_STAR.get())) {
+            EdenStarEnergy.add(player, weapon, amount);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDisciplineUnitDeath(LivingDeathEvent event) {
+        if (event.getEntity().level().isClientSide()) return;
+        long end = event.getEntity().level().getGameTime() + 200L;
+        for (Player player : event.getEntity().level().players()) {
+            if (player.distanceToSqr(event.getEntity()) > 4096.0D
+                    || !hasItem(player, ModItems.SIGNET_OF_DISCIPLINE.get())
+                    || !SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                    player, Skill.DISCIPLINE_SIX)) continue;
+            disciplineUnyieldingEnd.put(player.getUUID(), end);
+        }
+    }
+
+    private static void clearDisciplineRuntime(UUID uuid) {
+        disciplineUltimateEnd.remove(uuid);
+        disciplineUltimatePenetrationEnd.remove(uuid);
+        disciplineUnyieldingEnd.remove(uuid);
+        disciplineMountainNext.remove(uuid);
+        disciplineMountainDamageEnd.remove(uuid);
+        disciplineMountainDamageBonus.remove(uuid);
+        disciplineMountainHits.remove(uuid);
+        disciplineVirtuePenetrationEnd.remove(uuid);
+        disciplineVirtuePenetration.remove(uuid);
+        disciplinePunishmentEnd.remove(uuid);
+        disciplineRetaliationNext.remove(uuid);
+    }
+
+    public static void resetDisciplineCoreRuntime(Player player) {
+        if (player == null) return;
+        UUID id = player.getUUID();
+        disciplineUltimatePenetrationEnd.remove(id);
+        disciplineMountainNext.remove(id);
+        disciplineMountainDamageEnd.remove(id);
+        disciplineMountainDamageBonus.remove(id);
+        disciplineMountainHits.remove(id);
+        disciplineVirtuePenetrationEnd.remove(id);
+        disciplineVirtuePenetration.remove(id);
+        disciplinePunishmentEnd.remove(id);
+        disciplineRetaliationNext.remove(id);
+        player.removeEffect(ModEffects.DISCIPLINE_ASCETICISM.get());
+        player.removeEffect(ModEffects.DISCIPLINE_BLESSING.get());
+        player.removeEffect(ModEffects.DISCIPLINE_PUNISHMENT.get());
+    }
+
     @SubscribeEvent
     public static void onDisciplineEffect(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) return;
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        LivingEntity target = event.getEntity();
+        if (PlayerControlledAllies.isElysianHero(target)) return;
+        long now = target.level().getGameTime();
+        UUID targetId = target.getUUID();
+        if (disciplineFalseSpeechEnd.getOrDefault(targetId, 0L) >= now) {
+            event.setAmount(event.getAmount() * (1.0F
+                    + disciplineFalseSpeechPower.getOrDefault(targetId, 0.0F)));
+        }
 
         if (event.getSource().getEntity() instanceof Player player) {
             boolean has = CuriosApi.getCuriosHelper()
@@ -1873,6 +2388,75 @@ public class SignetEffects {
                             PRECEPT_DAMAGE_BONUS
                     ));
                     event.setAmount(event.getAmount() * (1.0f + bonus));
+                }
+                UUID uuid = player.getUUID();
+                boolean ultimateActive = disciplineUltimateEnd.getOrDefault(uuid, 0L) >= now;
+                if (ultimateActive && count > 0
+                        && SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                        player, Skill.DISCIPLINE_FOUR)) {
+                    event.setAmount(event.getAmount() * (1.0F + count
+                            * SignetUpgradeData.scaleBonus(
+                            player, Skill.DISCIPLINE_FOUR, 0.003F)));
+                }
+                if (SignetUpgradeData.isDisciplineSecondarySkillUnlocked(
+                        player, Skill.DISCIPLINE_SIX)
+                        && disciplineUnyieldingEnd.getOrDefault(uuid, 0L) >= now) {
+                    event.setAmount(event.getAmount() * (1.0F
+                            + SignetUpgradeData.scaleBonus(
+                            player, Skill.DISCIPLINE_SIX, 0.40F)));
+                }
+                boolean asceticism = SignetUpgradeData.getDisciplineCore(player)
+                        == SignetUpgradeData.DisciplineCore.ASCETICISM && count >= 90;
+                if (asceticism) {
+                    int signetCount = getDisciplineSignetCount(player);
+                    event.setAmount(event.getAmount() * (1.25F + signetCount * 0.05F));
+                    if (ultimateActive) {
+                        disciplineUltimatePenetrationEnd.put(uuid, now + 400L);
+                        if (SignetUpgradeData.hasDisciplineCoreSignet(
+                                player, Skill.DISCIPLINE_ASCETIC_PROOF)) {
+                            event.setAmount(event.getAmount() * (1.0F
+                                    + SignetUpgradeData.scaleBonus(
+                                    player, Skill.DISCIPLINE_ASCETIC_PROOF, 0.20F)));
+                        }
+                    }
+                }
+                event.setAmount(event.getAmount() * (1.0F
+                        + disciplineMountainDamageBonus.getOrDefault(uuid, 0.0F)));
+                if (disciplinePunishmentEnd.getOrDefault(uuid, 0L) >= now
+                        && SignetUpgradeData.hasDisciplineCoreSignet(
+                        player, Skill.DISCIPLINE_BLESSING_RETURN)) {
+                    event.setAmount(event.getAmount() * (1.0F + disciplineAugmentValue(
+                            player, Skill.DISCIPLINE_BLESSING_RETURN, 0.26F)));
+                }
+                Map<UUID, Integer> mountainHits = disciplineMountainHits.get(uuid);
+                if (mountainHits != null
+                        && mountainHits.getOrDefault(targetId, 0) >= 2
+                        && SignetUpgradeData.hasDisciplineCoreSignet(
+                        player, Skill.DISCIPLINE_BLESSING_PUNISHMENT)) {
+                    event.setAmount(event.getAmount() * (1.0F + disciplineAugmentValue(
+                            player, Skill.DISCIPLINE_BLESSING_PUNISHMENT, 0.26F)));
+                }
+                float penetration = 0.0F;
+                if (disciplineUltimatePenetrationEnd.getOrDefault(uuid, 0L) >= now) {
+                    penetration = combinePenetration(penetration, 0.40F);
+                }
+                if (asceticism && !ultimateActive
+                        && event.getSource().getDirectEntity() == player
+                        && SignetUpgradeData.hasDisciplineCoreSignet(
+                        player, Skill.DISCIPLINE_ASCETIC_BODY)) {
+                    penetration = combinePenetration(
+                            penetration,
+                            SignetUpgradeData.scaleBonus(
+                                    player, Skill.DISCIPLINE_ASCETIC_BODY, 0.15F));
+                }
+                if (disciplineVirtuePenetrationEnd.getOrDefault(uuid, 0L) >= now) {
+                    penetration = combinePenetration(
+                            penetration,
+                            disciplineVirtuePenetration.getOrDefault(uuid, 0.0F));
+                }
+                if (penetration > 0.0F) {
+                    event.setAmount(applyArmorPenetration(
+                            target, event.getSource(), event.getAmount(), penetration));
                 }
             }
         }
@@ -1891,13 +2475,109 @@ public class SignetEffects {
                     )));
                     event.setAmount(applyIndependentReduction(event.getAmount(), reduction));
                 }
+                boolean asceticism = SignetUpgradeData.getDisciplineCore(player)
+                        == SignetUpgradeData.DisciplineCore.ASCETICISM && count >= 90;
+                if (asceticism && SignetUpgradeData.hasDisciplineCoreSignet(
+                        player, Skill.DISCIPLINE_ASCETIC_BODY)) {
+                    event.setAmount(event.getAmount() * (1.0F + SignetUpgradeData.scaleBonus(
+                            player, Skill.DISCIPLINE_ASCETIC_BODY, 0.15F)));
+                }
+                if (asceticism && SignetUpgradeData.hasDisciplineCoreSignet(
+                        player, Skill.DISCIPLINE_ASCETIC_PROOF)) {
+                    event.setAmount(event.getAmount() * (1.0F + SignetUpgradeData.scaleBonus(
+                            player, Skill.DISCIPLINE_ASCETIC_PROOF, 0.15F)));
+                }
+                UUID uuid = player.getUUID();
+                if (disciplinePunishmentEnd.getOrDefault(uuid, 0L) >= now
+                        && SignetUpgradeData.hasDisciplineCoreSignet(
+                        player, Skill.DISCIPLINE_BLESSING_RETURN)) {
+                    event.setAmount(applyIndependentReduction(
+                            event.getAmount(),
+                            disciplineAugmentValue(
+                                    player, Skill.DISCIPLINE_BLESSING_RETURN, 0.20F)));
+                    Entity source = event.getSource().getEntity();
+                    if (source instanceof LivingEntity living
+                            && living != player
+                            && !PlayerControlledAllies.isProtectedEffectTarget(player, living)
+                            && disciplineRetaliationNext.getOrDefault(uuid, 0L) <= now
+                            && disciplineRetaliationGuard.add(uuid)) {
+                        try {
+                            float retaliation = (float) player.getAttributeValue(
+                                    Attributes.ATTACK_DAMAGE) * disciplineAugmentValue(
+                                    player, Skill.DISCIPLINE_BLESSING_RETURN, 7.0F);
+                            PlayerControlledAllies.hurt(player, living,
+                                    player.damageSources().playerAttack(player), retaliation);
+                            disciplineRetaliationNext.put(uuid, now + 100L);
+                        } finally {
+                            disciplineRetaliationGuard.remove(uuid);
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private static float combinePenetration(float current, float added) {
+        return 1.0F - (1.0F - Mth.clamp(current, 0.0F, 1.0F))
+                * (1.0F - Mth.clamp(added, 0.0F, 1.0F));
+    }
+
+    public static float applyArmorPenetration(
+            LivingEntity target,
+            DamageSource source,
+            float damage,
+            float penetration
+    ) {
+        if (target == null || source == null || damage <= 0.0F) return damage;
+        PenetrationContext context = findPenetrationContext(target, source);
+        if (context == null) return damage;
+        context.penetration = combinePenetration(context.penetration, penetration);
+        return damage;
     }
 
     public static void activateDeliveranceUltimateBuff(
             Player player
     ) {
+        deliveranceFenghuangEnergyTargets.remove(player.getUUID());
+        deliveranceAbyssEnergyTargets.remove(player.getUUID());
+        deliveranceSkyfireEnergyTargets.remove(player.getUUID());
+        deliveranceEdenEnergyTargets.remove(player.getUUID());
+        activateDeliveranceUltimateBuffInternal(player);
+    }
+
+    public static void activateDeliveranceUltimateBuffFromFenghuangDown(Player player) {
+        deliveranceAbyssEnergyTargets.remove(player.getUUID());
+        deliveranceSkyfireEnergyTargets.remove(player.getUUID());
+        deliveranceEdenEnergyTargets.remove(player.getUUID());
+        deliveranceFenghuangEnergyTargets.add(player.getUUID());
+        activateDeliveranceUltimateBuffInternal(player);
+    }
+
+    public static void activateDeliveranceUltimateBuffFromAbyssFlower(Player player) {
+        deliveranceFenghuangEnergyTargets.remove(player.getUUID());
+        deliveranceSkyfireEnergyTargets.remove(player.getUUID());
+        deliveranceEdenEnergyTargets.remove(player.getUUID());
+        deliveranceAbyssEnergyTargets.add(player.getUUID());
+        activateDeliveranceUltimateBuffInternal(player);
+    }
+
+    public static void activateDeliveranceUltimateBuffFromSkyfire(Player player) {
+        deliveranceFenghuangEnergyTargets.remove(player.getUUID());
+        deliveranceAbyssEnergyTargets.remove(player.getUUID());
+        deliveranceEdenEnergyTargets.remove(player.getUUID());
+        deliveranceSkyfireEnergyTargets.add(player.getUUID());
+        activateDeliveranceUltimateBuffInternal(player);
+    }
+
+    public static void activateDeliveranceUltimateBuffFromEdenStar(Player player) {
+        deliveranceFenghuangEnergyTargets.remove(player.getUUID());
+        deliveranceAbyssEnergyTargets.remove(player.getUUID());
+        deliveranceSkyfireEnergyTargets.remove(player.getUUID());
+        deliveranceEdenEnergyTargets.add(player.getUUID());
+        activateDeliveranceUltimateBuffInternal(player);
+    }
+
+    private static void activateDeliveranceUltimateBuffInternal(Player player) {
         if (player.level().isClientSide()) {
             return;
         }
@@ -1908,27 +2588,10 @@ public class SignetEffects {
                 player.getUUID(),
                 player.level().getGameTime() + durationTicks
         );
-
-        AttributeInstance atkDmg =
-                player.getAttribute(
-                        Attributes.ATTACK_DAMAGE
-                );
-
-        if (atkDmg == null) {
-            return;
+        AttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (attackDamage != null) {
+            attackDamage.removeModifier(DELIVERANCE_ULTIMATE_BUFF_UUID);
         }
-
-        atkDmg.removeModifier(DELIVERANCE_ULTIMATE_BUFF_UUID);
-
-        atkDmg.addTransientModifier(
-                new AttributeModifier(
-                        DELIVERANCE_ULTIMATE_BUFF_UUID,
-                        "deliverance_ultimate_buff",
-                        signetBoost(player, Skill.DELIVERANCE_ULTIMATE, 0.25D),
-                        AttributeModifier.Operation
-                                .MULTIPLY_TOTAL
-                )
-        );
     }
 
     private static int activateDeliveranceCore(Player player) {
@@ -1950,9 +2613,15 @@ public class SignetEffects {
             int durationTicks = durationSeconds * 20;
             deliveranceFinalBattleEnd.put(uuid, gameTime + durationTicks);
             deliveranceFinalBattleDamage.put(uuid, new HashMap<>());
-            player.displayClientMessage(
-                    Component.literal("终末之战").withStyle(ChatFormatting.DARK_BLUE),
-                    true
+            player.addEffect(
+                    new MobEffectInstance(
+                            ModEffects.DELIVERANCE_FINAL_BATTLE.get(),
+                            durationTicks,
+                            0,
+                            false,
+                            false,
+                            true
+                    )
             );
             return durationTicks;
         }
@@ -2047,9 +2716,37 @@ public class SignetEffects {
 
         long nextPulse = deliveranceSeekersRobeNextPulse.getOrDefault(uuid, gameTime + 20L);
         if (gameTime < nextPulse) return;
-        ItemStack weapon = findFlawlessWeapon(player);
-        if (!weapon.isEmpty()) {
-            FlawlessWeaponEnergy.addEnergy(player, weapon, deliveranceEnergyPerSecond(player));
+        if (deliveranceAbyssEnergyTargets.contains(uuid)) {
+            ItemStack weapon = AbyssFlowerEnergy.find(player);
+            if (!weapon.isEmpty()) AbyssFlowerEnergy.add(player, weapon, deliveranceEnergyPerSecond(player));
+        } else if (deliveranceFenghuangEnergyTargets.contains(uuid)) {
+            ItemStack weapon = FenghuangDownEnergy.find(player);
+            if (!weapon.isEmpty()) {
+                FenghuangDownEnergy.addEnergy(
+                        player,
+                        weapon,
+                        deliveranceEnergyPerSecond(player)
+                );
+            }
+        } else if (deliveranceSkyfireEnergyTargets.contains(uuid)) {
+            ItemStack weapon = SkyfireGreatswordEnergy.find(player);
+            if (!weapon.isEmpty()) {
+                SkyfireGreatswordEnergy.add(player, weapon, deliveranceEnergyPerSecond(player));
+            }
+        } else if (deliveranceEdenEnergyTargets.contains(uuid)) {
+            ItemStack weapon = EdenStarEnergy.find(player);
+            if (!weapon.isEmpty()) {
+                EdenStarEnergy.add(player, weapon, deliveranceEnergyPerSecond(player));
+            }
+        } else {
+            ItemStack weapon = findFlawlessWeapon(player);
+            if (!weapon.isEmpty()) {
+                FlawlessWeaponEnergy.addEnergy(
+                        player,
+                        weapon,
+                        deliveranceEnergyPerSecond(player)
+                );
+            }
         }
         deliveranceSeekersRobeNextPulse.put(uuid, nextPulse + 20L);
     }
@@ -2065,6 +2762,10 @@ public class SignetEffects {
                 attackDamage.removeModifier(DELIVERANCE_ULTIMATE_BUFF_UUID);
             }
             deliveranceBuffEnd.remove(uuid);
+            deliveranceFenghuangEnergyTargets.remove(uuid);
+            deliveranceAbyssEnergyTargets.remove(uuid);
+            deliveranceSkyfireEnergyTargets.remove(uuid);
+            deliveranceEdenEnergyTargets.remove(uuid);
             return;
         }
 
@@ -2085,7 +2786,7 @@ public class SignetEffects {
             deliveranceDecisionDamageBonus.remove(uuid);
             deliveranceTriumphTriggered.remove(uuid);
             player.displayClientMessage(
-                    Component.literal("救世之战结束").withStyle(ChatFormatting.GRAY),
+                    ModText.literal("救世之战结束").withStyle(ChatFormatting.GRAY),
                     true
             );
         }
@@ -2100,26 +2801,20 @@ public class SignetEffects {
         AttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackDamage != null) {
             attackDamage.removeModifier(DELIVERANCE_ULTIMATE_BUFF_UUID);
-            if (buffEnd != null && gameTime <= buffEnd) {
-                attackDamage.addTransientModifier(
-                        new AttributeModifier(
-                                DELIVERANCE_ULTIMATE_BUFF_UUID,
-                                "deliverance_ultimate_buff",
-                                signetBoost(player, Skill.DELIVERANCE_ULTIMATE, 0.25D),
-                                AttributeModifier.Operation.MULTIPLY_TOTAL
-                        )
-                );
-            }
         }
         if (buffEnd != null && gameTime > buffEnd) {
             deliveranceBuffEnd.remove(uuid);
+            deliveranceFenghuangEnergyTargets.remove(uuid);
+            deliveranceAbyssEnergyTargets.remove(uuid);
+            deliveranceSkyfireEnergyTargets.remove(uuid);
+            deliveranceEdenEnergyTargets.remove(uuid);
         }
 
         if (player.tickCount % 200 == 0) {
-            deliveranceTriumphVulnerabilityEnd.entrySet()
-                    .removeIf(entry -> entry.getValue() < gameTime);
-            deliveranceTriumphVulnerability.keySet()
-                    .removeIf(target -> !deliveranceTriumphVulnerabilityEnd.containsKey(target));
+            deliveranceTriumphVulnerabilities.entrySet().removeIf(entry -> {
+                entry.getValue().values().removeIf(vulnerability -> vulnerability.end() < gameTime);
+                return entry.getValue().isEmpty();
+            });
         }
     }
 
@@ -2137,7 +2832,7 @@ public class SignetEffects {
         deliveranceBuffEnd.put(uuid, end);
         activateDeliveranceSecondaryEffects(player, durationTicks);
         player.displayClientMessage(
-                Component.literal("救世之战").withStyle(ChatFormatting.DARK_BLUE),
+                ModText.literal("救世之战").withStyle(ChatFormatting.DARK_BLUE),
                 true
         );
     }
@@ -2145,6 +2840,9 @@ public class SignetEffects {
     private static void finishDeliveranceFinalBattle(Player player) {
         UUID uuid = player.getUUID();
         deliveranceFinalBattleEnd.remove(uuid);
+        player.removeEffect(
+                ModEffects.DELIVERANCE_FINAL_BATTLE.get()
+        );
         Map<UUID, Float> accumulated = deliveranceFinalBattleDamage.remove(uuid);
         if (accumulated == null
                 || accumulated.isEmpty()
@@ -2165,11 +2863,11 @@ public class SignetEffects {
         try {
             for (Map.Entry<UUID, Float> entry : accumulated.entrySet()) {
                 Entity target = serverLevel.getEntity(entry.getKey());
-                if (target instanceof LivingEntity living && living.isAlive()) {
-                    living.hurt(
+                if (target instanceof LivingEntity living
+                        && PlayerControlledAllies.isValidEnemy(player, living)) {
+                    PlayerControlledAllies.hurt(player, living,
                             player.damageSources().playerAttack(player),
-                            Math.max(0.0F, entry.getValue()) * ratio
-                    );
+                            Math.max(0.0F, entry.getValue()) * ratio);
                 }
             }
         } finally {
@@ -2193,27 +2891,23 @@ public class SignetEffects {
             case 3 -> 0.30F;
             default -> 0.20F;
         };
-        long end = player.level().getGameTime() + 200L;
+        long now = player.level().getGameTime();
+        long end = now + 200L;
+        deliveranceTriumphOwners.add(player.getUUID());
         player.level().getEntitiesOfClass(
                 LivingEntity.class,
                 player.getBoundingBox().inflate(64.0D),
-                entity -> !(entity instanceof Player) && entity.isAlive()
+                entity -> PlayerControlledAllies.isValidEnemy(player, entity)
         ).forEach(entity -> {
             UUID targetId = entity.getUUID();
-            deliveranceTriumphVulnerability.put(
-                    targetId,
-                    Math.max(
-                            vulnerability,
-                            deliveranceTriumphVulnerability.getOrDefault(targetId, 0.0F)
-                    )
-            );
-            deliveranceTriumphVulnerabilityEnd.put(
-                    targetId,
-                    Math.max(
-                            end,
-                            deliveranceTriumphVulnerabilityEnd.getOrDefault(targetId, 0L)
-                    )
-            );
+            deliveranceTriumphVulnerabilities
+                    .computeIfAbsent(targetId, ignored -> new HashMap<>())
+                    .merge(player.getUUID(),
+                            new DeliveranceTriumphVulnerability(vulnerability, end),
+                            (oldValue, newValue) -> oldValue.end() < now
+                                    ? newValue : new DeliveranceTriumphVulnerability(
+                                            Math.max(oldValue.amount(), newValue.amount()),
+                                            Math.max(oldValue.end(), newValue.end())));
         });
     }
 
@@ -2222,6 +2916,9 @@ public class SignetEffects {
         UUID uuid = player.getUUID();
         deliveranceFinalBattleEnd.remove(uuid);
         deliveranceFinalBattleDamage.remove(uuid);
+        player.removeEffect(
+                ModEffects.DELIVERANCE_FINAL_BATTLE.get()
+        );
         deliveranceLoneHitWindowEnd.remove(uuid);
         deliveranceLoneHitCount.remove(uuid);
         deliveranceSaviorBattleEnd.remove(uuid);
@@ -2229,6 +2926,16 @@ public class SignetEffects {
         deliveranceTriumphIgnoreDefenseEnd.remove(uuid);
         deliveranceTriumphTriggered.remove(uuid);
         deliveranceFinalBurstGuard.remove(uuid);
+        deliveranceFenghuangEnergyTargets.remove(uuid);
+        deliveranceAbyssEnergyTargets.remove(uuid);
+        deliveranceSkyfireEnergyTargets.remove(uuid);
+        deliveranceEdenEnergyTargets.remove(uuid);
+        if (deliveranceTriumphOwners.remove(uuid)) {
+            deliveranceTriumphVulnerabilities.entrySet().removeIf(entry -> {
+                entry.getValue().remove(uuid);
+                return entry.getValue().isEmpty();
+            });
+        }
     }
 
     private static ItemStack findFlawlessWeapon(Player player) {
@@ -2277,17 +2984,35 @@ public class SignetEffects {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeliveranceHuntersMaskDamage(LivingHurtEvent event) {
         LivingEntity target = event.getEntity();
+        if (PlayerControlledAllies.isElysianHero(target)) return;
         long gameTime = target.level().getGameTime();
         UUID targetId = target.getUUID();
-        Long vulnerableUntil = deliveranceTriumphVulnerabilityEnd.get(targetId);
-        if (vulnerableUntil != null && gameTime <= vulnerableUntil) {
-            event.setAmount(event.getAmount() * (1.0F
-                    + deliveranceTriumphVulnerability.getOrDefault(targetId, 0.0F)));
+        Map<UUID, DeliveranceTriumphVulnerability> vulnerabilities =
+                deliveranceTriumphVulnerabilities.get(targetId);
+        if (vulnerabilities != null) {
+            float strongest = 0.0F;
+            for (DeliveranceTriumphVulnerability vulnerability : vulnerabilities.values()) {
+                if (gameTime <= vulnerability.end()) {
+                    strongest = Math.max(strongest, vulnerability.amount());
+                }
+            }
+            if (strongest > 0.0F) {
+                event.setAmount(event.getAmount() * (1.0F + strongest));
+            }
         }
 
         if (!(event.getSource().getEntity() instanceof Player player)) return;
         if (event.getAmount() <= 0.0F) return;
         UUID uuid = player.getUUID();
+
+        Long buffEnd = deliveranceBuffEnd.get(uuid);
+        if (buffEnd != null && gameTime <= buffEnd) {
+            event.setAmount(event.getAmount() * (1.0F + signetBoost(
+                    player,
+                    Skill.DELIVERANCE_ULTIMATE,
+                    0.25F
+            )));
+        }
 
         Long maskEnd = deliveranceHuntersMaskEnd.get(uuid);
         if (maskEnd != null && gameTime <= maskEnd) {
@@ -2359,6 +3084,7 @@ public class SignetEffects {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeliveranceFinalBattleDamage(LivingDamageEvent event) {
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
         if (!(event.getSource().getEntity() instanceof Player player)
                 || event.getAmount() <= 0.0F) {
             return;
@@ -2376,6 +3102,7 @@ public class SignetEffects {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeliveranceHolyShieldDamage(LivingDamageEvent event) {
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
         if (!(event.getEntity() instanceof Player player)) return;
         UUID uuid = player.getUUID();
         Long end = deliveranceHolyShieldEnd.get(uuid);
@@ -2402,6 +3129,7 @@ public class SignetEffects {
 
     @SubscribeEvent
     public static void onInfinityDamageBoost(LivingDamageEvent event) {
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
         if (!(event.getSource().getEntity() instanceof Player player)) return;
         if (player.level().isClientSide()) return;
 
@@ -2503,6 +3231,8 @@ public class SignetEffects {
     @SubscribeEvent
     public static void onEgoHurt(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) return;
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        if (PlayerControlledAllies.isElysianHero(event.getEntity())) return;
 
         if (event.getEntity() instanceof Player player) {
             if (hasEgoAnd(player, ModItems.SIGNET_OF_VICISSITUDE.get())) {
@@ -2524,12 +3254,9 @@ public class SignetEffects {
         if (event.getSource().getEntity() instanceof Player player) {
             if (hasEgoAnd(player, ModItems.SIGNET_OF_STARS.get())) {
                 LivingEntity target = event.getEntity();
-                boolean hasPinkInk = target.hasEffect(ModEffects.PINK_INK.get());
-                float boostedDamage = event.getAmount() * (hasPinkInk ? 1.5F : 1.2F);
-
-                if (hasPinkInk) boostedDamage = compensateArmorForStarsIgnoreDefense(target, event.getSource(), boostedDamage);
-
-                event.setAmount(boostedDamage);
+                float boostedDamage = event.getAmount() * 1.5F;
+                event.setAmount(applyArmorPenetration(
+                        target, event.getSource(), boostedDamage, 0.50F));
             }
         }
     }
@@ -2741,40 +3468,7 @@ public class SignetEffects {
         double y = player.level().getMinBuildHeight() - 8.0;
         player.teleportTo(player.getX(), y, player.getZ());
         player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 100, 0, false, false));
-        player.displayClientMessage(Component.literal("空之诅咒将你拖入了虚空……").withStyle(ChatFormatting.DARK_PURPLE), true);
-    }
-
-    private static void handleGoldFurnaceBoost(Player player) {
-        if (!hasItem(player, ModItems.SIGNET_OF_GOLD.get())) return;
-        Level level = player.level();
-        if (level.isClientSide()) return;
-
-        long gameTime = level.getGameTime();
-        BlockPos center = player.blockPosition();
-        int range = 8;
-        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-range, -range, -range), center.offset(range, range, range))) {
-            long key = pos.asLong();
-            if (goldFurnaceLastBoostTick.getOrDefault(key, -1L) == gameTime) continue;
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof AbstractFurnaceBlockEntity furnace) {
-                goldFurnaceLastBoostTick.put(key, gameTime);
-                boostFurnaceCookProgress(furnace, player);
-            }
-        }
-    }
-
-    private static void boostFurnaceCookProgress(AbstractFurnaceBlockEntity furnace, Player player) {
-        CompoundTag tag = furnace.saveWithFullMetadata();
-        if (tag.getInt("BurnTime") <= 0) return;
-        int cookTimeTotal = tag.getInt("CookTimeTotal");
-        if (cookTimeTotal <= 0) return;
-        int cookTime = tag.getInt("CookTime");
-        int extraCook = Math.max(1, Math.round(
-                signetBoost(player, Skill.GOLD_STREAM, 2.0F)
-        ));
-        tag.putShort("CookTime", (short) Math.min(cookTime + extraCook, cookTimeTotal));
-        furnace.load(tag);
-        furnace.setChanged();
+        player.displayClientMessage(ModText.literal("空之诅咒将你拖入了虚空……").withStyle(ChatFormatting.DARK_PURPLE), true);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

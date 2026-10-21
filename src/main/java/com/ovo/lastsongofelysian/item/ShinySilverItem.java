@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -20,18 +22,18 @@ public class ShinySilverItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("可以在银币商店购买和升级刻印")
+        tooltip.add(ModText.literal("可以在银币商店购买和升级刻印")
                 .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.BOLD));
 
-        tooltip.add(Component.literal("闪闪发亮的银质硬币")
+        tooltip.add(ModText.literal("闪闪发亮的银质硬币")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-        tooltip.add(Component.literal("印有形似猫爪的图案。")
+        tooltip.add(ModText.literal("印有形似猫爪的图案。")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-        tooltip.add(Component.literal("显然，这并不是一种曾在世界上的某处流通过的货币。")
+        tooltip.add(ModText.literal("显然，这并不是一种曾在世界上的某处流通过的货币。")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-        tooltip.add(Component.literal("但在这里，它却的确作为一种特殊的货币在被使用着。")
+        tooltip.add(ModText.literal("但在这里，它却的确作为一种特殊的货币在被使用着。")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-        tooltip.add(Component.literal("因为它永远都亮闪闪的，而她，则刚好喜欢一切亮闪闪的东西。")
+        tooltip.add(ModText.literal("因为它永远都亮闪闪的，而她，则刚好喜欢一切亮闪闪的东西。")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
     }
 }

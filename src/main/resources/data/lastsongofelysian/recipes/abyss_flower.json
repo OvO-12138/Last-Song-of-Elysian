@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "combat",
+  "pattern": [
+    "WSG",
+    " D ",
+    " V "
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:wither_skeleton_skull"
+    },
+    "S": {
+      "item": "lastsongofelysian:soul_steel_ingot"
+    },
+    "G": {
+      "item": "minecraft:ghast_tear"
+    },
+    "D": {
+      "item": "lastsongofelysian:core_of_death"
+    },
+    "V": {
+      "item": "minecraft:diamond_sword"
+    }
+  },
+  "result": {
+    "item": "lastsongofelysian:abyss_flower"
+  },
+  "show_notification": true
+}

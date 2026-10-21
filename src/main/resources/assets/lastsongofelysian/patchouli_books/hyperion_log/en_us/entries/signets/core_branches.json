@@ -1,0 +1,23 @@
+{
+  "name": "核心分支与商店限制",
+  "icon": "lastsongofelysian:decimation_blood_release",
+  "category": "lastsongofelysian:signets",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "分支",
+      "text": "同一英桀的两个核心互不兼容，双方附属的三个核心增幅也不能混用。$(br2)不同英桀的核心可以同时使用。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "核心",
+      "text": "购买一个核心后，另一分支的核心不再出售，所选分支的三个增幅才会加入可购买商品。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "更换核心",
+      "text": "将对应基础刻印放入工坊，使用核心重置功能，再选择新的分支。"
+    }
+  ]
+}

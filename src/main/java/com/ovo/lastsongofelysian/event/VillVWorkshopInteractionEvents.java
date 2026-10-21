@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.menu.SpiralWorkshopMenu;
 import com.ovo.lastsongofelysian.registry.ModEntities;
@@ -47,7 +49,7 @@ public final class VillVWorkshopInteractionEvents {
                     new SimpleMenuProvider(
                             (containerId, inventory, menuPlayer) ->
                                     new SpiralWorkshopMenu(containerId, inventory),
-                            Component.literal("螺旋工坊")
+                            ModText.literal("螺旋工坊")
                     )
             );
         }

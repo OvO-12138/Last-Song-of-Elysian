@@ -1,15 +1,20 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.item.FlawlessBenedictionLegacyItem;
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModEffects;
 import com.ovo.lastsongofelysian.registry.ModItems;
+import com.ovo.lastsongofelysian.util.EgoSignetAmplification;
 import com.ovo.lastsongofelysian.util.FlawlessWeaponEnergy;
 import com.ovo.lastsongofelysian.util.FlawlessWeaponSkill;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -39,6 +44,7 @@ import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -57,7 +63,9 @@ import com.ovo.lastsongofelysian.network.ModNetwork;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -78,8 +86,13 @@ public final class FlawlessBenedictionLegacyEvents {
 
     private static final int DOMAIN_CLOSE_DURATION_TICKS = 80;
 
+    private static final double DOMAIN_RADIUS = 10.0D;
+
+    private static final double DOMAIN_RADIUS_SQR =
+            DOMAIN_RADIUS * DOMAIN_RADIUS;
+
     private static final float DOMAIN_DAMAGE_PER_SECOND =
-            10000.0F;
+            5000.0F;
 
     private static final float DOMAIN_PETAL_DAMAGE_VALUE =
             5000.0F;
@@ -149,6 +162,8 @@ public final class FlawlessBenedictionLegacyEvents {
 
     private static final Random RAND = new Random();
 
+    private static Method damageDisplayDummyDamageMethod;
+
     private static final DustParticleOptions DOMAIN_DEEP_PINK =
             new DustParticleOptions(
                     new Vector3f(
@@ -216,7 +231,7 @@ public final class FlawlessBenedictionLegacyEvents {
         );
 
         player.displayClientMessage(
-                net.minecraft.network.chat.Component.literal(
+                ModText.literal(
                         "必杀技——无暇乐土"
                 ).withStyle(
                         net.minecraft.ChatFormatting.LIGHT_PURPLE,
@@ -348,6 +363,15 @@ public final class FlawlessBenedictionLegacyEvents {
             );
         }
 
+        if (player.level() instanceof ServerLevel level) {
+            applyDomainClosingDamage(
+                    level,
+                    player,
+                    domainCenter,
+                    remainingTicks
+            );
+        }
+
         FlawlessVisualEffects.spawnUltimateClosing(
                 player,
                 visualCenter,
@@ -402,6 +426,16 @@ public final class FlawlessBenedictionLegacyEvents {
     public static int addBloomStack(
             LivingEntity entity
     ) {
+        return addBloomStack(entity, true);
+    }
+
+    private static int addBloomStack(
+            LivingEntity entity,
+            boolean showVisuals
+    ) {
+        if (PlayerControlledAllies.isElysianHero(entity)) {
+            return 0;
+        }
         int next = Math.min(
                 MAX_BLOOM_STACKS,
                 getBloomStacks(entity) + 1
@@ -437,15 +471,17 @@ public final class FlawlessBenedictionLegacyEvents {
                 )
         );
 
-        spawnBloomStackParticles(
-                entity,
-                next
-        );
+        if (showVisuals) {
+            spawnBloomStackParticles(
+                    entity,
+                    next
+            );
 
-        FlawlessVisualEffects.spawnBloomStackSigil(
-                entity,
-                next
-        );
+            FlawlessVisualEffects.spawnBloomStackSigil(
+                    entity,
+                    next
+            );
+        }
         syncBloomStacks(
                 entity,
                 next
@@ -629,15 +665,6 @@ public final class FlawlessBenedictionLegacyEvents {
             return;
         }
 
-        int remainingTicks =
-                Math.max(
-                        1,
-                        player.getPersistentData()
-                                .getInt(
-                                        NBT_DOMAIN_CLOSE_REMAINING
-                                )
-                );
-
         Vec3 center =
                 new Vec3(
                         player.getPersistentData()
@@ -648,61 +675,15 @@ public final class FlawlessBenedictionLegacyEvents {
                                 .getDouble(NBT_DOMAIN_CLOSE_Z)
                 );
 
-        float damage =
-                (float) Math.min(
-                        Float.MAX_VALUE,
-                        DOMAIN_CLOSE_DAMAGE_PER_TICK
-                                * remainingTicks
-                );
-
-        AABB area =
-                new AABB(
-                        center.x - 6.5D,
-                        center.y - 6.0D,
-                        center.z - 6.5D,
-                        center.x + 6.5D,
-                        center.y + 10.0D,
-                        center.z + 6.5D
-                );
-
-        List<LivingEntity> enemies =
-                level.getEntitiesOfClass(
-                        LivingEntity.class,
-                        area,
-                        entity ->
-                                isDomainEnemy(
-                                        player,
-                                        entity
-                                )
-                );
-
-        for (LivingEntity enemy : enemies) {
-            markNoHeal(enemy);
-
-            applyFixedDomainDamage(
-                    enemy,
-                    player.damageSources()
-                            .playerAttack(player),
-                    damage
-            );
-
-            if (enemy instanceof Mob mob) {
-                clearHostileIntent(
-                        mob,
-                        player
-                );
-            }
-        }
-
         level.sendParticles(
                 ParticleTypes.FIREWORK,
                 center.x,
                 center.y + 1.0D,
                 center.z,
                 180,
-                6.5D,
-                6.0D,
-                6.5D,
+                DOMAIN_RADIUS,
+                DOMAIN_RADIUS * 0.75D,
+                DOMAIN_RADIUS,
                 0.20D
         );
 
@@ -712,21 +693,21 @@ public final class FlawlessBenedictionLegacyEvents {
                 center.y + 1.0D,
                 center.z,
                 240,
-                6.5D,
-                5.0D,
-                6.5D,
+                DOMAIN_RADIUS,
+                DOMAIN_RADIUS * 0.65D,
+                DOMAIN_RADIUS,
                 0.12D
         );
 
         level.sendParticles(
                 ParticleTypes.CHERRY_LEAVES,
                 center.x,
-                center.y + 7.0D,
+                center.y + DOMAIN_RADIUS,
                 center.z,
                 160,
-                7.0D,
-                7.0D,
-                7.0D,
+                DOMAIN_RADIUS,
+                DOMAIN_RADIUS,
+                DOMAIN_RADIUS,
                 0.18D
         );
 
@@ -740,6 +721,57 @@ public final class FlawlessBenedictionLegacyEvents {
         );
 
         clearDomainClosingData(player);
+    }
+
+    private static void applyDomainClosingDamage(
+            ServerLevel level,
+            Player player,
+            Vec3 center,
+            int remainingTicks
+    ) {
+        float damage =
+                (float) Math.min(
+                        Float.MAX_VALUE,
+                        DOMAIN_CLOSE_DAMAGE_PER_TICK
+                                * remainingTicks
+                );
+
+        AABB area =
+                new AABB(center, center)
+                        .inflate(DOMAIN_RADIUS);
+
+        List<LivingEntity> enemies =
+                level.getEntitiesOfClass(
+                        LivingEntity.class,
+                        area,
+                        entity ->
+                                isDomainEnemy(
+                                        player,
+                                        entity
+                                ) && entity.position()
+                                        .distanceToSqr(center)
+                                        <= DOMAIN_RADIUS_SQR
+                );
+
+        DamageSource source =
+                player.damageSources()
+                        .playerAttack(player);
+
+        for (LivingEntity enemy : enemies) {
+            markNoHeal(enemy);
+            applyFixedDomainDamage(
+                    enemy,
+                    source,
+                    damage
+            );
+
+            if (enemy instanceof Mob mob) {
+                clearHostileIntent(
+                        mob,
+                        player
+                );
+            }
+        }
     }
 
     private static void clearDomainClosingData(
@@ -841,16 +873,8 @@ public final class FlawlessBenedictionLegacyEvents {
             );
         }
 
-        if (
-                hasCurio(
-                        player,
-                        ModItems.SIGNET_OF_EGO.get()
-                ) &&
-                hasCurio(
-                        player,
-                        ModItems.SIGNET_OF_GOLD.get()
-                )
-        ) {
+        if (EgoSignetAmplification.isEnabledFor(
+                player, ModItems.SIGNET_OF_GOLD.get())) {
             player.getPersistentData()
                     .putBoolean(
                             NBT_PERMANENT_FLIGHT,
@@ -1302,11 +1326,7 @@ public final class FlawlessBenedictionLegacyEvents {
 
         AABB domain =
                 player.getBoundingBox()
-                        .inflate(
-                                6.5D,
-                                4.0D,
-                                6.5D
-                        );
+                        .inflate(DOMAIN_RADIUS);
 
         List<LivingEntity> enemies =
                 level.getEntitiesOfClass(
@@ -1316,7 +1336,8 @@ public final class FlawlessBenedictionLegacyEvents {
                                 isDomainEnemy(
                                         player,
                                         entity
-                                )
+                                ) && entity.distanceToSqr(player)
+                                        <= DOMAIN_RADIUS_SQR
                 );
         if (player.tickCount % 5 == 0) {
             spawnDomainParticles(level, player);
@@ -1326,22 +1347,11 @@ public final class FlawlessBenedictionLegacyEvents {
             for (LivingEntity enemy : enemies) {
                 markNoHeal(enemy);
 
-                boolean damaged =
-                        applyFixedDomainDamage(
-                                enemy,
-                                level.damageSources().magic(),
-                                DOMAIN_DAMAGE_PER_SECOND
-                        );
-
-                if (damaged && enemy.isAlive()) {
-                    spawnWeaponHitParticles(
-                            enemy,
-                            Math.max(
-                                    1,
-                                    getBloomStacks(enemy)
-                            )
-                    );
-                }
+                applyFixedDomainDamage(
+                        enemy,
+                        level.damageSources().magic(),
+                        DOMAIN_DAMAGE_PER_SECOND
+                );
 
                 if (enemy instanceof Mob mob) {
                     clearHostileIntent(
@@ -1370,7 +1380,6 @@ public final class FlawlessBenedictionLegacyEvents {
                         == 0
         ) {
             strikeOneDomainPetal(
-                    level,
                     player,
                     enemies
             );
@@ -1396,7 +1405,7 @@ public final class FlawlessBenedictionLegacyEvents {
                         )
                 );
 
-                addBloomStack(enemy);
+                addBloomStack(enemy, false);
             }
         }
     }
@@ -1405,11 +1414,7 @@ public final class FlawlessBenedictionLegacyEvents {
             Player owner,
             LivingEntity entity
     ) {
-        if (
-                !entity.isAlive() ||
-                entity == owner ||
-                entity.isAlliedTo(owner)
-        ) {
+        if (!PlayerControlledAllies.isValidEnemy(owner, entity)) {
             return false;
         }
 
@@ -1439,9 +1444,9 @@ public final class FlawlessBenedictionLegacyEvents {
                 player.getY() + 6.0D,
                 player.getZ(),
                 12,
-                6.35D,
+                DOMAIN_RADIUS - 0.15D,
                 1.2D,
-                6.35D,
+                DOMAIN_RADIUS - 0.15D,
                 0.045D
         );
 
@@ -1451,9 +1456,9 @@ public final class FlawlessBenedictionLegacyEvents {
                 player.getY() + 2.0D,
                 player.getZ(),
                 14,
-                6.35D,
+                DOMAIN_RADIUS - 0.15D,
                 2.0D,
-                6.35D,
+                DOMAIN_RADIUS - 0.15D,
                 0.015D
         );
 
@@ -1463,9 +1468,9 @@ public final class FlawlessBenedictionLegacyEvents {
                 player.getY() + 2.0D,
                 player.getZ(),
                 14,
-                6.35D,
+                DOMAIN_RADIUS - 0.15D,
                 2.0D,
-                6.35D,
+                DOMAIN_RADIUS - 0.15D,
                 0.010D
         );
 
@@ -1475,9 +1480,9 @@ public final class FlawlessBenedictionLegacyEvents {
                 player.getY() + 0.12D,
                 player.getZ(),
                 10,
-                6.45D,
+                DOMAIN_RADIUS - 0.05D,
                 0.08D,
-                6.45D,
+                DOMAIN_RADIUS - 0.05D,
                 0.004D
         );
 
@@ -1487,9 +1492,9 @@ public final class FlawlessBenedictionLegacyEvents {
                 player.getY() + 0.20D,
                 player.getZ(),
                 10,
-                6.45D,
+                DOMAIN_RADIUS - 0.05D,
                 0.12D,
-                6.45D,
+                DOMAIN_RADIUS - 0.05D,
                 0.004D
         );
     }
@@ -1569,7 +1574,6 @@ public final class FlawlessBenedictionLegacyEvents {
     }
 
     private static void strikeOneDomainPetal(
-            ServerLevel level,
             Player owner,
             List<LivingEntity> enemies
     ) {
@@ -1581,40 +1585,6 @@ public final class FlawlessBenedictionLegacyEvents {
                 enemies.get(
                         RAND.nextInt(enemies.size())
                 );
-
-        double impactX =
-                target.getX()
-                        + (RAND.nextDouble() - 0.5D)
-                        * Math.max(
-                        0.8D,
-                        target.getBbWidth()
-                );
-
-        double impactZ =
-                target.getZ()
-                        + (RAND.nextDouble() - 0.5D)
-                        * Math.max(
-                        0.8D,
-                        target.getBbWidth()
-                );
-
-        double startY =
-                target.getY()
-                        + target.getBbHeight()
-                        + 5.0D
-                        + RAND.nextDouble() * 3.0D;
-
-        level.sendParticles(
-                ParticleTypes.CHERRY_LEAVES,
-                impactX,
-                startY,
-                impactZ,
-                8,
-                0.55D,
-                1.15D,
-                0.55D,
-                0.12D
-        );
 
         markNoHeal(target);
 
@@ -1631,34 +1601,8 @@ public final class FlawlessBenedictionLegacyEvents {
         }
 
         if (target.isAlive()) {
-            addBloomStack(target);
+            addBloomStack(target, false);
         }
-
-        level.sendParticles(
-                DOMAIN_DEEP_PINK,
-                impactX,
-                target.getY()
-                        + target.getBbHeight() * 0.50D,
-                impactZ,
-                8,
-                target.getBbWidth() * 0.60D,
-                target.getBbHeight() * 0.40D,
-                target.getBbWidth() * 0.60D,
-                0.055D
-        );
-
-        level.sendParticles(
-                DOMAIN_LIGHT_PINK,
-                impactX,
-                target.getY()
-                        + target.getBbHeight() * 0.60D,
-                impactZ,
-                8,
-                target.getBbWidth() * 0.55D,
-                target.getBbHeight() * 0.38D,
-                target.getBbWidth() * 0.55D,
-                0.045D
-        );
 
         if (target instanceof Mob mob) {
             clearHostileIntent(
@@ -1673,11 +1617,54 @@ public final class FlawlessBenedictionLegacyEvents {
             DamageSource source,
             float amount
     ) {
+        if (source.getEntity() instanceof Player player
+                && PlayerControlledAllies.isProtectedEffectTarget(player, target)) return false;
+        if (source.getEntity() instanceof Player player && source.getDirectEntity() == player) {
+            amount *= SignetEffects.getDisciplineUltimateDamageMultiplier(player);
+        }
         if (
                 !target.isAlive() ||
                 amount <= 0.0F
         ) {
             return false;
+        }
+
+        if (isDamageDisplayDummy(target)) {
+            target.invulnerableTime = 0;
+            target.hurtTime = 0;
+            target.hurtDuration = 0;
+
+            boolean wasMarked = target.getPersistentData()
+                    .getBoolean(NBT_DOMAIN_PETAL_DAMAGE);
+            target.getPersistentData().putBoolean(
+                    NBT_DOMAIN_PETAL_DAMAGE,
+                    true
+            );
+
+            try {
+                target.hurt(source, 0.0F);
+                Method method = damageDisplayDummyDamageMethod;
+                if (method == null || method.getDeclaringClass() != target.getClass()) {
+                    method = target.getClass().getDeclaredMethod(
+                            "onActuallyDamagedOrTrueDamageDetected",
+                            float.class,
+                            DamageSource.class
+                    );
+                    method.setAccessible(true);
+                    damageDisplayDummyDamageMethod = method;
+                }
+                method.invoke(target, amount, source);
+                return true;
+            } catch (ReflectiveOperationException | RuntimeException ignored) {
+                damageDisplayDummyDamageMethod = null;
+                return target.hurt(source, amount);
+            } finally {
+                if (!wasMarked) {
+                    target.getPersistentData().remove(
+                            NBT_DOMAIN_PETAL_DAMAGE
+                    );
+                }
+            }
         }
 
         float healthBefore =
@@ -1703,6 +1690,16 @@ public final class FlawlessBenedictionLegacyEvents {
 
         return target.getHealth() < healthBefore ||
                 requiredHealth <= 0.0F;
+    }
+
+    private static boolean isDamageDisplayDummy(
+            LivingEntity target
+    ) {
+        ResourceLocation id = ForgeRegistries.ENTITY_TYPES
+                .getKey(target.getType());
+        return id != null &&
+                id.getNamespace().equals("dummmmmmy") &&
+                id.getPath().equals("target_dummy");
     }
 
     private static void fireOneDomainArrow(
@@ -1779,10 +1776,6 @@ public final class FlawlessBenedictionLegacyEvents {
         );
 
         level.addFreshEntity(arrow);
-        FlawlessVisualEffects.spawnArrowTrail(
-                arrow,
-                true
-        );
     }
 
     private static boolean isAggroProtected(
@@ -1991,10 +1984,7 @@ public final class FlawlessBenedictionLegacyEvents {
                                     NBT_DOMAIN_ARROW
                             );
 
-            if (
-                    normalFlawlessArrow ||
-                    domainArrow
-            ) {
+            if (normalFlawlessArrow) {
                 markNoHeal(target);
 
                 spawnWeaponHitParticles(
@@ -2041,7 +2031,7 @@ public final class FlawlessBenedictionLegacyEvents {
             ) {
                 addBloomStack(target);
 
-                FlawlessWeaponEnergy.addEnergy(
+                FlawlessWeaponEnergy.addEnergyFromAttack(
                         player,
                         player.getMainHandItem(),
                         5
@@ -2102,8 +2092,19 @@ public final class FlawlessBenedictionLegacyEvents {
                                 NBT_DOMAIN_ARROW
                         );
 
+        if ((normalFlawlessArrow || domainArrow)
+                && arrow.getOwner() instanceof Player owner
+                && event.getRayTraceResult() instanceof EntityHitResult hit
+                && PlayerControlledAllies.isProtectedEffectTarget(
+                        owner,
+                        hit.getEntity()
+                )) {
+            event.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
+            return;
+        }
+
         if (
-                (normalFlawlessArrow || domainArrow) &&
+                normalFlawlessArrow &&
                 !arrow.getPersistentData()
                         .getBoolean(
                                 NBT_ARROW_IMPACT_VISUAL
@@ -2116,7 +2117,7 @@ public final class FlawlessBenedictionLegacyEvents {
 
             FlawlessVisualEffects.spawnArrowImpact(
                     arrow,
-                    domainArrow
+                    false
             );
         }
 
@@ -2172,12 +2173,12 @@ public final class FlawlessBenedictionLegacyEvents {
                 entity.level().getEntitiesOfClass(
                         Player.class,
                         entity.getBoundingBox()
-                                .inflate(7.0D),
+                                .inflate(DOMAIN_RADIUS),
                         player ->
                                 player.isAlive()
                                         && isDomainActive(player)
                                         && player.distanceToSqr(entity)
-                                        <= 6.5D * 6.5D
+                                        <= DOMAIN_RADIUS_SQR
                 );
 
         return !players.isEmpty();

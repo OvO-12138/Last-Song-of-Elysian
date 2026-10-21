@@ -3,7 +3,7 @@
   "category": "combat",
   "pattern": [
     "ACA",
-    "PBN",
+    "SBS",
     "AOA"
   ],
   "key": {
@@ -13,14 +13,11 @@
     "C": {
       "item": "minecraft:clock"
     },
-    "P": {
-      "item": "minecraft:poppy"
-    },
     "B": {
       "item": "minecraft:bow"
     },
-    "N": {
-      "item": "minecraft:peony"
+    "S": {
+      "item": "lastsongofelysian:soul_steel_ingot"
     },
     "O": {
       "item": "lastsongofelysian:core_of_origin"

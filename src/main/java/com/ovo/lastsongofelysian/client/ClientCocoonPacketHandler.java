@@ -13,5 +13,8 @@ public final class ClientCocoonPacketHandler {
         ClientCocoonData.setReversed(message.isReversed());
         ClientCocoonData.setTrialsUnlocked(message.areTrialsUnlocked());
         ClientCocoonData.setCompletedTrialMask(message.getCompletedTrialMask());
+        ClientCocoonData.setThunderStrikes(message.getThunderStrikes());
+        ClientCocoonData.setThunderKills(message.getThunderKills());
+        ClientCocoonData.setEarthExplosions(message.getEarthExplosions());
     }
 }

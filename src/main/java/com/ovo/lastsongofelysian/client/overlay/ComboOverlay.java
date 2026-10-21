@@ -1,7 +1,11 @@
 package com.ovo.lastsongofelysian.client.overlay;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import com.ovo.lastsongofelysian.client.hud.HudLayout;
+import com.ovo.lastsongofelysian.config.ClientHudConfig;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
@@ -50,8 +54,10 @@ public class ComboOverlay implements IGuiOverlay {
         float pulse = pulseTicks / 8.0F;
         int width = 116 + Math.round(pulse * 4.0F);
         int height = 22;
-        int x = screenWidth - width - 14;
-        int y = 74;
+        if (!HudLayout.begin(guiGraphics, screenWidth, screenHeight, width + 4, height + 4,
+                ClientHudConfig.COMBO)) return;
+        int x = 2;
+        int y = 2;
         int accent = clientCombo >= 12
                 ? 0xFFFFB247
                 : clientCombo >= 8
@@ -98,20 +104,19 @@ public class ComboOverlay implements IGuiOverlay {
         String label = "连击";
         String value = "x" + clientCombo;
         guiGraphics.drawString(
-                mc.font,
-                label,
+                mc.font, ModText.display(label),
                 x + 12,
                 y + 7,
                 0xFFE8ECF8,
                 false
         );
         guiGraphics.drawString(
-                mc.font,
-                value,
+                mc.font, ModText.display(value),
                 x + width - mc.font.width(value) - 10,
                 y + 7,
                 accent,
                 true
         );
+        HudLayout.end(guiGraphics);
     }
 }

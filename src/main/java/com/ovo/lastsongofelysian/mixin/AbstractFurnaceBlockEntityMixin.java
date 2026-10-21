@@ -1,5 +1,6 @@
 package com.ovo.lastsongofelysian.mixin;
 
+import com.ovo.lastsongofelysian.event.SignetEffects;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.core.BlockPos;
@@ -30,16 +31,14 @@ public abstract class AbstractFurnaceBlockEntityMixin {
 
                 int progress = accessor.getCookingProgress();
                 int total = accessor.getCookingTotalTime();
+                if (total <= 1 || progress < 0 || progress >= total) return;
 
-                progress += Math.max(1, Math.round(SignetUpgradeData.scaleBonus(
+                progress += Math.max(1, Math.round(SignetEffects.getScaledSignetValue(
                         player,
                         SignetUpgradeData.Skill.GOLD_STREAM,
                         2.0F
                 )));
-                if (progress >= total) {
-                    progress = total - 1;
-                }
-                accessor.setCookingProgress(progress);
+                accessor.setCookingProgress(Math.min(progress, total - 1));
                 break;
             }
         }

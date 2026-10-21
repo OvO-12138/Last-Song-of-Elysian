@@ -1,0 +1,18 @@
+{
+  "name": "收集律者核心",
+  "icon": "lastsongofelysian:core_of_reason",
+  "category": "lastsongofelysian:finality",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "帕朵的核心商品",
+      "text": "当前版本的帕朵商店出售全部十二种非始源律者核心，基础售价为每个3000闪亮的银币；商店折扣会影响实际价格。$(br2)每种核心只能购买一次，已获得的核心不再出售。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "核心与诅咒",
+      "text": "非始源核心包括理、空、雷、风、冰、死、炎、识、岩、支配、约束、侵蚀。$(br2)获得侵蚀之核心会解除侵蚀诅咒。"
+    }
+  ]
+}

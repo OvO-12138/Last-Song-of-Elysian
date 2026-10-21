@@ -1,7 +1,10 @@
 package com.ovo.lastsongofelysian.util;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.event.SignetEffects;
+import com.ovo.lastsongofelysian.event.GoldSignetSystem;
 import com.ovo.lastsongofelysian.item.FlawlessBenedictionLegacyItem;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import net.minecraft.ChatFormatting;
@@ -22,7 +25,7 @@ import top.theillusivec4.curios.api.CuriosApi;
 )
 public final class FlawlessWeaponEnergy {
 
-    public static final int MAX_ENERGY = 100;
+    public static final int MAX_ENERGY = 300;
     public static final String NBT_ENERGY = "WeaponEnergy";
 
     private static final float DAMAGE_PER_ENERGY = 0.005F;
@@ -45,7 +48,7 @@ public final class FlawlessWeaponEnergy {
                 weapon.getOrCreateTag()
                         .getInt(NBT_ENERGY),
                 0,
-                MAX_ENERGY
+                4000
         );
     }
 
@@ -63,14 +66,15 @@ public final class FlawlessWeaponEnergy {
             return;
         }
 
+        int previous = getEnergy(weapon);
+        int maximum = GoldSignetSystem.getMaximumEnergy(player);
+        int next = Mth.clamp(energy, 0, maximum);
         weapon.getOrCreateTag().putInt(
                 NBT_ENERGY,
-                Mth.clamp(
-                        energy,
-                        0,
-                        MAX_ENERGY
-                )
+                next
         );
+
+        GoldSignetSystem.onEnergyChanged(player, previous, next);
 
         sync(player);
     }
@@ -84,26 +88,23 @@ public final class FlawlessWeaponEnergy {
             return getEnergy(weapon);
         }
 
-        int adjustedAmount = amount;
-        boolean hasDiscipline = CuriosApi.getCuriosHelper()
-                .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_DISCIPLINE.get()))
-                .isPresent();
-        if (hasDiscipline) {
-            float bonus = SignetEffects.getScaledSignetValue(
-                    player,
-                    SignetUpgradeData.Skill.DISCIPLINE_THREE,
-                    SignetEffects.getPreceptCount(player) * 0.003F
-            );
-            adjustedAmount = Math.max(amount, Math.round(amount * (1.0F + bonus)));
-        }
+        int adjustedAmount = WeaponEnergyGain.apply(player, amount);
 
         int next = Math.min(
-                MAX_ENERGY,
+                GoldSignetSystem.getMaximumEnergy(player),
                 getEnergy(weapon) + adjustedAmount
         );
 
         setEnergy(player, weapon, next);
 
+        return next;
+    }
+
+    public static int addEnergyFromAttack(Player player, ItemStack weapon, int amount) {
+        if (amount <= 0) return getEnergy(weapon);
+        int next = Math.min(GoldSignetSystem.getMaximumEnergy(player),
+                getEnergy(weapon) + WeaponEnergyGain.applyAttack(player, amount));
+        setEnergy(player, weapon, next);
         return next;
     }
 
@@ -117,7 +118,7 @@ public final class FlawlessWeaponEnergy {
 
         if (current < amount) {
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "武器能量不足："
                                     + current
                                     + "/"
@@ -162,16 +163,22 @@ public final class FlawlessWeaponEnergy {
         }
 
         ItemStack weapon = player.getMainHandItem();
-
-        if (
-                !weapon.is(
-                        ModItems.FLAWLESS_BENEDICTION_LEGACY.get()
-                )
-        ) {
-            return;
+        int energy;
+        if (weapon.is(ModItems.FLAWLESS_BENEDICTION_LEGACY.get())) {
+            energy = getEnergy(weapon);
+        } else if (!AbyssFlowerEnergy.findHeld(player).isEmpty()) {
+            energy = AbyssFlowerEnergy.get(AbyssFlowerEnergy.findHeld(player));
+        } else if (!EdenStarEnergy.findHeld(player).isEmpty()) {
+            energy = EdenStarEnergy.get(EdenStarEnergy.findHeld(player));
+        } else if (!SkyfireGreatswordEnergy.findHeld(player).isEmpty()) {
+            energy = SkyfireGreatswordEnergy.get(SkyfireGreatswordEnergy.findHeld(player));
+        } else {
+            ItemStack fenghuangDown = FenghuangDownEnergy.findHeld(player);
+            if (fenghuangDown.isEmpty()) {
+                return;
+            }
+            energy = FenghuangDownEnergy.getEnergy(fenghuangDown);
         }
-
-        int energy = getEnergy(weapon);
 
         float bonus = Math.min(
                 SignetEffects.getScaledSignetValue(

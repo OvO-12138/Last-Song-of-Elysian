@@ -1,0 +1,18 @@
+{
+  "name": "刻印与饰品栏",
+  "icon": "lastsongofelysian:signet_of_ego",
+  "category": "lastsongofelysian:getting_started",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "装备后生效",
+      "text": "饰品仅放在普通背包中不会启用。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "查看与成长",
+      "text": "按住 $(bold)Shift$() 查看物品的详细效果。$(br2)附加刻印、核心刻印与增幅刻印需要在螺旋工坊融合进对应的基础刻印。"
+    }
+  ]
+}

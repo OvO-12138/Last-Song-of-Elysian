@@ -14,8 +14,6 @@ public class HelixHelper {
     public static boolean isEgoEquipped() {
         Player player = Minecraft.getInstance().player;
         if (player == null) return false;
-        return CuriosApi.getCuriosHelper()
-                .findFirstCurio(player, stack -> stack.is(ModItems.SIGNET_OF_EGO.get()))
-                .isPresent();
+        return EgoSignetAmplification.isEnabled(player);
     }
 }

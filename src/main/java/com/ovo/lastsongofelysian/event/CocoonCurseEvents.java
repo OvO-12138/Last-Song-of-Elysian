@@ -1,7 +1,11 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModItems;
+import com.ovo.lastsongofelysian.util.EgoSignetAmplification;
+import com.ovo.lastsongofelysian.util.ElysianHeroExplosionProtection;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -176,7 +180,8 @@ public final class CocoonCurseEvents {
             UUID.fromString("78da3d1e-da33-487e-821f-a75bdb65b741");
 
     private static boolean isWearingCocoon(Player player) {
-        return CuriosApi.getCuriosHelper()
+        return !FenghuangDownSystem.isCocoonConnectionSevered(player)
+                && CuriosApi.getCuriosHelper()
                 .findFirstCurio(
                         player,
                         stack -> stack.is(ModItems.COCOON_OF_FINALITY.get())
@@ -189,49 +194,20 @@ public final class CocoonCurseEvents {
     }
 
     private static boolean hasCurse(Player player, int trial) {
-        return isWearingCocoon(player) && !CocoonTrialProgress.isComplete(player, trial);
+        return isWearingCocoon(player)
+                && !CocoonTrialProgress.isComplete(player, trial)
+                && (trial != CocoonTrialProgress.CORROSION
+                || !CocoonCoreProgress.hasAcquiredCore(player, ModItems.CORE_OF_CORROSION.get()));
     }
 
     private static boolean hasEgoGold(Player player) {
-        boolean hasEgo = CuriosApi.getCuriosHelper()
-                .findFirstCurio(
-                        player,
-                        stack -> stack.is(ModItems.SIGNET_OF_EGO.get())
-                )
-                .isPresent();
-
-        if (!hasEgo) {
-            return false;
-        }
-
-        return CuriosApi.getCuriosHelper()
-                .findFirstCurio(
-                        player,
-                        stack -> stack.is(ModItems.SIGNET_OF_GOLD.get())
-                )
-                .isPresent();
+        return EgoSignetAmplification.isEnabledFor(
+                player, ModItems.SIGNET_OF_GOLD.get());
     }
 
     private static boolean hasEgoVicissitude(Player player) {
-        boolean hasEgo = CuriosApi.getCuriosHelper()
-                .findFirstCurio(
-                        player,
-                        stack -> stack.is(ModItems.SIGNET_OF_EGO.get())
-                )
-                .isPresent();
-
-        if (!hasEgo) {
-            return false;
-        }
-
-        return CuriosApi.getCuriosHelper()
-                .findFirstCurio(
-                        player,
-                        stack -> stack.is(
-                                ModItems.SIGNET_OF_VICISSITUDE.get()
-                        )
-                )
-                .isPresent();
+        return EgoSignetAmplification.isEnabledFor(
+                player, ModItems.SIGNET_OF_VICISSITUDE.get());
     }
 
     private static float multiplier(Player player) {
@@ -501,7 +477,9 @@ public final class CocoonCurseEvents {
                     player.getZ()
             );
 
-            player.level().addFreshEntity(lightning);
+            if (player.level().addFreshEntity(lightning)) {
+                CocoonTrialProgress.markThunderLightningPending(player);
+            }
         }
     }
 
@@ -699,6 +677,9 @@ public final class CocoonCurseEvents {
         if (event.getEntity().level().isClientSide()) {
             return;
         }
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return;
+        }
 
         if (isVoidSummon(event.getEntity())) {
             tryVoidSummonTeleport(event.getEntity());
@@ -712,7 +693,6 @@ public final class CocoonCurseEvents {
             return;
         }
 
-        // Skip teleport if no actual damage occurred (e.g., from armor effect removal)
         if (event.getAmount() <= 0.0F) {
             return;
         }
@@ -755,6 +735,7 @@ public final class CocoonCurseEvents {
     ) {
         if (
                 event.getEntity().level().isClientSide() ||
+                event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY) ||
                 event.getSource().is(
                         VOID_SUMMON_DAMAGE_TYPE
                 ) ||
@@ -858,6 +839,9 @@ public final class CocoonCurseEvents {
     public static void onVoidSummonFinalDamage(
             LivingDamageEvent event
     ) {
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return;
+        }
         if (isVoidSummon(event.getEntity())) {
             LivingEntity summoned = event.getEntity();
             CompoundTag data = summoned.getPersistentData();
@@ -936,7 +920,6 @@ public final class CocoonCurseEvents {
             return;
         }
 
-        // Check cooldown (use tickCount to avoid issues with world time)
         CompoundTag data = player.getPersistentData();
         long lastTeleportTick = data.getLong("LSE_VoidCurse_Teleport_LastTick");
         if (player.tickCount < lastTeleportTick + VOID_SUMMON_TELEPORT_COOLDOWN_TICKS) {
@@ -951,7 +934,6 @@ public final class CocoonCurseEvents {
             return;
         }
 
-        // Set cooldown
         data.putLong("LSE_VoidCurse_Teleport_LastTick", player.tickCount);
         CocoonTrialProgress.recordVoidTeleport(player);
 
@@ -966,6 +948,9 @@ public final class CocoonCurseEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onCocoonDamage(LivingHurtEvent event) {
         if (event.getEntity().level().isClientSide()) {
+            return;
+        }
+        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
 
@@ -1054,7 +1039,6 @@ public final class CocoonCurseEvents {
                             RAND.nextFloat() < chance(attacker, 0.025F)
             ) {
                 spawnCatalystMobs(attacker);
-                // Remove one stackable item from victim as Reason curse penalty
                 if (event.getEntity() instanceof Player victim) {
                     removeRandomStackableItem(victim);
                 }
@@ -1313,7 +1297,6 @@ public final class CocoonCurseEvents {
         }
 
 
-        // Skip if this is not a real crafting event (e.g., curios equipping/unequipping)
         boolean foundInInventory = false;
         Inventory playerInv = player.getInventory();
         for (int i = 0; i < playerInv.getContainerSize(); i++) {
@@ -1418,14 +1401,14 @@ public final class CocoonCurseEvents {
                 0.05F
         );
 
-        player.level().explode(
+        ElysianHeroExplosionProtection.run(() -> player.level().explode(
                 player,
                 player.getX(),
                 player.getY() + 0.5D,
                 player.getZ(),
                 REASON_CRAFT_EXPLOSION_POWER,
                 Level.ExplosionInteraction.NONE
-        );
+        ));
 
         if (
                 CocoonCoreProgress.unlocked(
@@ -1437,7 +1420,7 @@ public final class CocoonCurseEvents {
         }
 
         player.displayClientMessage(
-                Component.literal(
+                ModText.literal(
                         "真理拒绝了你"
                 ).withStyle(ChatFormatting.RED),
                 true
@@ -1675,8 +1658,6 @@ public final class CocoonCurseEvents {
             return;
         }
 
-        // NOTE: Dimension change teleport disabled per user request
-        // No automatic teleport when entering Elysian Realm
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
@@ -1967,7 +1948,6 @@ public final class CocoonCurseEvents {
             return false;
         }
 
-        // Check chunk zombie limit
         String chunkKey = player.chunkPosition().toString();
         int currentZombieCount = CHUNK_ZOMBIE_COUNT.getOrDefault(chunkKey, 0);
         if (currentZombieCount >= MAX_ZOMBIES_PER_CHUNK) {
@@ -1998,7 +1978,6 @@ public final class CocoonCurseEvents {
 
         zombie.setTarget(player);
 
-        // Store chunk key on zombie for cleanup tracking
         zombie.getPersistentData().putString("LSE_Cocoon_Chunk_Key", chunkKey);
         
         boolean spawned = level.addFreshEntity(zombie);
@@ -2192,7 +2171,7 @@ public final class CocoonCurseEvents {
         );
 
         player.displayClientMessage(
-                Component.literal(
+                ModText.literal(
                         "坠入虚空吧，虫豸。"
                 ).withStyle(ChatFormatting.DARK_PURPLE),
                 false
@@ -2292,7 +2271,7 @@ public final class CocoonCurseEvents {
         );
 
         player.displayClientMessage(
-                Component.literal(
+                ModText.literal(
                         "岩之诅咒损耗了 "
                 ).withStyle(
                         ChatFormatting.GOLD

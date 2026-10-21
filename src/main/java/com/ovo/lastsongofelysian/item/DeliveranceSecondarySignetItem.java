@@ -1,5 +1,6 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -25,13 +26,14 @@ public class DeliveranceSecondarySignetItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.literal(this.skill.displayName());
+        return ModText.literal(this.skill.displayName())
+                .withStyle(style -> style.withColor(0x3F64D8));
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal(this.skill.description(0))
+        tooltip.add(ModText.literal(this.skill.description(0))
                 .withStyle(style -> style.withColor(0x4444FF)));
         super.appendHoverText(stack, level, tooltip, flag);
     }

@@ -1,0 +1,5 @@
+{
+  "parent": "lastsongofelysian:core_death",
+  "display": { "icon": { "item": "lastsongofelysian:abyss_flower" }, "title": { "translate": "advancement.lastsongofelysian.obtain_abyss_flower.title" }, "description": { "translate": "advancement.lastsongofelysian.obtain_abyss_flower.description" }, "frame": "challenge", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:abyss_flower"] }] } } }
+}

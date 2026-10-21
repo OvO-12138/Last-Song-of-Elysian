@@ -1,0 +1,17 @@
+{
+  "name": "闪亮的银币与银币袋",
+  "icon": "lastsongofelysian:silver_pouch",
+  "category": "lastsongofelysian:realm",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "收集与存取",
+      "text": "击败敌对生物可以获得闪亮的银币；战利品箱也有机会出现银币。$(br2)手持银币袋右键打开界面，可存入背包里的全部银币、取出最多 64 枚，或输入自定义数量再取出。$(br2)商店可以直接使用袋内银币。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:silver_pouch"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "真我·始源",
+  "icon": "lastsongofelysian:core_of_origin",
+  "category": "lastsongofelysian:signets",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "真我",
+      "text": "获得真我之外的全部十二种基础刻印后，自动获得真我刻印。"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:core_of_origin",
+      "title": "始源",
+      "text": "获得全部十二种非始源律者核心，并收集包括真我在内的十三种基础刻印后，自动获得始源之核心。全部核心集齐后，终焉试炼开启。"
+    }
+  ]
+}

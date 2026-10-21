@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:obtain_cocoon",
+  "display": {
+    "icon": { "item": "lastsongofelysian:honkai_energy_inhibitor" },
+    "title": { "translate": "advancement.lastsongofelysian.craft_inhibitor.title" },
+    "description": { "translate": "advancement.lastsongofelysian.craft_inhibitor.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "crafted": { "trigger": "minecraft:impossible" } }
+}

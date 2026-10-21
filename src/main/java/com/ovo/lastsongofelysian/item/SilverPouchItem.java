@@ -1,5 +1,8 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
+import com.ovo.lastsongofelysian.client.ClientScreenHooks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -37,19 +40,20 @@ public class SilverPouchItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide()) {
             long balance = getBalance(stack);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    net.minecraft.client.Minecraft.getInstance()
-                            .setScreen(new com.ovo.lastsongofelysian.screen.SilverPouchScreen(balance)));
+            DistExecutor.unsafeRunWhenOn(
+                    Dist.CLIENT,
+                    () -> () -> ClientScreenHooks.openSilverPouchScreen(balance)
+            );
         }
-        return InteractionResultHolder.success(stack);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("余额：" + getBalance(stack) + " 枚")
+        tooltip.add(ModText.literal("余额：" + getBalance(stack) + " 枚")
                 .withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.literal("右键打开")
+        tooltip.add(ModText.literal("右键打开")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
     }
 }

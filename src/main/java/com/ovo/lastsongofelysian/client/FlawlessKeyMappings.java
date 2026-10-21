@@ -1,16 +1,16 @@
 package com.ovo.lastsongofelysian.client;
 
-import com.ovo.lastsongofelysian.lastsongofelysian;
+import com.ovo.lastsongofelysian.network.FenghuangDownActionPacket;
+import com.ovo.lastsongofelysian.network.AbyssFlowerActionPacket;
 import com.ovo.lastsongofelysian.network.FlawlessWeaponActionPacket;
 import com.ovo.lastsongofelysian.network.ModNetwork;
+import com.ovo.lastsongofelysian.network.SkyfireGreatswordActionPacket;
+import com.ovo.lastsongofelysian.network.EdenStarActionPacket;
+import com.ovo.lastsongofelysian.registry.ModItems;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
 public final class FlawlessKeyMappings {
@@ -18,19 +18,19 @@ public final class FlawlessKeyMappings {
     private static final String CATEGORY =
             "key.categories.lastsongofelysian";
 
-    public static final KeyMapping SWITCH_MODE =
-            new KeyMapping(
-                    "key.lastsongofelysian.flawless_switch_mode",
-                    InputConstants.Type.KEYSYM,
-                    GLFW.GLFW_KEY_C,
-                    CATEGORY
-            );
-
     public static final KeyMapping WEAPON_SKILL =
             new KeyMapping(
                     "key.lastsongofelysian.flawless_weapon_skill",
                     InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_R,
+                    CATEGORY
+            );
+
+    public static final KeyMapping SWITCH_MODE =
+            new KeyMapping(
+                    "key.lastsongofelysian.flawless_switch_mode",
+                    InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_C,
                     CATEGORY
             );
 
@@ -45,37 +45,11 @@ public final class FlawlessKeyMappings {
     private FlawlessKeyMappings() {
     }
 
-    @Mod.EventBusSubscriber(
-            modid = lastsongofelysian.MODID,
-            value = Dist.CLIENT,
-            bus = Mod.EventBusSubscriber.Bus.MOD
-    )
-    public static final class ModEvents {
-
-        private ModEvents() {
-        }
-
-        @SubscribeEvent
-        public static void registerKeys(
-                RegisterKeyMappingsEvent event
-        ) {
-            event.register(SWITCH_MODE);
-            event.register(WEAPON_SKILL);
-            event.register(ULTIMATE);
-        }
-    }
-
-    @Mod.EventBusSubscriber(
-            modid = lastsongofelysian.MODID,
-            value = Dist.CLIENT,
-            bus = Mod.EventBusSubscriber.Bus.FORGE
-    )
     public static final class ForgeEvents {
 
         private ForgeEvents() {
         }
 
-        @SubscribeEvent
         public static void onClientTick(
                 TickEvent.ClientTickEvent event
         ) {
@@ -86,29 +60,71 @@ public final class FlawlessKeyMappings {
                 return;
             }
 
-            while (SWITCH_MODE.consumeClick()) {
-                send(
-                        FlawlessWeaponActionPacket
-                                .Action
-                                .SWITCH_MODE
-                );
+            while (WEAPON_SKILL.consumeClick()) {
+                if (isHoldingEdenStar()) {
+                    send(EdenStarActionPacket.Action.ZEROTH);
+                } else if (isHoldingSkyfireGreatsword()) {
+                    send(SkyfireGreatswordActionPacket.Action.ZEROTH);
+                } else if (isHoldingAbyssFlower()) {
+                    send(AbyssFlowerActionPacket.Action.ZEROTH);
+                } else if (isHoldingFenghuangDown()) {
+                    send(FenghuangDownActionPacket.Action.ZEROTH);
+                } else {
+                    send(FlawlessWeaponActionPacket.Action.ULTIMATE);
+                }
             }
 
-            while (WEAPON_SKILL.consumeClick()) {
-                send(
-                        FlawlessWeaponActionPacket
-                                .Action
-                                .WEAPON_SKILL
-                );
+            while (SWITCH_MODE.consumeClick()) {
+                if (isHoldingEdenStar()) {
+                    send(EdenStarActionPacket.Action.FIRST);
+                } else if (isHoldingAbyssFlower()) {
+                    send(AbyssFlowerActionPacket.Action.FIRST);
+                } else if (isHoldingFenghuangDown()) {
+                    send(FenghuangDownActionPacket.Action.FIRST);
+                } else {
+                    send(FlawlessWeaponActionPacket.Action.SWITCH_MODE);
+                }
             }
 
             while (ULTIMATE.consumeClick()) {
-                send(
-                        FlawlessWeaponActionPacket
-                                .Action
-                                .ULTIMATE
-                );
+                if (isHoldingEdenStar()) {
+                    send(EdenStarActionPacket.Action.THIRD);
+                } else if (isHoldingAbyssFlower()) {
+                    send(AbyssFlowerActionPacket.Action.SECOND);
+                } else if (isHoldingFenghuangDown()) {
+                    send(FenghuangDownActionPacket.Action.SECOND);
+                } else {
+                    send(FlawlessWeaponActionPacket.Action.WEAPON_SKILL);
+                }
             }
+        }
+
+        private static boolean isHoldingFenghuangDown() {
+            Minecraft minecraft = Minecraft.getInstance();
+            return minecraft.player != null
+                    && (minecraft.player.getMainHandItem().is(ModItems.FENGHUANG_DOWN.get())
+                    || minecraft.player.getOffhandItem().is(ModItems.FENGHUANG_DOWN.get()));
+        }
+
+        private static boolean isHoldingAbyssFlower() {
+            return Minecraft.getInstance().player != null
+                    && !com.ovo.lastsongofelysian.util.AbyssFlowerEnergy.findHeld(Minecraft.getInstance().player).isEmpty();
+        }
+
+        private static boolean isHoldingSkyfireGreatsword() {
+            return Minecraft.getInstance().player != null
+                    && !com.ovo.lastsongofelysian.util.SkyfireGreatswordEnergy
+                    .findHeld(Minecraft.getInstance().player).isEmpty();
+        }
+
+        private static boolean isHoldingEdenStar() {
+            return Minecraft.getInstance().player != null
+                    && !com.ovo.lastsongofelysian.util.EdenStarEnergy
+                    .findHeld(Minecraft.getInstance().player).isEmpty();
+        }
+
+        private static void send(AbyssFlowerActionPacket.Action action) {
+            ModNetwork.CHANNEL.sendToServer(new AbyssFlowerActionPacket(action));
         }
 
         private static void send(
@@ -119,6 +135,18 @@ public final class FlawlessKeyMappings {
                             action
                     )
             );
+        }
+
+        private static void send(FenghuangDownActionPacket.Action action) {
+            ModNetwork.CHANNEL.sendToServer(new FenghuangDownActionPacket(action));
+        }
+
+        private static void send(SkyfireGreatswordActionPacket.Action action) {
+            ModNetwork.CHANNEL.sendToServer(new SkyfireGreatswordActionPacket(action));
+        }
+
+        private static void send(EdenStarActionPacket.Action action) {
+            ModNetwork.CHANNEL.sendToServer(new EdenStarActionPacket(action));
         }
     }
 }

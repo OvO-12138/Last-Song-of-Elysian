@@ -1,7 +1,11 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.registry.ModEffects;
 import com.ovo.lastsongofelysian.registry.ModItems;
+import com.ovo.lastsongofelysian.util.EgoSignetAmplification;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -72,23 +76,23 @@ public class PaintbrushItem extends Item {
                         next = MODE_BLUE;
                     } else {
                         player.displayClientMessage(
-                                Component.literal("需要佩戴繁星刻印才能使用颜料喵～").withStyle(ChatFormatting.RED),
+                                ModText.literal("需要佩戴繁星刻印才能使用颜料喵～").withStyle(ChatFormatting.RED),
                                 true);
                         return InteractionResultHolder.success(stack);
                     }
                 } else if (MODE_BLUE.equals(current)) {
 
-                    if (hasSignet(player, ModItems.SIGNET_OF_STARS.get()) &&
-                            hasSignet(player, ModItems.SIGNET_OF_EGO.get())) {
+                    if (hasSignet(player, ModItems.SIGNET_OF_STARS.get())
+                            && EgoSignetAmplification.isEnabled(player)) {
                         next = MODE_PINK;
                     } else if (!hasSignet(player, ModItems.SIGNET_OF_STARS.get())) {
                         player.displayClientMessage(
-                                Component.literal("需要佩戴繁星刻印才能使用颜料喵～").withStyle(ChatFormatting.RED),
+                                ModText.literal("需要佩戴繁星刻印才能使用颜料喵～").withStyle(ChatFormatting.RED),
                                 true);
                         return InteractionResultHolder.success(stack);
                     } else {
                         player.displayClientMessage(
-                                Component.literal("需要同时佩戴繁星和真我刻印才能切换粉色颜料喵～").withStyle(ChatFormatting.LIGHT_PURPLE),
+                                ModText.literal("需要同时佩戴繁星和真我刻印才能切换粉色颜料喵～").withStyle(ChatFormatting.LIGHT_PURPLE),
                                 true);
                         return InteractionResultHolder.success(stack);
                     }
@@ -98,7 +102,7 @@ public class PaintbrushItem extends Item {
 
                 setMode(stack, next);
                 player.displayClientMessage(
-                        Component.literal(
+                        ModText.literal(
                                 MODE_RED.equals(next)  ? "✦ 红色颜料" :
                                         MODE_BLUE.equals(next) ? "✦ 蓝色颜料" : "✦ 粉色颜料"
                         ).withStyle(
@@ -121,7 +125,8 @@ public class PaintbrushItem extends Item {
             List<LivingEntity> targets = level.getEntitiesOfClass(
                     LivingEntity.class,
                     player.getBoundingBox().inflate(8.0),
-                    e -> e instanceof Enemy && e.isAlive());
+                    e -> e instanceof Enemy
+                            && PlayerControlledAllies.isValidEnemy(player, e));
 
             for (LivingEntity target : targets) {
                 int amplifier = MODE_RED.equals(mode)
@@ -129,14 +134,15 @@ public class PaintbrushItem extends Item {
                         : MODE_BLUE.equals(mode)
                         ? SignetUpgradeData.getEquippedLevel(player, SignetUpgradeData.Skill.STARS_BLUE)
                         : 0;
-                target.addEffect(new MobEffectInstance(effect, 100, amplifier, false, true));
+                int duration = MODE_PINK.equals(mode) ? Integer.MAX_VALUE : 100;
+                target.addEffect(new MobEffectInstance(effect, duration, amplifier, false, true, true));
             }
 
             if (!targets.isEmpty()) {
                 Style s = mode.equals(MODE_RED) ? RED_LIGHT :
                         mode.equals(MODE_BLUE) ? BLUE_LIGHT : PINK_LIGHT;
                 player.displayClientMessage(
-                        Component.literal("已涂抹 " + targets.size() + " 个敌人").withStyle(s), true);
+                        ModText.literal("已涂抹 " + targets.size() + " 个敌人").withStyle(s), true);
             }
         }
 
@@ -152,8 +158,8 @@ public class PaintbrushItem extends Item {
         boolean isBlue = MODE_BLUE.equals(mode);
         String colorName = isRed ? "■ 红色" : (isBlue ? "■ 蓝色" : "■ 粉色");
         Style colorStyle = isRed ? RED : (isBlue ? BLUE : PINK);
-        tooltip.add(Component.literal("当前颜料：" + colorName).withStyle(colorStyle));
-        tooltip.add(Component.literal("Shift+右键 切换颜料  │  右键 涂抹周围敌人")
+        tooltip.add(ModText.literal("当前颜料：" + colorName).withStyle(colorStyle));
+        tooltip.add(ModText.literal("Shift+右键 切换颜料  │  右键 涂抹周围敌人")
                 .withStyle(GRAY_ITALIC));
     }
 }

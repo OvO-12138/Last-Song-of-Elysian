@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -28,7 +30,8 @@ public class DeliveranceCoreSignetItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.literal(this.core.displayName());
+        return ModText.literal(this.core.displayName())
+                .withStyle(style -> style.withColor(0x3F64D8));
     }
 
     @Override
@@ -38,9 +41,9 @@ public class DeliveranceCoreSignetItem extends Item {
             List<Component> tooltip,
             TooltipFlag flag
     ) {
-        tooltip.add(Component.literal(this.core.description())
+        tooltip.add(ModText.literal(this.core.description())
                 .withStyle(style -> style.withColor(0x2244CC)));
-        tooltip.add(Component.literal("核心不可升级；需在螺旋工坊与救世刻印融合")
+        tooltip.add(ModText.literal("核心不可升级；需在螺旋工坊与救世刻印融合")
                 .withStyle(style -> style.withColor(0x888888).withItalic(true)));
         super.appendHoverText(stack, level, tooltip, flag);
     }

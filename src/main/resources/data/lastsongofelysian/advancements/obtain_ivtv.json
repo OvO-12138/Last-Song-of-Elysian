@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:open_history_book",
+  "display": {
+    "icon": { "item": "lastsongofelysian:ivtv_book" },
+    "title": { "translate": "advancement.lastsongofelysian.obtain_ivtv.title" },
+    "description": { "translate": "advancement.lastsongofelysian.obtain_ivtv.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:ivtv_book"] }] } } }
+}

@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import net.minecraft.ChatFormatting;
@@ -91,7 +93,7 @@ public class HonkaiEnergyEvents {
         }
 
         player.displayClientMessage(
-                Component.literal("你获得了一个中等崩坏能抑制剂。")
+                ModText.literal("你获得了一个中等崩坏能抑制剂。")
                         .withStyle(ChatFormatting.AQUA),
                 true
         );
@@ -115,7 +117,7 @@ public class HonkaiEnergyEvents {
                 long remainingMinutes = Math.max(1, remaining / 1000L / 60L);
 
                 player.displayClientMessage(
-                        Component.literal("彩蛋冷却中，还需要约 " + remainingMinutes + " 分钟。")
+                        ModText.literal("彩蛋冷却中，还需要约 " + remainingMinutes + " 分钟。")
                                 .withStyle(ChatFormatting.GRAY),
                         true
                 );
@@ -140,7 +142,7 @@ public class HonkaiEnergyEvents {
             );
 
             player.displayClientMessage(
-                    Component.literal("彩蛋触发：你获得了一个高等崩坏能抑制剂。")
+                    ModText.literal("彩蛋触发：你获得了一个高等崩坏能抑制剂。")
                             .withStyle(ChatFormatting.LIGHT_PURPLE),
                     true
             );
@@ -161,7 +163,7 @@ public class HonkaiEnergyEvents {
                 long remainingMinutes = Math.max(1, remaining / 1000L / 60L);
 
                 player.displayClientMessage(
-                        Component.literal("彩蛋冷却中，还需要约 " + remainingMinutes + " 分钟。")
+                        ModText.literal("彩蛋冷却中，还需要约 " + remainingMinutes + " 分钟。")
                                 .withStyle(ChatFormatting.GRAY),
                         true
                 );
@@ -209,7 +211,7 @@ public class HonkaiEnergyEvents {
             );
 
             player.displayClientMessage(
-                    Component.literal("彩蛋触发：即使如此，你仍然向前。")
+                    ModText.literal("彩蛋触发：即使如此，你仍然向前。")
                             .withStyle(ChatFormatting.AQUA),
                     true
             );
@@ -224,7 +226,7 @@ public class HonkaiEnergyEvents {
 
             if (data.getBoolean(NBT_GOT_DELIVERANCE_EASTER_EGG)) {
                 player.displayClientMessage(
-                        Component.literal("这个彩蛋你已经触发过了。")
+                        ModText.literal("这个彩蛋你已经触发过了。")
                                 .withStyle(ChatFormatting.GRAY),
                         true
                 );
@@ -249,7 +251,7 @@ public class HonkaiEnergyEvents {
             );
 
             player.displayClientMessage(
-                    Component.literal("彩蛋触发：你获得了救世刻印。")
+                    ModText.literal("彩蛋触发：你获得了救世刻印。")
                             .withStyle(ChatFormatting.GOLD),
                     true
             );
@@ -264,7 +266,7 @@ public class HonkaiEnergyEvents {
 
             if (data.getBoolean(NBT_GOT_GOLD_EASTER_EGG)) {
                 player.displayClientMessage(
-                        Component.literal("这个彩蛋你已经触发过了。")
+                        ModText.literal("这个彩蛋你已经触发过了。")
                                 .withStyle(ChatFormatting.GRAY),
                         true
                 );
@@ -289,7 +291,7 @@ public class HonkaiEnergyEvents {
             );
 
             player.displayClientMessage(
-                    Component.literal("彩蛋触发：愿明日如黄金般辉煌")
+                    ModText.literal("彩蛋触发：愿明日如黄金般辉煌")
                             .withStyle(ChatFormatting.GOLD),
                     true
             );

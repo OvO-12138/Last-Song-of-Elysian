@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.entity;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.menu.SpiralWorkshopMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -75,7 +77,7 @@ public class ElysianHeroNpcEntity extends PathfinderMob {
                     new SimpleMenuProvider(
                             (containerId, inventory, menuPlayer) ->
                                     new SpiralWorkshopMenu(containerId, inventory),
-                            Component.literal("螺旋工坊")
+                            ModText.literal("螺旋工坊")
                     )
             );
         }

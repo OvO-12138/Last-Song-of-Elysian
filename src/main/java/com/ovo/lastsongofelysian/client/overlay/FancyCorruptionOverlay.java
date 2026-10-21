@@ -2,6 +2,8 @@ package com.ovo.lastsongofelysian.client.overlay;
 
 import com.ovo.lastsongofelysian.client.CorruptionHudData;
 import com.ovo.lastsongofelysian.client.ClientCocoonData;
+import com.ovo.lastsongofelysian.client.hud.HudLayout;
+import com.ovo.lastsongofelysian.config.ClientHudConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
@@ -30,7 +32,9 @@ public final class FancyCorruptionOverlay
 
         if (
                         minecraft.player == null
+                        || minecraft.options.hideGui
                         || ClientCocoonData.isReversed()
+                        || ClientCocoonData.hasCore(11)
                         || ClientCocoonData.isTrialComplete(11)
                         || minecraft.options.renderDebug
         ) {
@@ -44,8 +48,10 @@ public final class FancyCorruptionOverlay
         );
         float progress = energy / 10000.0F;
 
-        int x = 10;
-        int y = screenHeight - 36;
+        if (!HudLayout.begin(graphics, screenWidth, screenHeight, WIDTH + 2, HEIGHT + 2,
+                ClientHudConfig.CORRUPTION)) return;
+        int x = 0;
+        int y = 0;
 
         drawFrame(graphics, x, y);
         drawDiamond(graphics, x + 8, y + 7);
@@ -77,6 +83,7 @@ public final class FancyCorruptionOverlay
                 0xFFF4ECFF,
                 true
         );
+        HudLayout.end(graphics);
     }
 
     private static void drawFrame(

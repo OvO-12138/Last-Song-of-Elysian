@@ -1,0 +1,21 @@
+{
+  "name": "item.lastsongofelysian.hyperion_log",
+  "landing_text": "book.lastsongofelysian.hyperion_log.landing",
+  "subtitle": "book.lastsongofelysian.hyperion_log.subtitle",
+  "version": 0,
+  "use_resource_pack": true,
+  "dont_generate_book": true,
+  "custom_book_item": "lastsongofelysian:hyperion_log",
+  "book_texture": "patchouli:textures/gui/book_purple.png",
+  "use_blocky_font": true,
+  "show_progress": false,
+  "show_toasts": false,
+  "advancements_tab": "lastsongofelysian:root",
+  "pause_game": false,
+  "text_overflow_mode": "resize",
+  "text_color": "382C36",
+  "header_color": "633C6E",
+  "nameplate_color": "F4BCD9",
+  "link_color": "85519B",
+  "link_hover_color": "C15891"
+}

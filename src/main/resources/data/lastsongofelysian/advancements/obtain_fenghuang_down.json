@@ -1,0 +1,5 @@
+{
+  "parent": "lastsongofelysian:core_sentience",
+  "display": { "icon": { "item": "lastsongofelysian:fenghuang_down" }, "title": { "translate": "advancement.lastsongofelysian.obtain_fenghuang_down.title" }, "description": { "translate": "advancement.lastsongofelysian.obtain_fenghuang_down.description" }, "frame": "challenge", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:fenghuang_down"] }] } } }
+}

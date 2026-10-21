@@ -1,0 +1,5 @@
+{
+  "parent": "lastsongofelysian:core_earth",
+  "display": { "icon": { "item": "lastsongofelysian:eden_star" }, "title": { "translate": "advancement.lastsongofelysian.obtain_eden_star.title" }, "description": { "translate": "advancement.lastsongofelysian.obtain_eden_star.description" }, "frame": "challenge", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:eden_star"] }] } } }
+}

@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.HelixHelper;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
@@ -29,30 +31,34 @@ public class SignetOfBodhiItem extends Item implements ICurioItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         boolean ego = HelixHelper.isEgoEquipped();
 
-        tooltip.add(Component.literal("「天慧」善法之瞳 苏 VII").withStyle(ICE_GREEN_BOLD));
+        tooltip.add(ModText.literal("「天慧」善法之瞳 苏 VII").withStyle(ICE_GREEN_BOLD));
 
         if (ego) {
-            tooltip.add(Component.literal("医师“觉者”的落叶，以此洞察世界，答案难寻，坠「天慧」之泡影")
+            tooltip.add(ModText.literal("医师“觉者”的落叶，以此洞察世界，答案难寻，坠「天慧」之泡影")
                     .withStyle(SignetOfEgoItem.LIGHT_PINK_I));
         }
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("诸行无常").withStyle(LIGHT_ICE_ITALIC));
-        tooltip.add(Component.literal("皆是因果轮转").withStyle(LIGHT_ICE_ITALIC));
-        tooltip.add(Component.literal("刹那生灭").withStyle(LIGHT_ICE_ITALIC));
-        tooltip.add(Component.literal("来吧").withStyle(LIGHT_ICE_ITALIC));
-        tooltip.add(Component.literal("踏入这无量光中").withStyle(LIGHT_ICE_ITALIC));
-        tooltip.add(Component.literal("此即「天慧」之铭").withStyle(LIGHT_ICE_ITALIC));
+        tooltip.add(ModText.literal("诸行无常").withStyle(LIGHT_ICE_ITALIC));
+        tooltip.add(ModText.literal("皆是因果轮转").withStyle(LIGHT_ICE_ITALIC));
+        tooltip.add(ModText.literal("刹那生灭").withStyle(LIGHT_ICE_ITALIC));
+        tooltip.add(ModText.literal("来吧").withStyle(LIGHT_ICE_ITALIC));
+        tooltip.add(ModText.literal("踏入这无量光中").withStyle(LIGHT_ICE_ITALIC));
+        tooltip.add(ModText.literal("此即「天慧」之铭").withStyle(LIGHT_ICE_ITALIC));
 
         if (Screen.hasShiftDown()) {
             if (ego) {
                 tooltip.add(Component.empty());
-                tooltip.add(Component.literal("愿善法之瞳爱佑其身，赐予「天慧」的智识").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("获得永久夜视效果").withStyle(LIGHT_ICE_ITALIC));
+                tooltip.add(ModText.literal("愿善法之瞳爱佑其身，赐予「天慧」的智识").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("获得永久夜视效果").withStyle(LIGHT_ICE_ITALIC));
             }
             SignetUpgradeData.addSkillTooltips(
                     tooltip, stack, SignetUpgradeData.Signet.BODHI, 0x40E0B0, 0xAAF5E0);
+            SignetUpgradeData.addUnlockedBodhiSecondaryTooltips(
+                    tooltip, stack, 0x40E0B0, 0xAAF5E0);
+            SignetUpgradeData.addBodhiCoreTooltips(
+                    tooltip, stack, 0x40E0B0, 0xAAF5E0);
         } else {
-            tooltip.add(Component.literal("按住 [Shift] 查看效果").withStyle(ChatFormatting.GRAY));
+            tooltip.add(ModText.literal("按住 [Shift] 查看效果").withStyle(ChatFormatting.GRAY));
         }
 
         super.appendHoverText(stack, level, tooltip, flag);

@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.screen;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,7 +33,7 @@ public class ShiJiBookScreen extends Screen {
     private static final int LINE_HEIGHT = 12;
 
     public ShiJiBookScreen() {
-        super(Component.literal("岁月史书"));
+        super(ModText.literal("岁月史书"));
         jokes = buildJokes();
     }
 
@@ -160,14 +162,14 @@ public class ShiJiBookScreen extends Screen {
         contentTop = panelTop + 62;
         contentBottom = panelTop + panelHeight - 39;
 
-        previousButton = this.addRenderableWidget(Button.builder(Component.literal("<"), button -> {
+        previousButton = this.addRenderableWidget(Button.builder(ModText.literal("<"), button -> {
             if (currentPage > 0) {
                 currentPage--;
                 scrollOffset = 0;
             }
         }).bounds(this.width / 2 - 58, panelTop + panelHeight - 30, 24, 20).build());
 
-        nextButton = this.addRenderableWidget(Button.builder(Component.literal(">"), button -> {
+        nextButton = this.addRenderableWidget(Button.builder(ModText.literal(">"), button -> {
             if (currentPage < jokes.size() - 1) {
                 currentPage++;
                 scrollOffset = 0;
@@ -190,10 +192,10 @@ public class ShiJiBookScreen extends Screen {
         guiGraphics.fill(panelLeft + 13, panelTop + 13, panelLeft + 17, panelTop + 31, 0xFFE5C56D);
         guiGraphics.fill(panelLeft + panelWidth - 17, panelTop + 13, panelLeft + panelWidth - 13, panelTop + 31, 0xFFE5C56D);
 
-        guiGraphics.drawCenteredString(font, "岁月史书", this.width / 2, panelTop + 18, 0xFFFFDC82);
-        guiGraphics.drawString(font, page.title(), panelLeft + 21, panelTop + 51, 0xFF6D211D, false);
+        guiGraphics.drawCenteredString(font, ModText.display("岁月史书"), this.width / 2, panelTop + 18, 0xFFFFDC82);
+        guiGraphics.drawString(font, ModText.display(page.title()), panelLeft + 21, panelTop + 51, 0xFF6D211D, false);
 
-        List<FormattedCharSequence> wrapped = font.split(Component.literal(page.content()), panelWidth - 54);
+        List<FormattedCharSequence> wrapped = font.split(ModText.exact(page.content()), panelWidth - 54);
         int totalHeight = wrapped.size() * LINE_HEIGHT;
         int visibleHeight = contentBottom - contentTop;
         maxScroll = Math.max(0, totalHeight - visibleHeight);
@@ -202,13 +204,13 @@ public class ShiJiBookScreen extends Screen {
         guiGraphics.enableScissor(panelLeft + 20, contentTop, panelLeft + panelWidth - 22, contentBottom);
         int y = contentTop - scrollOffset;
         for (FormattedCharSequence line : wrapped) {
-            guiGraphics.drawString(font, line, panelLeft + 21, y, 0xFF3B2B20, false);
+            guiGraphics.drawString(font, ModText.display(line), panelLeft + 21, y, 0xFF3B2B20, false);
             y += LINE_HEIGHT;
         }
         guiGraphics.disableScissor();
 
         String pageText = (currentPage + 1) + "/" + jokes.size();
-        guiGraphics.drawCenteredString(font, pageText, this.width / 2, panelTop + panelHeight - 23, 0xFF6B261F);
+        guiGraphics.drawCenteredString(font, ModText.display(pageText), this.width / 2, panelTop + panelHeight - 23, 0xFF6B261F);
 
         if (maxScroll > 0) {
             int barHeight = Math.max(12, (int) ((visibleHeight / (float) totalHeight) * visibleHeight));

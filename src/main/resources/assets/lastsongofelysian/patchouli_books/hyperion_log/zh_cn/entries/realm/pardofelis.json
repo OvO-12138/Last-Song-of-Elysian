@@ -1,0 +1,18 @@
+{
+  "name": "帕朵的商店",
+  "icon": "lastsongofelysian:shiny_silver",
+  "category": "lastsongofelysian:realm",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "交易与刷新",
+      "text": "在乐土右键帕朵菲利丝打开商店，点击商品购买。银币可放在背包或银币袋内。$(br2)刷新基础费用为 50 银币。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "选择核心路线",
+      "text": "购买某一核心路线后，另一核心及其增幅会从可购商品中移除。对应的三个增幅刻印会在获得该核心后开放购买。$(br2)买到的刻印物品还需要到维尔薇处完成融合。"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.HelixHelper;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
@@ -29,29 +31,30 @@ public class SignetOfInfinityItem extends Item implements ICurioItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         boolean ego = HelixHelper.isEgoEquipped();
 
-        tooltip.add(Component.literal("「无限」噬界之蛇 梅比乌斯 X").withStyle(DARK_GREEN_BOLD));
+        tooltip.add(ModText.literal("「无限」噬界之蛇 梅比乌斯 X").withStyle(DARK_GREEN_BOLD));
 
         if (ego) {
-            tooltip.add(Component.literal("渴望“蛇主”的未来，以此永恒轮回，生死难忘，掀「∞」之禁忌")
+            tooltip.add(ModText.literal("渴望“蛇主”的未来，以此永恒轮回，生死难忘，掀「∞」之禁忌")
                     .withStyle(SignetOfEgoItem.LIGHT_PINK_I));
         }
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("死亡并不是生命的终点").withStyle(CYAN_ITALIC));
-        tooltip.add(Component.literal("生命将因死亡得到进化").withStyle(CYAN_ITALIC));
-        tooltip.add(Component.literal("并由此重获新生").withStyle(CYAN_ITALIC));
+        tooltip.add(ModText.literal("死亡并不是生命的终点").withStyle(CYAN_ITALIC));
+        tooltip.add(ModText.literal("生命将因死亡得到进化").withStyle(CYAN_ITALIC));
+        tooltip.add(ModText.literal("并由此重获新生").withStyle(CYAN_ITALIC));
 
         if (Screen.hasShiftDown()) {
 
             if (ego) {
                 tooltip.add(Component.empty());
-                tooltip.add(Component.literal("愿噬界之蛇爱佑其身，赐予「无限」的渴求").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("召唤物与协同者造成的伤害提高31.415926%")
+                tooltip.add(ModText.literal("愿噬界之蛇爱佑其身，赐予「无限」的渴求").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("召唤物与协同者造成的伤害提高31.415926%")
                         .withStyle(CYAN_ITALIC));
             }
             SignetUpgradeData.addSkillTooltips(
                     tooltip, stack, SignetUpgradeData.Signet.INFINITY, 0x2E8B57, 0x40CFA0);
+            SignetUpgradeData.addExtensionTooltips(tooltip, stack, 0x2E8B57, 0x40CFA0);
         } else {
-            tooltip.add(Component.literal("按住 [Shift] 查看效果")
+            tooltip.add(ModText.literal("按住 [Shift] 查看效果")
                     .withStyle(ChatFormatting.GRAY));
         }
 

@@ -1,10 +1,13 @@
 package com.ovo.lastsongofelysian.client;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.event.FlawlessBenedictionLegacyEvents;
 import com.ovo.lastsongofelysian.dimension.ModDimensions;
 import com.ovo.lastsongofelysian.event.SignetEffects;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import com.ovo.lastsongofelysian.util.FlawlessWeaponEnergy;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -100,7 +103,7 @@ public final class FlawlessWeaponSkill {
         );
 
         player.displayClientMessage(
-                Component.literal(
+                ModText.literal(
                         "真我之境形态："
                                 + next.displayName()
                 ).withStyle(
@@ -122,10 +125,6 @@ public final class FlawlessWeaponSkill {
                 )
         ) {
             return;
-        }
-
-        if (hasHelix(player)) {
-            SignetEffects.onWeaponSkillActivated(player);
         }
 
         Mode mode = getMode(weapon);
@@ -173,7 +172,7 @@ public final class FlawlessWeaponSkill {
                     );
 
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "无瑕乐土尚在冷却："
                                     + remainingSeconds
                                     + "秒"
@@ -196,6 +195,8 @@ public final class FlawlessWeaponSkill {
         ) {
             return;
         }
+
+        SignetEffects.onWeaponUltimateActivated(player, 400);
 
         if (hasDeliverance(player)) {
             AttributeInstance attackDamage =
@@ -326,7 +327,7 @@ public final class FlawlessWeaponSkill {
 
         if (target == null) {
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "无暇绽放：未锁定目标"
                     ).withStyle(ChatFormatting.RED),
                     true
@@ -344,7 +345,7 @@ public final class FlawlessWeaponSkill {
                                 .MAX_BLOOM_STACKS
         ) {
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "真我之绽不足："
                                     + stacks
                                     + "/3"
@@ -373,18 +374,14 @@ public final class FlawlessWeaponSkill {
                                 .inflate(4.0D),
                         entity ->
                                 entity.isAlive()
-                                        && entity != player
-                                        && !entity.isAlliedTo(player)
+                                        && PlayerControlledAllies.isValidEnemy(player, entity)
                 );
 
         int hitCount = 0;
 
         for (LivingEntity victim : victims) {
-            if (victim.hurt(
-                    player.damageSources()
-                            .playerAttack(player),
-                    damage
-            )) {
+            if (PlayerControlledAllies.hurt(player, victim,
+                    player.damageSources().playerAttack(player), damage)) {
                 hitCount++;
             }
         }
@@ -417,6 +414,8 @@ public final class FlawlessWeaponSkill {
                 weapon,
                 25
         );
+
+        SignetEffects.onWeaponSkillActivated(player);
 
     }
 
@@ -549,7 +548,7 @@ public final class FlawlessWeaponSkill {
             String text
     ) {
         player.displayClientMessage(
-                Component.literal(text)
+                ModText.literal(text)
                         .withStyle(
                                 ChatFormatting.LIGHT_PURPLE,
                                 ChatFormatting.BOLD

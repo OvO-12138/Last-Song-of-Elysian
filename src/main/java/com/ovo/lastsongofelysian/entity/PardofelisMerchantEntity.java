@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.entity;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -57,7 +59,7 @@ public class PardofelisMerchantEntity extends PathfinderMob {
                     serverPlayer,
                     new SimpleMenuProvider(
                             (containerId, inventory, p) -> new PardofelisShopMenu(containerId, inventory),
-                            Component.literal("帕朵菲利斯的小店")
+                            ModText.literal("帕朵菲利斯的小店")
                     )
             );
         }

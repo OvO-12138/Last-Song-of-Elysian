@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.ovo.lastsongofelysian.event.FlawlessBenedictionLegacyEvents;
@@ -29,6 +31,8 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -147,7 +151,7 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
         }
 
         if (!level.isClientSide()) {
-            Arrow arrow = new Arrow(level, player);
+            Arrow arrow = new FlawlessChargedArrow(level, player);
 
             arrow.setPos(
                     player.getX(),
@@ -370,6 +374,22 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
         }
     }
 
+    private static final class FlawlessChargedArrow extends Arrow {
+        private FlawlessChargedArrow(Level level, LivingEntity owner) {
+            super(level, owner);
+        }
+
+        @Override
+        protected void onHitEntity(EntityHitResult hit) {
+            Vec3 beforeHit = getDeltaMovement();
+            super.onHitEntity(hit);
+            if (!level().isClientSide() && !isRemoved()
+                    && beforeHit.dot(getDeltaMovement()) < 0.0D) {
+                discard();
+            }
+        }
+    }
+
     @Override
     public void appendHoverText(
             ItemStack stack,
@@ -427,7 +447,14 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
     ) {
         addAbility(
                 tooltip,
-                "绚丽，如繁花初绽",
+                "如梦初醒，无瑕一生",
+                "全部刻印效果提升1314%"
+        );
+        tooltip.add(Component.empty());
+
+        addAbility(
+                tooltip,
+                "浪漫，如天穹映月",
                 "每5秒在周围草地上催生花朵"
 
         );
@@ -435,77 +462,77 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
 
         addAbility(
                 tooltip,
-                "青春，如萌芽新生",
+                "朦胧，如幻梦入眸",
                 "周围的农作物生长速度提升1314%"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "圣洁，如白鸟齐舞",
+                "光辉，如终幕开演",
                 "黄金·真我之祝福飞行时间提升至永久"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "甘洌，如清泉落花",
+                "自若，如戒约无束",
                 "真我之境·无暇回归蓄力期间，可以使角色在水上行走并获得520%加速效果"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "嫣然，如少女回眸",
+                "希冀，如星火熠熠",
                 "真我之境·无暇回归蓄力期间，可以使角色在岩浆上行走并获得131.4%加速效果"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "沉醉，如烛光余香",
-                "删除真我之境·无暇回归的耐久值"
+                "眷恋，如思念不绝",
+                "真我之境·无暇回归在主手时，无需条件触发所有佩戴的刻印增幅效果"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "幽雅，如淡云蔽月",
+                "纯真，如白花始生",
                 "携带真我之境·无暇回归时，生物不会主动远离玩家"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "恬静，如夜露微明",
+                "慈爱，如微风细语",
                 "主手持有真我之境·无暇回归时，敌对生物不会主动攻击玩家"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "缱绻，如薰风卷雪",
+                "安谧，如雷鸣止息",
                 "武器技—天气之子：处于天气之子形态下，使用武器技可切换天气"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "光辉，如朝阳初升",
+                "温煦，如霜雪微融",
                 "武器技—日月的女儿：处于日月的女儿形态下，使用武器技可切换时间"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "闪耀，如明星天坠",
+                "璀璨，如金石遍地",
                 "真我之境·无暇回归获得全部满级附魔"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "隽永，如牧歌长鸣",
+                "隽永，如真理长存",
                 "实体单位受到来自真我之境·无暇回归的蓄力攻击时，获得一层真我之绽，上限三层，获得5点能量",
                 "每层真我之绽增加1733.3%易伤"
         );
@@ -513,21 +540,21 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
 
         addAbility(
                 tooltip,
-                "永恒，如往世折枝",
-                "真我之绽三层时，可以释放武器技—无暇绽放：处于无暇形态下，清空所有真我之绽，造成13140%基础攻击力的扩散伤害，并冻结该单位，获得25点能量"
+                "真我，如爱莉希雅",
+                "真我之绽三层时，可以释放武器技—无暇绽放：处于无暇形态下，清空所有真我之绽，造成131400%基础攻击力的扩散伤害，并冻结该单位，获得25点能量"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "无暇，如神佑乐土",
-                "终结技—无暇乐土：展开可跟随的领域，持续20秒，领域中其他的敌方单位造成的伤害降低52%，每秒损失10000血量，领域内有花瓣从天而降，每3秒冻结1秒并增加一层真我之绽，真我之境·无暇回归蓄力时间减少200%，可提前关闭，造成200000*剩余tick伤害，能量60，冷却20秒"
+                "永恒，如往世乐园",
+                "终结技—无暇乐土：展开可跟随的领域，持续20秒，领域中其他的敌方单位造成的伤害降低52%，每秒损失5000血量，领域内有花瓣从天而降，每3秒冻结1秒并增加一层真我之绽，真我之境·无暇回归蓄力时间减少200%，可提前关闭，造成200000*剩余tick伤害，能量60，冷却20秒"
         );
         tooltip.add(Component.empty());
 
         addAbility(
                 tooltip,
-                "纯美，如爱莉希雅",
+                "无瑕，如始源之人",
                 "主手持有真我之境·无暇回归时，获得速度V，力量V，抗性III，火焰抵抗V，生命回复V，跳跃提升III，村庄英雄V，饱和V，幸运V，生命提升V"
         );
     }
@@ -538,7 +565,7 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
             String... effects
     ) {
         tooltip.add(
-                Component.literal(name)
+                ModText.literal(name)
                         .setStyle(PINK_BOLD_STYLE)
         );
 
@@ -552,7 +579,7 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
             String text
     ) {
         tooltip.add(
-                Component.literal(text)
+                ModText.literal(text)
                         .setStyle(PINK_STYLE)
         );
     }
@@ -562,7 +589,7 @@ public class FlawlessBenedictionLegacyItem extends BowItem {
             String text
     ) {
         tooltip.add(
-                Component.literal(text)
+                ModText.literal(text)
                         .setStyle(LIGHT_PINK_STYLE)
         );
     }

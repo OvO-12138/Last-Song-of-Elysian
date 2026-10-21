@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.HelixHelper;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
@@ -40,35 +42,36 @@ public class SignetOfStarsItem extends Item implements ICurioItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         boolean ego = HelixHelper.isEgoEquipped();
 
-        tooltip.add(Component.literal("「繁星」绘世之卷 格蕾修 XI")
+        tooltip.add(ModText.literal("「繁星」绘世之卷 格蕾修 XI")
                 .withStyle(LIGHT_BLUE_BOLD));
 
         if (ego) {
-            tooltip.add(Component.literal("美好“画家”的笔墨：以此孤月相伴，希望难见，观「繁星」之绘梦")
+            tooltip.add(ModText.literal("美好“画家”的笔墨：以此孤月相伴，希望难见，观「繁星」之绘梦")
                     .withStyle(SignetOfEgoItem.LIGHT_PINK_I));
         }
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("天空…").withStyle(VERY_LIGHT_BLUE_ITALIC));
-        tooltip.add(Component.literal("云朵…").withStyle(VERY_LIGHT_BLUE_ITALIC));
-        tooltip.add(Component.literal("蓝色的…").withStyle(VERY_LIGHT_BLUE_ITALIC));
-        tooltip.add(Component.literal("白色的...").withStyle(VERY_LIGHT_BLUE_ITALIC));
-        tooltip.add(Component.literal("还没画完的部分…").withStyle(VERY_LIGHT_BLUE_ITALIC));
-        tooltip.add(Component.literal("想用你喜欢的颜色").withStyle(VERY_LIGHT_BLUE_ITALIC));
-        tooltip.add(Component.literal("你的颜色").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("天空…").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("云朵…").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("蓝色的…").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("白色的...").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("还没画完的部分…").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("想用你喜欢的颜色").withStyle(VERY_LIGHT_BLUE_ITALIC));
+        tooltip.add(ModText.literal("你的颜色").withStyle(VERY_LIGHT_BLUE_ITALIC));
 
         if (Screen.hasShiftDown()) {
 
             if (ego) {
                 tooltip.add(Component.empty());
-                tooltip.add(Component.literal("愿绘世之卷爱佑其身，赐予「繁星」的纯真").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("粉色的，真我的").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("攻击时无视50%防御")
+                tooltip.add(ModText.literal("愿绘世之卷爱佑其身，赐予「繁星」的纯真").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("粉色的，真我的").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("攻击时无视50%防御")
                         .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xFFB6C1)).withItalic(true)));
             }
             SignetUpgradeData.addSkillTooltips(
                     tooltip, stack, SignetUpgradeData.Signet.STARS, 0x7EC8E3, 0xC8E8FF);
+            SignetUpgradeData.addExtensionTooltips(tooltip, stack, 0x7EC8E3, 0xC8E8FF);
         } else {
-            tooltip.add(Component.literal("按住 [Shift] 查看效果")
+            tooltip.add(ModText.literal("按住 [Shift] 查看效果")
                     .withStyle(ChatFormatting.GRAY));
         }
 

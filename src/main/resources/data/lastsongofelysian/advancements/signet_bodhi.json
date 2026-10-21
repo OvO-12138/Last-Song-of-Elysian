@@ -1,0 +1,5 @@
+{
+  "parent": "lastsongofelysian:signet_setsuna",
+  "display": { "icon": { "item": "lastsongofelysian:signet_of_bodhi" }, "title": { "translate": "advancement.lastsongofelysian.signet_bodhi.title" }, "description": { "translate": "advancement.lastsongofelysian.signet_bodhi.description" }, "frame": "task", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_bodhi"] }] } } }
+}

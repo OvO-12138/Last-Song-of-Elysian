@@ -1,0 +1,23 @@
+{
+  "name": "维尔薇的螺旋工坊",
+  "icon": "lastsongofelysian:signet_of_helix",
+  "category": "lastsongofelysian:realm",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "融合",
+      "text": "同一系的两条核心路线互不兼容；增幅必须先融合它所属的核心。融合会消耗下方物品并解锁其效果。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "升级效果",
+      "text": "放入基础刻印后，选择想升级的效果。每次升级消耗 $(bold)1 个对应刻印升级材料$()与 $(bold)10 级经验$()。升级材料需放在背包内。$(br2)可升级的效果最多提升 3 次；标注：「无法升级」的核心或特殊效果不能升级。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "重置核心",
+      "text": "把基础刻印放入工坊，点击核心重置即可清除该系的核心路线、增幅与增幅等级，重新选择路线。$(br2)重置会返还已记录的核心相关银币与经验等级消耗的 50%。"
+    }
+  ]
+}

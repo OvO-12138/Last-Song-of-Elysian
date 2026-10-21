@@ -1,0 +1,19 @@
+{
+  "name": "刻印",
+  "icon": "lastsongofelysian:signet_of_reverie",
+  "category": "lastsongofelysian:signets",
+  "sortnum": 0,
+  "pages": [
+
+    {
+      "type": "patchouli:text",
+      "title": "十二种基础刻印",
+      "text": "真我之外的十二种基础刻印为：$(br2)空梦、浮生、繁星、无限、旭光、刹那、天慧、鏖灭、螺旋、黄金、戒律、救世。$(br2)附加刻印、核心刻印和核心增幅是融合材料。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "已开放的获取方式",
+      "text": "空梦基础刻印可在帕朵商店购买。$(br2)剩下的没有了 喵"
+    }
+  ]
+}

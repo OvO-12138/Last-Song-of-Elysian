@@ -1,0 +1,22 @@
+{
+  "name": "真我之境·无暇回归",
+  "icon": "lastsongofelysian:flawless_benediction_legacy",
+  "category": "lastsongofelysian:weapons",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:flawless_benediction_legacy"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "形态与无暇绽放",
+      "text": "按 $(k:key.lastsongofelysian.flawless_switch_mode) 切换形态。$(br2)无暇形态：目标具有3层真我之绽时，按 $(k:key.lastsongofelysian.flawless_ultimate) 释放无暇绽放，回复25点能量。$(br2)天气之子／日月的女儿形态：分别切换天气／时间。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "无暇乐土",
+      "text": "按 $(k:key.lastsongofelysian.flawless_weapon_skill) 展开跟随玩家的领域，消耗60点能量，持续20秒，冷却20秒。$(br2)领域作用于玩家周围10格内的单位。$(br2)再次使用可提前关闭；关闭攻击按剩余持续时间结算。"
+    }
+  ]
+}

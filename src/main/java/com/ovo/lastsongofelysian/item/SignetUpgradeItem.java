@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -20,6 +22,6 @@ public class SignetUpgradeItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.literal(this.signet.displayName() + "刻印升级");
+        return ModText.literal(this.signet.displayName() + "刻印升级");
     }
 }

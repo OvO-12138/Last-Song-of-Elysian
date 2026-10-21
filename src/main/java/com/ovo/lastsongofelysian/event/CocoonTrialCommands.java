@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -38,7 +40,7 @@ public final class CocoonTrialCommands {
     private static int complete(CommandSourceStack source, ServerPlayer player) {
         CocoonTrialProgress.completeAll(player);
         source.sendSuccess(
-                () -> Component.literal("已完成 " + player.getGameProfile().getName() + " 的全部终焉试炼"),
+                () -> ModText.literal("已完成 " + player.getGameProfile().getName() + " 的全部终焉试炼"),
                 true
         );
         return 1;

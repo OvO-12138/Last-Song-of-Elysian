@@ -1,0 +1,28 @@
+{
+  "name": "伊甸之星",
+  "icon": "lastsongofelysian:eden_star",
+  "category": "lastsongofelysian:weapons",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:eden_star"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:eden_star",
+      "title": "拟似黑洞",
+      "text": "第零额定功率：消耗150点能量，冷却300秒，持续30秒。$(br2)进入吸积盘时将实体吸向中心，越靠近中心时间越慢。中心内生物持续受到伤害，黑洞吞噬方块并扩张，结束时发生爆炸。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "引力波与空间回归",
+      "text": "第一额定功率：释放引力波，压制其行动5秒；回复30点能量，冷却15秒。$(br2)第三额定功率：消耗300点能量，记录目标点半径6格内的空间。5秒后恢复其中可回归的普通方块，并将仍存活的目标生物恢复至记录时的位置和生命状态；冷却600秒。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "黑洞的影响",
+      "text": "被吸入中心的生物在自身位置持续爆炸，并持续损失生命、防具耐久和增加崩坏能侵蚀。"
+    }
+  ]
+}

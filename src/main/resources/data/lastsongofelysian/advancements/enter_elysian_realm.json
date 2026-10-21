@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:obtain_silver",
+  "display": {
+    "icon": { "item": "lastsongofelysian:elysian_realm_entrance" },
+    "title": { "translate": "advancement.lastsongofelysian.enter_elysian_realm.title" },
+    "description": { "translate": "advancement.lastsongofelysian.enter_elysian_realm.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "entered": { "trigger": "minecraft:impossible" } }
+}

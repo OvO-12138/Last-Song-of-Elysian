@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.client.screen;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.menu.PardofelisShopMenu;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import net.minecraft.client.gui.GuiGraphics;
@@ -38,7 +40,7 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
             int row = i / 5;
             this.buyButtons[i] = this.addRenderableWidget(
                     Button.builder(
-                                    Component.literal("购买"),
+                                    ModText.literal("购买"),
                                     ignored -> clickShopButton(offerIndex)
                             )
                             .bounds(
@@ -52,7 +54,7 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
         }
         this.rerollButton = this.addRenderableWidget(
                 Button.builder(
-                                Component.literal("刷新 50 银币"),
+                                ModText.literal("刷新 50 银币"),
                                 ignored -> clickShopButton(PardofelisShopMenu.REROLL_BUTTON)
                         )
                         .bounds(this.leftPos + 270, this.topPos + 187, 108, 20)
@@ -82,10 +84,13 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
             boolean purchased = this.menu.isDisplayedOfferPurchased(i);
             button.visible = !empty;
             button.active = !empty && !purchased && silver >= this.menu.getDisplayedOfferPrice(i);
-            button.setMessage(Component.literal(purchased ? "已购买" : "购买"));
+            button.setMessage(ModText.literal(purchased ? "已购买" : "购买"));
         }
         if (this.rerollButton != null) {
-            this.rerollButton.active = silver >= PardofelisShopMenu.REROLL_PRICE;
+            boolean free = this.menu.isDisplayedRerollFree();
+            this.rerollButton.active = free || silver >= PardofelisShopMenu.REROLL_PRICE;
+            this.rerollButton.setMessage(ModText.literal(
+                    free ? "刷新 免费" : "刷新 50 银币"));
         }
     }
 
@@ -117,8 +122,7 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         guiGraphics.drawString(
-                this.font,
-                Component.literal("帕朵菲利斯的小店"),
+                this.font, ModText.display(ModText.literal("帕朵菲利斯的小店")),
                 15,
                 18,
                 0xFFFFD36A,
@@ -132,8 +136,7 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
             ItemStack offer = this.menu.getDisplayedOffer(i);
             if (offer.isEmpty()) continue;
             guiGraphics.drawCenteredString(
-                    this.font,
-                    offer.getHoverName(),
+                    this.font, ModText.display(offer.getHoverName()),
                     cardX + 34,
                     cardY + 7,
                     0xFFFFE4AC
@@ -142,8 +145,7 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
                     ? 0xFF999999
                     : 0xFFFFD36A;
             guiGraphics.drawString(
-                    this.font,
-                    Component.literal(String.valueOf(this.menu.getDisplayedOfferPrice(i))),
+                    this.font, ModText.display(ModText.literal(String.valueOf(this.menu.getDisplayedOfferPrice(i)))),
                     cardX + 45,
                     cardY + 29,
                     color,
@@ -151,8 +153,7 @@ public class PardofelisShopScreen extends AbstractContainerScreen<PardofelisShop
             );
         }
         guiGraphics.drawString(
-                this.font,
-                Component.literal("银币 " + this.menu.getDisplayedSilver()),
+                this.font, ModText.display(ModText.literal("银币 " + this.menu.getDisplayedSilver())),
                 24,
                 193,
                 0xFFFFD36A,

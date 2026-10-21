@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.client;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModEffects;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -133,7 +135,7 @@ public final class FlawlessBloomLayerRenderer {
                     ) - camera.z;
 
             Component text =
-                    Component.literal(
+                    ModText.literal(
                             "真我之绽 × " + stacks
                     );
 
@@ -158,10 +160,10 @@ public final class FlawlessBloomLayerRenderer {
             );
 
             float x =
-                    -font.width(text) / 2.0F;
+                    -font.width(ModText.display(text)) / 2.0F;
 
             font.drawInBatch(
-                    text,
+                    ModText.display(text).getVisualOrderText(),
                     x,
                     0.0F,
                     0xFFFF69B4,
@@ -174,7 +176,7 @@ public final class FlawlessBloomLayerRenderer {
             );
 
             font.drawInBatch(
-                    text,
+                    ModText.display(text).getVisualOrderText(),
                     x,
                     0.0F,
                     0xFFFFB6E3,

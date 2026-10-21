@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.HelixHelper;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
@@ -37,43 +39,44 @@ public class SignetOfVicissitudeItem extends Item implements ICurioItem {
                                 List<Component> tooltip, TooltipFlag flag) {
         boolean ego = HelixHelper.isEgoEquipped();
 
-        tooltip.add(Component.literal("「浮生」渡尘之羽 华 XII")
+        tooltip.add(ModText.literal("「浮生」渡尘之羽 华 XII")
                 .withStyle(DARK_ORANGE_BOLD));
 
         if (ego) {
-            tooltip.add(Component.literal("迷茫“战士”的决意: 以此落羽铭记，凡尘难渡，历「浮生」之坚守")
+            tooltip.add(ModText.literal("迷茫“战士”的决意: 以此落羽铭记，凡尘难渡，历「浮生」之坚守")
                     .withStyle(SignetOfEgoItem.LIGHT_PINK_I));
         }
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("世界之纷扰，早已麻木；")
+        tooltip.add(ModText.literal("世界之纷扰，早已麻木；")
                 .withStyle(LIGHT_ORANGE_ITALIC));
-        tooltip.add(Component.literal("珍重之羁绊，尽皆离散；")
+        tooltip.add(ModText.literal("珍重之羁绊，尽皆离散；")
                 .withStyle(LIGHT_ORANGE_ITALIC));
-        tooltip.add(Component.literal("千年之坚守，只为拯救苍生。")
+        tooltip.add(ModText.literal("千年之坚守，只为拯救苍生。")
                 .withStyle(LIGHT_ORANGE_ITALIC));
-        tooltip.add(Component.literal("醒时恐为梦一场，身世俱忘，何处是吾乡")
+        tooltip.add(ModText.literal("醒时恐为梦一场，身世俱忘，何处是吾乡")
                 .withStyle(LIGHT_ORANGE_ITALIC));
 
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("她是华，逐火战士")
+        tooltip.add(ModText.literal("她是华，逐火战士")
                 .withStyle(LIGHT_ORANGE_ITALIC));
-        tooltip.add(Component.literal("她是赤鸢仙人，太虚山的守护者")
+        tooltip.add(ModText.literal("她是赤鸢仙人，太虚山的守护者")
                 .withStyle(LIGHT_ORANGE_ITALIC));
-        tooltip.add(Component.literal("她是符华，圣芙蕾雅的班长")
+        tooltip.add(ModText.literal("她是符华，圣芙蕾雅的班长")
                 .withStyle(LIGHT_ORANGE_ITALIC));
 
         if (Screen.hasShiftDown()) {
 
             if (ego) {
                 tooltip.add(Component.empty());
-                tooltip.add(Component.literal("愿渡尘之羽爱佑其身，赐予「浮生」的坚忍").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("免疫击退，获得48%伤害免疫")
+                tooltip.add(ModText.literal("愿渡尘之羽爱佑其身，赐予「浮生」的坚忍").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("免疫击退，获得48%伤害免疫")
                         .withStyle(LIGHT_ORANGE_ITALIC));
             }
             SignetUpgradeData.addSkillTooltips(
                     tooltip, stack, SignetUpgradeData.Signet.VICISSITUDE, 0xD4680A, 0xFFA040);
+            SignetUpgradeData.addExtensionTooltips(tooltip, stack, 0xD4680A, 0xFFA040);
         } else {
-            tooltip.add(Component.literal("按住 [Shift] 查看效果")
+            tooltip.add(ModText.literal("按住 [Shift] 查看效果")
                     .withStyle(ChatFormatting.GRAY));
         }
 

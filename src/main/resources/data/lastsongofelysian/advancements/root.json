@@ -1,13 +1,13 @@
 {
   "display": {
     "icon": {
-      "item": "lastsongofelysian:image_19"
+      "item": "lastsongofelysian:because_of_you"
     },
     "title": {
-      "text": "乐土终曲"
+      "translate": "advancement.lastsongofelysian.root.title"
     },
     "description": {
-      "text": "去创造他们没能拥有的未来吧"
+      "translate": "advancement.lastsongofelysian.root.description"
     },
     "background": "minecraft:textures/gui/advancements/backgrounds/end.png",
     "frame": "task",

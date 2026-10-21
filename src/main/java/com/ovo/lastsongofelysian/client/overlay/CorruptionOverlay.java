@@ -32,6 +32,7 @@ public class CorruptionOverlay implements IGuiOverlay {
     public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || ClientCocoonData.isReversed()
+                || ClientCocoonData.hasCore(11)
                 || ClientCocoonData.isTrialComplete(11) || mc.options.renderDebug) return;
 
         int energy = Mth.clamp(

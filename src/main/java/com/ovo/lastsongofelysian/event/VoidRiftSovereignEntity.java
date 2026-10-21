@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -99,7 +101,7 @@ public class VoidRiftSovereignEntity extends PathfinderMob {
 
     @Override
     public Component getName() {
-        return Component.literal("虚空裂相");
+        return ModText.literal("虚空裂相");
     }
 
     @Override

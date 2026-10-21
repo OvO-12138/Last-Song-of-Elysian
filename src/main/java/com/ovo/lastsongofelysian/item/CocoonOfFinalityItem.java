@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.event.CocoonCoreProgress;
 import com.ovo.lastsongofelysian.event.CocoonTrialProgress;
 import com.ovo.lastsongofelysian.client.ClientCocoonData;
@@ -37,10 +39,10 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
             {"死 · 死生的边界", "在生命不高于20%的情况下累计生存360秒，同时击败20只敌对生物；使用不死图腾会重置本次连续进度"},
             {"炎 · 永燃的薪炎", "处于燃烧状态累计90秒，并击败20个正在燃烧的敌对生物"},
             {"识 · 幻觉的彼岸", "在反胃、失明或黑暗效果生效时击败25只敌对生物"},
-            {"岩 · 坚韧的壁垒", "穿戴完整防具承受10次爆炸，期间不能有任何一件防具损坏消失"},
+            {"岩 · 坚韧的壁垒", "穿戴头盔、胸甲、护腿、靴子承受10次爆炸伤害；TNT、苦力怕、末影水晶等造成实际爆炸伤害时计数。脱下或损坏任一件防具会清空进度"},
             {"支配 · 断裂的人偶", "在经验获取、攻击和护甲仍受压制时，累计提升30级，并击败100只敌对生物"},
             {"约束 · 束缚的行路", "在挖掘疲劳生效时破坏128个石质或矿石方块；牛奶、急迫和信标会暂停计数"},
-            {"侵蚀 · 认知的崩解", "将崩坏侵蚀度提升到90%以上，击败一只自己的敌对侵蚀镜像，随后在不死亡的情况下把侵蚀度降低到10%以下"}
+            {"侵蚀 · 认知的崩解", "获得侵蚀之核心后，在任意维度连续击败30个敌方单位；死亡会重置进度"}
     };
 
     private static final String[] TRIAL_BLESSINGS = {
@@ -149,19 +151,19 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         float multiplier = getMultiplier(stage);
 
         tooltip.add(
-                Component.literal("命运曾向世界提问")
+                ModText.literal("命运曾向世界提问")
                         .withStyle(ChatFormatting.LIGHT_PURPLE)
         );
         tooltip.add(
-                Component.literal("于是，英雄给出了回答")
+                ModText.literal("于是，英雄给出了回答")
                         .withStyle(ChatFormatting.LIGHT_PURPLE)
         );
         tooltip.add(
-                Component.literal("跨越漫长的轮回")
+                ModText.literal("跨越漫长的轮回")
                         .withStyle(ChatFormatting.LIGHT_PURPLE)
         );
         tooltip.add(
-                Component.literal("创造属于每一个人的故事")
+                ModText.literal("创造属于每一个人的故事")
                         .withStyle(ChatFormatting.LIGHT_PURPLE)
         );
 
@@ -173,10 +175,10 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         }
 
         tooltip.add(
-                Component.literal("律者核心进度：")
+                ModText.literal("律者核心进度：")
                         .withStyle(ChatFormatting.GRAY)
                         .append(
-                                Component.literal(stage + "/12")
+                                ModText.literal(stage + "/12")
                                         .withStyle(
                                                 stage >= CocoonCoreProgress.MAX_STAGE
                                                         ? ChatFormatting.GREEN
@@ -187,10 +189,10 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal("侵蚀强度：")
+                ModText.literal("侵蚀强度：")
                         .withStyle(ChatFormatting.GRAY)
                         .append(
-                                Component.literal("×" + formatNumber(multiplier))
+                                ModText.literal("×" + formatNumber(multiplier))
                                         .withStyle(
                                                 ChatFormatting.RED,
                                                 ChatFormatting.BOLD
@@ -201,15 +203,15 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         if (ClientCocoonData.areTrialsUnlocked()) {
             int completed = Integer.bitCount(ClientCocoonData.getCompletedTrialMask());
             tooltip.add(
-                    Component.literal("终焉试炼：")
+                    ModText.literal("终焉试炼：")
                             .withStyle(ChatFormatting.GRAY)
-                            .append(Component.literal(completed + "/12")
+                            .append(ModText.literal(completed + "/12")
                                     .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
             );
         }
 
         if (stage >= CocoonCoreProgress.MAX_STAGE) {
-            tooltip.add(Component.literal(
+            tooltip.add(ModText.literal(
                     ClientCocoonData.areTrialsUnlocked()
                             ? "十二项终焉试炼等待完成"
                             : "等待始源之核心开启终焉试炼"
@@ -224,7 +226,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         if (!shiftDown && !controlDown) {
             tooltip.add(Component.empty());
             tooltip.add(
-                    Component.literal(ClientCocoonData.areTrialsUnlocked()
+                    ModText.literal(ClientCocoonData.areTrialsUnlocked()
                                     ? "按住 [Shift] 查看终焉试炼"
                                     : "按住 [Shift] 查看正常诅咒")
                             .withStyle(ChatFormatting.GRAY)
@@ -232,7 +234,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
 
             if (corrosionCurseAcquired) {
                 tooltip.add(
-                        Component.literal("按住 [Ctrl] 查看侵蚀诅咒")
+                        ModText.literal("按住 [Ctrl] 查看侵蚀诅咒")
                                 .withStyle(ChatFormatting.DARK_PURPLE)
                 );
             }
@@ -255,7 +257,9 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
                 addEarthTooltip(tooltip, stage);
                 addDominanceTooltip(tooltip, stage);
                 addBindingTooltip(tooltip, stage);
-                addCorrosionTooltip(tooltip, stage);
+                if (!ClientCocoonData.hasCore(CocoonTrialProgress.CORROSION)) {
+                    addCorrosionTooltip(tooltip, stage);
+                }
             }
         }
 
@@ -265,21 +269,30 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
     }
 
     private static void addTrialTooltip(List<Component> tooltip) {
-        tooltip.add(Component.literal("终焉试炼")
+        tooltip.add(ModText.literal("终焉试炼")
                 .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
         int mask = ClientCocoonData.getCompletedTrialMask();
         for (int index = 0; index < TRIAL_TEXT.length; index++) {
             boolean complete = (mask & (1 << index)) != 0;
             tooltip.add(Component.empty());
-            tooltip.add(Component.literal(TRIAL_TEXT[index][0])
+            tooltip.add(ModText.literal(TRIAL_TEXT[index][0])
                     .withStyle(CocoonTrialPalette.color(index), ChatFormatting.BOLD)
-                    .append(Component.literal(complete ? "  [已完成]" : "  [未完成]")
+                    .append(ModText.literal(complete ? "  [已完成]" : "  [未完成]")
                             .withStyle(complete ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY,
                                     ChatFormatting.BOLD)));
-            tooltip.add(Component.literal(TRIAL_TEXT[index][1])
+            tooltip.add(ModText.literal(TRIAL_TEXT[index][1])
                     .withStyle(CocoonTrialPalette.color(index)));
+            if (index == CocoonTrialProgress.THUNDER) {
+                tooltip.add(ModText.literal("进度：诅咒雷击 " + ClientCocoonData.getThunderStrikes()
+                                + "/5；雷暴期间击败敌对生物 " + ClientCocoonData.getThunderKills() + "/20")
+                        .withStyle(ChatFormatting.GRAY));
+            } else if (index == CocoonTrialProgress.EARTH) {
+                tooltip.add(ModText.literal("防具：头盔、胸甲、护腿、靴子；爆炸必须实际对你造成伤害。进度："
+                                + ClientCocoonData.getEarthExplosions() + "/10")
+                        .withStyle(ChatFormatting.GRAY));
+            }
             if (complete) {
-                tooltip.add(Component.literal(TRIAL_BLESSINGS[index])
+                tooltip.add(ModText.literal(TRIAL_BLESSINGS[index])
                         .withStyle(CocoonTrialPalette.color(index)));
             }
         }
@@ -288,14 +301,14 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
     private static void addReversedBlessingTooltip(List<Component> tooltip) {
         if (!Screen.hasShiftDown()) {
             tooltip.add(
-                    Component.literal("按住 [Shift] 查看终焉祝福")
+                    ModText.literal("按住 [Shift] 查看终焉祝福")
                             .withStyle(ChatFormatting.GRAY)
             );
             return;
         }
 
         tooltip.add(
-                Component.literal("终焉祝福")
+                ModText.literal("终焉祝福")
                         .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD)
         );
         for (int index = 0; index < TRIAL_BLESSINGS.length; index++) {
@@ -314,7 +327,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
             boolean addSpacing
     ) {
         if (addSpacing) tooltip.add(Component.empty());
-        tooltip.add(Component.literal(text).withStyle(CocoonTrialPalette.color(trial)));
+        tooltip.add(ModText.literal(text).withStyle(CocoonTrialPalette.color(trial)));
     }
 
     private static void addPermanentCorrosionCurseTooltip(
@@ -322,17 +335,17 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
     ) {
         tooltip.add(Component.empty());
         tooltip.add(
-                Component.literal("侵蚀诅咒")
+                ModText.literal("侵蚀诅咒")
                         .withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD)
         );
 
         for (String[] entry : PERMANENT_CORROSION_CURSE_TEXT) {
             tooltip.add(
-                    Component.literal(entry[0])
+                    ModText.literal(entry[0])
                             .withStyle(ChatFormatting.RED)
             );
             tooltip.add(
-                    Component.literal("  " + entry[1])
+                    ModText.literal("  " + entry[1])
                             .withStyle(ChatFormatting.GRAY)
             );
         }
@@ -348,7 +361,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "附魔失败 " + percent(scaledChance(stage, 0.25F))
                                 + "；合成失败 " + percent(scaledChance(stage, 0.08F))
                 ).withStyle(ChatFormatting.BLUE)
@@ -376,7 +389,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "进入其他维度时有 "
                                 + percent(scaledChance(stage, 0.05F))
                                 + " 概率坠入虚空"
@@ -405,7 +418,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "移动速度 -" + percent(scaledPercent(stage, 0.20F))
                                 + "；攻击速度 -" + percent(scaledPercent(stage, 0.30F))
                 ).withStyle(ChatFormatting.LIGHT_PURPLE)
@@ -435,7 +448,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "治疗效率 -" + percent(scaledPercent(stage, 0.25F))
                                 + "；饱食消耗 +" + percent(0.15F * getMultiplier(stage))
                 ).withStyle(ChatFormatting.GREEN)
@@ -461,7 +474,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "水下氧气消耗约 +"
                                 + percent(scaledPercent(stage, 0.25F))
                                 + "；寒冷群系移速 -"
@@ -491,7 +504,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "最大生命值 -" + percent(scaledPercent(stage, 0.25F))
                                 + "；生命低于20%时受伤 +"
                                 + percent(scaledPercent(stage, 0.10F))
@@ -518,7 +531,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "火焰伤害 +" + percent(scaledPercent(stage, 0.20F))
                                 + "；燃烧时间 +" + percent(scaledPercent(stage, 0.25F))
                 ).withStyle(ChatFormatting.RED)
@@ -546,7 +559,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "正面效果时间 -" + percent(scaledPercent(stage, 0.15F))
                                 + "；负面效果时间 +"
                                 + percent(scaledPercent(stage, 0.15F))
@@ -577,7 +590,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "受击时有 "
                                 + percent(
                                 scaledChance(
@@ -619,7 +632,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "无法破坏的装备不受影响；装备不会被直接摧毁，至少保留1点耐久"
                 ).withStyle(ChatFormatting.DARK_GRAY)
         );
@@ -637,7 +650,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "经验获取 -80%；攻击伤害 -"
                                 + percent(scaledPercent(stage, 0.10F))
                                 + "；护甲 -"
@@ -646,7 +659,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "受击时有 " + percent(scaledChance(stage, 0.15F))
                                 + " 概率额外损耗主手装备"
                 ).withStyle(CocoonTrialPalette.color(CocoonTrialProgress.DOMINANCE))
@@ -676,7 +689,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "崩坏能容量 -"
                                 + percent(scaledPercent(stage, 0.20F))
                 ).withStyle(CocoonTrialPalette.color(CocoonTrialProgress.BINDING))
@@ -684,7 +697,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
 
         if (!restored) {
             tooltip.add(
-                    Component.literal(
+                    ModText.literal(
                             "每30秒获得挖掘疲劳 I，持续 "
                                     + formatNumber(scaleDurationSeconds(stage, 5.0F))
                                     + " 秒"
@@ -719,7 +732,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         }
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "造成伤害 -" + percent(damageReduction)
                                 + "；侵蚀增长与满溢效果 ×"
                                 + formatNumber(getMultiplier(stage))
@@ -727,7 +740,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         );
 
         tooltip.add(
-                Component.literal(
+                ModText.literal(
                         "侵蚀满溢时每秒受到 "
                                 + formatNumber(5.0F * getMultiplier(stage))
                                 + " 点伤害"
@@ -749,11 +762,11 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
             ChatFormatting color,
             boolean restored
     ) {
-        MutableComponent line = Component.literal(name)
+        MutableComponent line = ModText.literal(name)
                 .withStyle(color, ChatFormatting.BOLD);
 
         line.append(
-                Component.literal(
+                ModText.literal(
                         restored
                                 ? "  [完整机制已恢复]"
                                 : "  [削弱状态]"
@@ -773,19 +786,19 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
         ChatFormatting color = CocoonTrialPalette.color(trial);
         if (restored) {
             tooltip.add(
-                    Component.literal("已恢复：")
+                    ModText.literal("已恢复：")
                             .withStyle(color)
                             .append(
-                                    Component.literal(effectText)
+                                    ModText.literal(effectText)
                                             .withStyle(color)
                             )
             );
         } else {
             tooltip.add(
-                Component.literal("获得" + coreName + "后恢复：")
+                ModText.literal("获得" + coreName + "后恢复：")
                             .withStyle(color)
                             .append(
-                                    Component.literal(effectText)
+                                    ModText.literal(effectText)
                                             .withStyle(color)
                             )
             );

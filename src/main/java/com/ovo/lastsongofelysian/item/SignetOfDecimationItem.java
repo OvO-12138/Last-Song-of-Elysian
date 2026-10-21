@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.HelixHelper;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
@@ -24,33 +26,37 @@ public class SignetOfDecimationItem extends Item {
                                 List<Component> tooltip, TooltipFlag flag) {
         boolean ego = HelixHelper.isEgoEquipped();
 
-        tooltip.add(Component.literal("「鏖灭」 坏劫之焱 千劫 VI")
+        tooltip.add(ModText.literal("「鏖灭」 坏劫之焱 千劫 VI")
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
 
         if (ego) {
-            tooltip.add(Component.literal("非天“狂王”的面具：以此湮灭一切，怒火难熄，见「鏖灭」之杀戮")
+            tooltip.add(ModText.literal("非天“狂王”的面具：以此湮灭一切，怒火难熄，见「鏖灭」之杀戮")
                     .withStyle(SignetOfEgoItem.LIGHT_PINK_I));
         }
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("厮杀本就没有意义")
+        tooltip.add(ModText.literal("厮杀本就没有意义")
                 .withStyle(style -> style.withItalic(true).withColor(0xFF9999)));
-        tooltip.add(Component.literal("但他们的死")
+        tooltip.add(ModText.literal("但他们的死")
                 .withStyle(style -> style.withItalic(true).withColor(0xFF9999)));
-        tooltip.add(Component.literal("不能没有意义")
+        tooltip.add(ModText.literal("不能没有意义")
                 .withStyle(style -> style.withItalic(true).withColor(0xFF9999)));
 
         if (Screen.hasShiftDown()) {
 
             if (ego) {
-                tooltip.add(Component.literal(""));
-                tooltip.add(Component.literal("愿坏劫之焱爱佑其身，赐予「鏖灭」的赤诚").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("血量上限提升60%")
+                tooltip.add(ModText.literal(""));
+                tooltip.add(ModText.literal("愿坏劫之焱爱佑其身，赐予「鏖灭」的赤诚").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("血量上限提升60%")
                         .withStyle(style -> style.withItalic(true).withColor(0xFF9999)));
             }
             SignetUpgradeData.addSkillTooltips(
                     tooltip, stack, SignetUpgradeData.Signet.DECIMATION, 0xFF5555, 0xFF9999);
+            SignetUpgradeData.addUnlockedDecimationSecondaryTooltips(
+                    tooltip, stack, 0xFF5555, 0xFF9999);
+            SignetUpgradeData.addDecimationCoreTooltips(
+                    tooltip, stack, 0xFF5555, 0xFF9999);
         } else {
-            tooltip.add(Component.literal("按住 [Shift] 查看效果")
+            tooltip.add(ModText.literal("按住 [Shift] 查看效果")
                     .withStyle(ChatFormatting.GRAY));
         }
         super.appendHoverText(stack, level, tooltip, flag);

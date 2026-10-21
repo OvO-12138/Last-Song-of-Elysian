@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:obtain_cocoon",
+  "display": {
+    "icon": { "item": "lastsongofelysian:shi_ji" },
+    "title": { "translate": "advancement.lastsongofelysian.open_history_book.title" },
+    "description": { "translate": "advancement.lastsongofelysian.open_history_book.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "opened": { "trigger": "minecraft:impossible" } }
+}

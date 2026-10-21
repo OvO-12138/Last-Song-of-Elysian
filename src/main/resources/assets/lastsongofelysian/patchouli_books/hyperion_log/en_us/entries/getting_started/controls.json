@@ -1,0 +1,18 @@
+{
+  "name": "技能操作",
+  "icon": "lastsongofelysian:flawless_benediction_legacy",
+  "category": "lastsongofelysian:getting_started",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "共享技能按键",
+      "text": "在选项 → 控制 → 按键绑定中，找到本模组的分类即可修改按键。当前按键：$(br2)$(k:key.lastsongofelysian.flawless_weapon_skill)：必杀技／神之键第零额定功率。$(br2)$(k:key.lastsongofelysian.flawless_ultimate)：武器技／神之键第二或第三额定功率。$(br2)$(k:key.lastsongofelysian.flawless_switch_mode)：特殊技／神之键第一额定功率。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "释放条件",
+      "text": "每把武器的具体消耗与条件见其物品描述和武器条目。"
+    }
+  ]
+}

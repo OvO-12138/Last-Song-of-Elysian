@@ -1,0 +1,33 @@
+{
+  "name": "生物残渣与抑制剂",
+  "icon": "lastsongofelysian:honkai_energy_inhibitor",
+  "category": "lastsongofelysian:materials",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "生物残渣与抑制剂",
+      "text": "敌对生物死亡时通常掉落1至3份生物残渣，部分可繁殖生物也可能掉落"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:compressed_biological_residue",
+      "recipe2": "lastsongofelysian:double_compressed_biological_residue"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:low_honkai_energy_inhibitor",
+      "text": "低等抑制剂右键使用，降低相当于侵蚀容量5%的崩坏能侵蚀，代价为5点生命。生命不足时无法使用。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:honkai_energy_inhibitor",
+      "text": "中等抑制剂降低相当于侵蚀容量10%的崩坏能侵蚀，代价为2点生命。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:high_honkai_energy_inhibitor",
+      "text": "高等抑制剂降低相当于侵蚀容量20%的崩坏能侵蚀，无生命消耗。"
+    }
+  ]
+}

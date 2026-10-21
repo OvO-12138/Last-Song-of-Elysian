@@ -1,0 +1,5 @@
+{
+  "parent": "lastsongofelysian:enter_elysian_realm",
+  "display": { "icon": { "item": "lastsongofelysian:signet_of_reverie" }, "title": { "translate": "advancement.lastsongofelysian.signet_reverie.title" }, "description": { "translate": "advancement.lastsongofelysian.signet_reverie.description" }, "frame": "task", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_reverie"] }] } } }
+}

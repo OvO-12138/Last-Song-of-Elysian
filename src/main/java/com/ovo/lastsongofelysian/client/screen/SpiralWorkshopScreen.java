@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.client.screen;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.menu.SpiralWorkshopMenu;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.client.gui.GuiGraphics;
@@ -38,7 +40,7 @@ public class SpiralWorkshopScreen extends AbstractContainerScreen<SpiralWorkshop
         for (int i = 0; i < this.upgradeButtons.length; i++) {
             int skillIndex = i;
             this.upgradeButtons[i] = this.addRenderableWidget(
-                    Button.builder(Component.literal("升级"), ignored -> clickUpgrade(skillIndex))
+                    Button.builder(ModText.literal("升级"), ignored -> clickUpgrade(skillIndex))
                             .bounds(
                                     this.leftPos + UPGRADE_BUTTON_X,
                                     this.topPos + SKILL_ROW_START_Y + 4 + i * SKILL_ROW_HEIGHT,
@@ -49,17 +51,17 @@ public class SpiralWorkshopScreen extends AbstractContainerScreen<SpiralWorkshop
             );
         }
         this.fuseButton = this.addRenderableWidget(
-                Button.builder(Component.literal("融合"), ignored -> clickFuse())
+                Button.builder(ModText.literal("融合"), ignored -> clickFuse())
                         .bounds(this.leftPos + 18, this.topPos + 145, 52, 18)
                         .build()
         );
         this.pageButton = this.addRenderableWidget(
-                Button.builder(Component.literal("下一页"), ignored -> clickPage())
+                Button.builder(ModText.literal("下一页"), ignored -> clickPage())
                         .bounds(this.leftPos + 221, this.topPos + 16, 58, 18)
                         .build()
         );
         this.resetButton = this.addRenderableWidget(
-                Button.builder(Component.literal("重置核心"), ignored -> clickReset())
+                Button.builder(ModText.literal("重置核心"), ignored -> clickReset())
                         .bounds(this.leftPos + 18, this.topPos + 171, 52, 18)
                         .build()
         );
@@ -116,31 +118,36 @@ public class SpiralWorkshopScreen extends AbstractContainerScreen<SpiralWorkshop
             int level = this.menu.getDisplayedLevel(i);
             button.visible = skill != null;
             button.active = skill != null
+                    && skill.isUpgradeable()
                     && level < SignetUpgradeData.MAX_LEVEL
                     && (creative || (
                     this.menu.getDisplayedUpgradeItemCount() >= SignetUpgradeData.UPGRADE_ITEM_COST
                             && this.menu.getDisplayedExperienceLevel()
                             >= SignetUpgradeData.EXPERIENCE_LEVEL_COST
             ));
-            button.setMessage(Component.literal(level >= SignetUpgradeData.MAX_LEVEL ? "MAX" : "升级"));
+            button.setMessage(ModText.literal(
+                    skill != null && !skill.isUpgradeable()
+                            ? "固定"
+                            : level >= SignetUpgradeData.MAX_LEVEL ? "MAX" : "升级"
+            ));
         }
         if (this.fuseButton != null) {
             boolean alreadyFused = this.menu.isSecondaryInputFused();
             this.fuseButton.active = this.menu.canFuseSecondary();
-            this.fuseButton.setMessage(Component.literal(alreadyFused ? "已融合" : "融合"));
+            this.fuseButton.setMessage(ModText.literal(alreadyFused ? "已融合" : "融合"));
         }
         if (this.pageButton != null) {
             int pageCount = this.menu.getDisplayedSkillPageCount();
             this.pageButton.visible = pageCount > 1;
             this.pageButton.active = pageCount > 1;
-            this.pageButton.setMessage(Component.literal(
+            this.pageButton.setMessage(ModText.literal(
                     (this.menu.getDisplayedSkillPage() + 1) + "/" + pageCount
             ));
         }
         if (this.resetButton != null) {
-            this.resetButton.visible = this.menu.getInputSignet()
-                    == SignetUpgradeData.Signet.DELIVERANCE;
-            this.resetButton.active = this.menu.hasDisplayedCoreProgress();
+            this.resetButton.visible = this.menu.getInputSignet() != null;
+            this.resetButton.active = this.resetButton.visible
+                    && this.menu.hasDisplayedCoreProgress();
         }
     }
 
@@ -195,39 +202,26 @@ public class SpiralWorkshopScreen extends AbstractContainerScreen<SpiralWorkshop
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        guiGraphics.drawString(this.font, Component.literal("螺旋工坊"), 16, 19, 0xFFFFD991, false);
-        guiGraphics.drawString(this.font,
-                Component.literal("等级 " + this.menu.getDisplayedExperienceLevel()),
+        guiGraphics.drawString(this.font, ModText.display(ModText.literal("螺旋工坊")), 16, 19, 0xFFFFD991, false);
+        guiGraphics.drawString(this.font, ModText.display(ModText.literal("等级 " + this.menu.getDisplayedExperienceLevel())),
                 286, 19, 0xFFFFE2A8, false);
-        guiGraphics.drawString(this.font, Component.literal("刻印"), 31, 49, 0xFFD9B98B, false);
-        guiGraphics.drawString(this.font, Component.literal("融合刻印"), 23, 98, 0xFFD9B98B, false);
+        guiGraphics.drawString(this.font, ModText.display(ModText.literal("刻印")), 31, 49, 0xFFD9B98B, false);
+        guiGraphics.drawString(this.font, ModText.display(ModText.literal("融合刻印")), 23, 98, 0xFFD9B98B, false);
 
         SignetUpgradeData.Signet signet = this.menu.getInputSignet();
         if (signet == null) {
-            guiGraphics.drawString(this.font, Component.literal("放入刻印"), 82, 70, 0xFFD9B98B, false);
+            guiGraphics.drawString(this.font, ModText.display(ModText.literal("放入刻印")), 82, 70, 0xFFD9B98B, false);
         } else {
-            SignetUpgradeData.DeliveranceCore core = this.menu.getDisplayedDeliveranceCore();
-            if (core != null) {
-                guiGraphics.drawString(
-                        this.font,
-                        Component.literal("核心 · " + core.displayName()),
-                        82,
-                        38,
-                        0xFF80A8FF,
-                        false
-                );
-            }
             for (int i = 0; i < SpiralWorkshopMenu.MAX_SKILL_ROWS; i++) {
                 SignetUpgradeData.Skill skill = this.menu.getDisplayedSkill(i);
                 if (skill == null) continue;
                 int level = this.menu.getDisplayedLevel(i);
                 int rowY = SKILL_ROW_START_Y + i * SKILL_ROW_HEIGHT;
-                guiGraphics.drawString(this.font,
-                        Component.literal(skill.displayName() + (level == 0 ? "" : "  +" + level)),
+                guiGraphics.drawString(this.font, ModText.display(ModText.literal(skill.displayName() + (level == 0 ? "" : "  +" + level))),
                         SKILL_TEXT_X, rowY, 0xFFFFD991, false);
                 drawSkillDescription(
                         guiGraphics,
-                        Component.literal(skill.description(level)),
+                        ModText.literal(skill.description(level)),
                         SKILL_TEXT_X,
                         rowY + 11
                 );
@@ -238,8 +232,7 @@ public class SpiralWorkshopScreen extends AbstractContainerScreen<SpiralWorkshop
                 && this.minecraft.player != null
                 && this.minecraft.player.getAbilities().instabuild;
         if (signet != null && !creative) {
-            guiGraphics.drawString(this.font,
-                    Component.literal("×1  ·  10级  ·  持有 " + this.menu.getDisplayedUpgradeItemCount()),
+            guiGraphics.drawString(this.font, ModText.display(ModText.literal("×1  ·  10级  ·  持有 " + this.menu.getDisplayedUpgradeItemCount())),
                     42, 202, 0xFFFFC879, false);
         }
     }
@@ -259,8 +252,7 @@ public class SpiralWorkshopScreen extends AbstractContainerScreen<SpiralWorkshop
         guiGraphics.pose().scale(DESCRIPTION_SCALE, DESCRIPTION_SCALE, 1.0F);
         for (int line = 0; line < Math.min(lines.size(), DESCRIPTION_MAX_LINES); line++) {
             guiGraphics.drawString(
-                    this.font,
-                    lines.get(line),
+                    this.font, ModText.display(lines.get(line)),
                     0,
                     line * 9,
                     0xFFE8D4B8,

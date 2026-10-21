@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:core_origin",
+  "display": {
+    "icon": { "item": "lastsongofelysian:flawless_benediction_legacy" },
+    "title": { "translate": "advancement.lastsongofelysian.obtain_flawless_benediction.title" },
+    "description": { "translate": "advancement.lastsongofelysian.obtain_flawless_benediction.description" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:flawless_benediction_legacy"] }] } } }
+}

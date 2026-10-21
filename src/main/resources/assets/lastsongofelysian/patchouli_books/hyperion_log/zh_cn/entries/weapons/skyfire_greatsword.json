@@ -1,0 +1,23 @@
+{
+  "name": "天火大剑",
+  "icon": "lastsongofelysian:skyfire_greatsword",
+  "category": "lastsongofelysian:weapons",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:skyfire_greatsword"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:skyfire_greatsword",
+      "title": "平a",
+      "text": "普攻造成火焰伤害并回复5点能量，每损失1点生命回复3点能量。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "天火出鞘",
+      "text": "消耗50点能量，冷却30秒。燃烧相当于自身最大生命95%的生命值，造成$(bold)3000×燃烧生命$()的爆炸性火焰范围伤害。$(br2)$(bold)当前生命不足以支付代价时，使用者会死亡。$()爆炸还会大范围破坏地形并留下火焰。"
+    }
+  ]
+}

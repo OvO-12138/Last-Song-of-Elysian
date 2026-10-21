@@ -2,6 +2,7 @@ package com.ovo.lastsongofelysian.event;
 
 import com.ovo.lastsongofelysian.dimension.ModDimensions;
 import com.ovo.lastsongofelysian.lastsongofelysian;
+import com.ovo.lastsongofelysian.registry.ModEntities;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -59,6 +60,21 @@ public final class ElysianRealmThirdPartyBanEvents {
         return isBannedItem(player.getMainHandItem());
     }
 
+    private static boolean isProtectedNpc(Entity entity) {
+        return entity.getType() == ModEntities.PARDOFELIS_MERCHANT.get()
+                || entity.getType() == ModEntities.APONIA_NPC.get()
+                || entity.getType() == ModEntities.ELYSIA_NPC.get()
+                || entity.getType() == ModEntities.GRISEO_NPC.get()
+                || entity.getType() == ModEntities.VILL_V_NPC.get()
+                || entity.getType() == ModEntities.EDEN_NPC.get();
+    }
+
+    private static boolean isNpcCarryAttempt(PlayerInteractEvent event, Entity target) {
+        return isElysianRealm(event.getLevel())
+                && event.getEntity().isShiftKeyDown()
+                && isProtectedNpc(target);
+    }
+
     private static void deny(
             PlayerInteractEvent event
     ) {
@@ -97,7 +113,8 @@ public final class ElysianRealmThirdPartyBanEvents {
             PlayerInteractEvent.EntityInteract event
     ) {
         if (
-                isElysianRealm(event.getLevel())
+                isNpcCarryAttempt(event, event.getTarget())
+                        || isElysianRealm(event.getLevel())
                         && isBannedItem(event.getItemStack())
         ) {
             deny(event);
@@ -109,7 +126,8 @@ public final class ElysianRealmThirdPartyBanEvents {
             PlayerInteractEvent.EntityInteractSpecific event
     ) {
         if (
-                isElysianRealm(event.getLevel())
+                isNpcCarryAttempt(event, event.getTarget())
+                        || isElysianRealm(event.getLevel())
                         && isBannedItem(event.getItemStack())
         ) {
             deny(event);

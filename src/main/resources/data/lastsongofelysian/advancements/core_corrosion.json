@@ -1,0 +1,5 @@
+{
+  "parent": "lastsongofelysian:craft_inhibitor",
+  "display": { "icon": { "item": "lastsongofelysian:core_of_corrosion" }, "title": { "translate": "advancement.lastsongofelysian.core_corrosion.title" }, "description": { "translate": "advancement.lastsongofelysian.core_corrosion.description" }, "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": { "has_item": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:core_of_corrosion"] }] } } }
+}

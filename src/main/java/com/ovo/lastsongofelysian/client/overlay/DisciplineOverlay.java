@@ -1,6 +1,10 @@
 package com.ovo.lastsongofelysian.client.overlay;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.client.DisciplineHudData;
+import com.ovo.lastsongofelysian.client.hud.HudLayout;
+import com.ovo.lastsongofelysian.config.ClientHudConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
@@ -25,8 +29,10 @@ public class DisciplineOverlay implements IGuiOverlay {
 
         int width = 116;
         int height = 24;
-        int x = screenWidth - width - 14;
-        int y = 44;
+        if (!HudLayout.begin(guiGraphics, screenWidth, screenHeight, width + 4, height + 4,
+                ClientHudConfig.DISCIPLINE)) return;
+        int x = 2;
+        int y = 2;
         int fillWidth = Math.min(
                 width - 14,
                 Math.max(
@@ -78,20 +84,19 @@ public class DisciplineOverlay implements IGuiOverlay {
         String label = "规戒";
         String value = Integer.toString(precept);
         guiGraphics.drawString(
-                mc.font,
-                label,
+                mc.font, ModText.display(label),
                 x + 10,
                 y + 6,
                 0xFFFFE3A2,
                 false
         );
         guiGraphics.drawString(
-                mc.font,
-                value,
+                mc.font, ModText.display(value),
                 x + width - mc.font.width(value) - 10,
                 y + 6,
                 glow,
                 true
         );
+        HudLayout.end(guiGraphics);
     }
 }

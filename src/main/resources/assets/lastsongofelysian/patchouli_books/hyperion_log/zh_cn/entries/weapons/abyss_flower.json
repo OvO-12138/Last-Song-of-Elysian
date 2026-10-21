@@ -1,0 +1,28 @@
+{
+  "name": "黑渊白花",
+  "icon": "lastsongofelysian:abyss_flower",
+  "category": "lastsongofelysian:weapons",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:abyss_flower"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:abyss_flower",
+      "title": "黑渊与白花",
+      "text": "$(bold)Shift＋右键$()切换黑渊／白花。$(br2)黑渊普攻永久扣除目标生命上限并回复2点能量；右键释放持续5秒的黑雾，冷却15秒，黑雾中击杀单位回复3点能量。$(br2)白花右键治疗目标并清除黑渊凋零；使用者消耗等量生命，但不会因治疗代价死亡。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "最伟大的机制",
+      "text": "按对应额定功率按键后，吟唱会复制到剪贴板。将它粘贴到聊天框并发送以完成释放；按Esc取消。吟唱期间会有时停。$(br2)第零额定功率：消耗200点能量，冷却600秒，治疗5×5范围内生物至满血。使用范围内有对应死者的掉落物或头颅可复活该生物，消耗一件媒介；同一死者仅可复活一次。自身崩坏能侵蚀增加50%。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "第一与第二额定功率",
+      "text": "第一额定功率：累计20次黑渊攻击后，对前方目标造成5000点黑渊凋零伤害，随后每秒流失200点生命，持续5秒，结束时爆炸；回复30点能量。$(br2)第二额定功率：减少自身及周围生物20%的崩坏能侵蚀，冷却300秒。"
+    }
+  ]
+}

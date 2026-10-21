@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.screen;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -60,7 +62,7 @@ public class SignetOfEgoScreen extends Screen {
     private static final int BORDER_COLOR = 0xFFDB7FA8;
 
     public SignetOfEgoScreen() {
-        super(Component.literal("真我祝福"));
+        super(ModText.literal("真我祝福"));
     }
 
     @Override
@@ -77,7 +79,7 @@ public class SignetOfEgoScreen extends Screen {
 
         buildContent();
 
-        addRenderableWidget(Button.builder(Component.literal("关闭"), btn -> onClose())
+        addRenderableWidget(Button.builder(ModText.literal("关闭"), btn -> onClose())
                 .bounds(panelX + panelWidth / 2 - 40, panelY + panelHeight - 24, 80, 20)
                 .build());
     }
@@ -157,7 +159,7 @@ public class SignetOfEgoScreen extends Screen {
             if (line.text().isEmpty()) {
                 renderLines.add(FormattedCharSequence.EMPTY);
             } else {
-                renderLines.addAll(font.split(Component.literal(line.text()).setStyle(line.style()), viewWidth));
+                renderLines.addAll(font.split(ModText.literal(line.text()).setStyle(line.style()), viewWidth));
             }
         }
 
@@ -176,14 +178,14 @@ public class SignetOfEgoScreen extends Screen {
         g.fill(panelX, panelY, panelX + 1, panelY + panelHeight, BORDER_COLOR);
         g.fill(panelX + panelWidth - 1, panelY, panelX + panelWidth, panelY + panelHeight, BORDER_COLOR);
 
-        g.drawCenteredString(font, "「真我」 无瑕之人 爱莉希雅 II",
+        g.drawCenteredString(font, ModText.display("「真我」 无瑕之人 爱莉希雅 II"),
                 panelX + panelWidth / 2, panelY + 8, BORDER_COLOR);
 
         g.enableScissor(viewX, viewY, viewX + viewWidth, viewY + viewHeight);
         int y = viewY - (int) scrollAmount;
         for (FormattedCharSequence seq : renderLines) {
             if (y + LINE_HEIGHT >= viewY && y <= viewY + viewHeight) {
-                g.drawString(font, seq, viewX, y, 0xFFFFFF);
+                g.drawString(font, ModText.display(seq), viewX, y, 0xFFFFFF);
             }
             y += LINE_HEIGHT;
         }

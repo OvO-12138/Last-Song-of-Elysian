@@ -14,26 +14,32 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 @Mod.EventBusSubscriber(
         modid = lastsongofelysian.MODID,
@@ -61,6 +67,9 @@ public final class ElysianRealmRuntimeRules {
 
     private static final String VILL_V_RESIDENT_TAG =
             "LSEFixedVillV";
+
+    private static final Map<ServerLevel, Set<String>> COMMAND_REMOVED_RESIDENTS =
+            new WeakHashMap<>();
 
     private static final double
             MIN_ALLOWED_MOVEMENT_PER_TICK =
@@ -198,6 +207,7 @@ public final class ElysianRealmRuntimeRules {
                 player.serverLevel()
         );
 
+        COMMAND_REMOVED_RESIDENTS.remove(player.serverLevel());
         ensureRealmResidents(player.serverLevel());
 
         returnToEntry(player);
@@ -219,6 +229,7 @@ public final class ElysianRealmRuntimeRules {
                 player.serverLevel()
         );
 
+        COMMAND_REMOVED_RESIDENTS.remove(player.serverLevel());
         ensureRealmResidents(player.serverLevel());
     }
 
@@ -596,12 +607,16 @@ public final class ElysianRealmRuntimeRules {
             Vec3 position,
             float yaw
     ) {
+        if (COMMAND_REMOVED_RESIDENTS.getOrDefault(level, Set.of()).contains(residentTag)) {
+            return;
+        }
         level.getChunkAt(
                 BlockPos.containing(position)
         );
 
         Mob taggedResident = null;
         Mob nearestResident = null;
+        List<Mob> duplicateResidents = new ArrayList<>();
         double nearestDistance = Double.MAX_VALUE;
 
         for (Entity entity : level.getAllEntities()) {
@@ -613,8 +628,12 @@ public final class ElysianRealmRuntimeRules {
             }
 
             if (mob.getTags().contains(residentTag)) {
-                taggedResident = mob;
-                break;
+                if (taggedResident == null) {
+                    taggedResident = mob;
+                } else {
+                    duplicateResidents.add(mob);
+                }
+                continue;
             }
 
             double distance = mob.position()
@@ -625,6 +644,8 @@ public final class ElysianRealmRuntimeRules {
                 nearestResident = mob;
             }
         }
+
+        duplicateResidents.forEach(Entity::discard);
 
         if (taggedResident != null) {
             configureResident(
@@ -660,12 +681,33 @@ public final class ElysianRealmRuntimeRules {
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onResidentDeath(LivingDeathEvent event) {
+        if (!(event.getEntity().level() instanceof ServerLevel level)
+                || !isElysianRealm(level)
+                || !(event.getEntity() instanceof Mob resident)
+                || !event.getSource().is(DamageTypes.GENERIC_KILL)) {
+            return;
+        }
+
+        String tag = residentTag(resident.getType());
+        if (tag != null && resident.getTags().contains(tag)) {
+            COMMAND_REMOVED_RESIDENTS
+                    .computeIfAbsent(level, ignored -> new HashSet<>())
+                    .add(tag);
+        }
+    }
+
     private static void configureResident(
             Mob resident,
             Vec3 position,
             float yaw
     ) {
         resident.setPersistenceRequired();
+        resident.stopRiding();
+        resident.ejectPassengers();
+        resident.setDeltaMovement(Vec3.ZERO);
+        resident.fallDistance = 0.0F;
         resident.restrictTo(
                 BlockPos.containing(position),
                 1
@@ -683,6 +725,33 @@ public final class ElysianRealmRuntimeRules {
                     0.0F
             );
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
+    public static void onResidentJoin(EntityJoinLevelEvent event) {
+        if (!(event.getLevel() instanceof ServerLevel level)
+                || !isElysianRealm(level)
+                || !(event.getEntity() instanceof Mob resident)) {
+            return;
+        }
+
+        String residentTag = residentTag(resident.getType());
+        if (residentTag == null) return;
+
+        for (Entity entity : level.getAllEntities()) {
+            if (entity != resident
+                    && entity.getType() == resident.getType()
+                    && entity.getTags().contains(residentTag)) {
+                event.setCanceled(true);
+                return;
+            }
+        }
+    }
+
+    private static String residentTag(EntityType<?> type) {
+        if (type == ModEntities.PARDOFELIS_MERCHANT.get()) return PARDOFELIS_RESIDENT_TAG;
+        if (type == ModEntities.VILL_V_NPC.get()) return VILL_V_RESIDENT_TAG;
+        return null;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

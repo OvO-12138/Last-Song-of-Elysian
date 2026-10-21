@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:enter_elysian_realm",
+  "display": {
+    "icon": { "item": "lastsongofelysian:pardofelis_merchant_spawn_egg" },
+    "title": { "translate": "advancement.lastsongofelysian.buy_from_pardofelis.title" },
+    "description": { "translate": "advancement.lastsongofelysian.buy_from_pardofelis.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "bought": { "trigger": "minecraft:impossible" } }
+}

@@ -2,8 +2,11 @@ package com.ovo.lastsongofelysian.event;
 
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.item.ShiJiBookItem;
+import com.ovo.lastsongofelysian.network.ModNetwork;
+import com.ovo.lastsongofelysian.network.MissingShiJiBookCrashPacket;
 import com.ovo.lastsongofelysian.registry.ModItems;
-import net.minecraft.network.chat.Component;
+import com.ovo.lastsongofelysian.util.ModText;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,6 +19,7 @@ import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -23,7 +27,10 @@ import java.util.List;
 public class ShiJiProtectionEvents {
 
     private static final String NBT_GOT_SHI_JI = "GotShiJi";
-    private static final int CHECK_INTERVAL = 100;
+    private static final String NBT_MISSING_TICKS = "ShiJiMissingTicks";
+    private static final String NBT_CRASH_SENT = "ShiJiCrashSent";
+    private static final int REPLACEMENT_INTERVAL_TICKS = 100;
+    private static final int MISSING_GRACE_TICKS = 20 * 20;
 
     private static boolean isShiJi(ItemStack stack) {
         return stack.is(ModItems.SHI_JI.get());
@@ -49,15 +56,11 @@ public class ShiJiProtectionEvents {
 
     private static void giveShiJi(ServerPlayer player) {
         ItemStack stack = new ItemStack(ModItems.SHI_JI.get());
-
         if (!player.addItem(stack)) {
             player.drop(stack, false);
         }
-
         player.displayClientMessage(
-                Component.literal("岁月史书不可遗失。新的史书已被补回。"),
-                true
-        );
+                ModText.exact("岁月史书不可遗失。新的史书已被补回。"), true);
     }
 
     @SubscribeEvent
@@ -66,20 +69,46 @@ public class ShiJiProtectionEvents {
         if (event.phase != TickEvent.Phase.END) return;
         if (!(event.player instanceof ServerPlayer player)) return;
 
-        if (player.tickCount % CHECK_INTERVAL != 0) return;
-
-        boolean gotShiJi = player.getPersistentData().getBoolean(NBT_GOT_SHI_JI);
+        CompoundTag data = player.getPersistentData();
+        boolean gotShiJi = data.getBoolean(NBT_GOT_SHI_JI);
+        boolean hasBook = hasShiJi(player);
 
         if (!gotShiJi) {
-            player.getPersistentData().putBoolean(NBT_GOT_SHI_JI, true);
-            if (!hasShiJi(player)) {
+            if (hasBook) {
+                data.putBoolean(NBT_GOT_SHI_JI, true);
+            } else {
                 giveShiJi(player);
+                data.putBoolean(NBT_GOT_SHI_JI, true);
             }
             return;
         }
 
-        if (!hasShiJi(player)) {
+        if (hasBook) {
+            data.remove(NBT_MISSING_TICKS);
+            data.remove(NBT_CRASH_SENT);
+            return;
+        }
+
+        int missingTicks = Math.min(MISSING_GRACE_TICKS,
+                data.getInt(NBT_MISSING_TICKS) + 1);
+        data.putInt(NBT_MISSING_TICKS, missingTicks);
+
+        if (missingTicks < MISSING_GRACE_TICKS
+                && missingTicks % REPLACEMENT_INTERVAL_TICKS == 0) {
             giveShiJi(player);
+        }
+
+        if (missingTicks >= MISSING_GRACE_TICKS && !data.getBoolean(NBT_CRASH_SENT)) {
+            data.putBoolean(NBT_CRASH_SENT, true);
+            ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                    new MissingShiJiBookCrashPacket());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            player.getPersistentData().remove(NBT_CRASH_SENT);
         }
     }
 
@@ -121,11 +150,11 @@ public class ShiJiProtectionEvents {
 
     @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
-        if (!event.isWasDeath()) return;
-
         boolean gotShiJi = event.getOriginal().getPersistentData().getBoolean(NBT_GOT_SHI_JI);
         if (gotShiJi) {
             event.getEntity().getPersistentData().putBoolean(NBT_GOT_SHI_JI, true);
         }
+        event.getEntity().getPersistentData().remove(NBT_MISSING_TICKS);
+        event.getEntity().getPersistentData().remove(NBT_CRASH_SENT);
     }
 }

@@ -7,10 +7,16 @@
   "mixins": [
     "AbstractFurnaceBlockEntityAccessor",
     "MobEffectInstanceAccessor",
-    "RangedAttributeAccessor",
     "ItemStackHandlerMixin",
+    "ItemEntityMixin",
+    "ServerLevelTimeStopMixin",
+    "LevelBlockEntityTimeStopMixin",
     "AnvilMenuMixin",
     "EnchantmentMenuMixin",
-    "CraftingOutputSlotMixin"
+    "CraftingOutputSlotMixin",
+    "LivingEntityMixin"
+  ],
+  "client": [
+    "ClientLevelTimeStopMixin"
   ]
 }

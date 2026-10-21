@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.util.HelixHelper;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
 import net.minecraft.ChatFormatting;
@@ -31,29 +33,33 @@ public class SignetOfDaybreakItem extends Item {
                                 List<Component> tooltip, TooltipFlag flag) {
         boolean ego = HelixHelper.isEgoEquipped();
 
-        tooltip.add(Component.literal("「旭光」 黎明之哨 科斯魔 IX").withStyle(TITLE));
+        tooltip.add(ModText.literal("「旭光」 黎明之哨 科斯魔 IX").withStyle(TITLE));
 
         if (ego) {
-            tooltip.add(Component.literal("少年之琴音，以此伴暮色之光，无声回响，守「旭光」之明静").withStyle(SignetOfEgoItem.LIGHT_PINK_I));
+            tooltip.add(ModText.literal("少年之琴音，以此伴暮色之光，无声回响，守「旭光」之明静").withStyle(SignetOfEgoItem.LIGHT_PINK_I));
         }
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal("大地也曾渴求雨露").withStyle(LORE));
-        tooltip.add(Component.literal("但我们").withStyle(LORE));
-        tooltip.add(Component.literal("却只能为它献上这临行前的祈祷").withStyle(LORE));
-        tooltip.add(Component.literal("动身吧").withStyle(LORE));
-        tooltip.add(Component.literal("身为英桀之名…").withStyle(LORE));
-        tooltip.add(Component.literal("正是为了将其了结").withStyle(LORE));
+        tooltip.add(ModText.literal("大地也曾渴求雨露").withStyle(LORE));
+        tooltip.add(ModText.literal("但我们").withStyle(LORE));
+        tooltip.add(ModText.literal("却只能为它献上这临行前的祈祷").withStyle(LORE));
+        tooltip.add(ModText.literal("动身吧").withStyle(LORE));
+        tooltip.add(ModText.literal("身为英桀之名…").withStyle(LORE));
+        tooltip.add(ModText.literal("正是为了将其了结").withStyle(LORE));
 
         if (Screen.hasShiftDown()) {
             if (ego) {
                 tooltip.add(Component.empty());
-                tooltip.add(Component.literal("愿黎明之哨爱佑其身，赐予「旭光」的意志").withStyle(ChatFormatting.LIGHT_PURPLE));
-                tooltip.add(Component.literal("撕裂上限提高18，撕裂伤害无视防御").withStyle(LORE));
+                tooltip.add(ModText.literal("愿黎明之哨爱佑其身，赐予「旭光」的意志").withStyle(ChatFormatting.LIGHT_PURPLE));
+                tooltip.add(ModText.literal("撕裂上限提高18，撕裂伤害无视防御").withStyle(LORE));
             }
             SignetUpgradeData.addSkillTooltips(
                     tooltip, stack, SignetUpgradeData.Signet.DAYBREAK, 0x55FF55, 0xAAFFAA);
+            SignetUpgradeData.addUnlockedDaybreakSecondaryTooltips(
+                    tooltip, stack, 0x55FF55, 0xAAFFAA);
+            SignetUpgradeData.addDaybreakCoreTooltips(
+                    tooltip, stack, 0x55FF55, 0xAAFFAA);
         } else {
-            tooltip.add(Component.literal("按住 [Shift] 查看效果").withStyle(ChatFormatting.GRAY));
+            tooltip.add(ModText.literal("按住 [Shift] 查看效果").withStyle(ChatFormatting.GRAY));
         }
 
         super.appendHoverText(stack, level, tooltip, flag);

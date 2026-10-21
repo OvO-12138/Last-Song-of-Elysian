@@ -1,0 +1,17 @@
+{
+  "name": "往世乐土入口",
+  "icon": "lastsongofelysian:elysian_realm_entrance",
+  "category": "lastsongofelysian:realm",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "进入与返回",
+      "text": "在主世界放置往世乐土入口，右键即可进入乐土。$(br2)乐土的初始地点也有入口；右键它即可返回主世界。入口只连接主世界与往世乐土。$(br2)乐土不会自然刷新普通怪物。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:elysian_realm_entrance"
+    }
+  ]
+}

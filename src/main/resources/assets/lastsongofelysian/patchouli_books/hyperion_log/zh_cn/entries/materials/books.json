@@ -1,0 +1,33 @@
+{
+  "name": "日志与其他书籍",
+  "icon": "lastsongofelysian:hyperion_log",
+  "category": "lastsongofelysian:materials",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "日志与其他书籍",
+      "text": "休伯利安日志是本模组的教程书。右键打开，使用分类和搜索查阅条目；配方页面可直接查看所需材料。$(br2)语言跟随Minecraft的语言设置，本书提供中文和英文内容。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:hyperion_log"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:shi_ji",
+      "text": "史，可是帝王之证啊"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:ivtv_book",
+      "title": "ivTV与赛博人物传",
+      "text": "冷知识，当你打开ivTV的时候你已经比小V的妈妈更爱她了"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:cyber_character_biography",
+      "text": "赛博人物传与岁月史书、ivTV分别作为独立物品保留。本条目展示它们的名称和图标，便于辨认。"
+    }
+  ]
+}

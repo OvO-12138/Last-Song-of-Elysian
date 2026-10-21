@@ -1,0 +1,28 @@
+{
+  "name": "羽渡尘",
+  "icon": "lastsongofelysian:fenghuang_down",
+  "category": "lastsongofelysian:weapons",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "lastsongofelysian:fenghuang_down"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "lastsongofelysian:fenghuang_down",
+      "title": "灵魂转移",
+      "text": "消耗100点能量留下渡尘之羽；冷却300秒，最多保留10片。$(br2)死亡时消耗一片羽毛复活，并传送至它的位置。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "太虚剑神",
+      "text": "$(bold)释放会烧毁背包中除羽渡尘外的所有物品。$()$(br2)向前释放火焰攻击并定身目标15秒。基础伤害2000，每烧毁一件物品增加10点。与茧的联系切断60秒。$(br2)回复30点能量，冷却240秒。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "太虚幻境",
+      "text": "展开纯白幻境，持续5秒，冷却120秒。领域内时间停止，并召唤5个分身协同攻击。$(br2)领域期间击杀单位可回复5点能量。"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 package com.ovo.lastsongofelysian.item;
 
-import com.ovo.lastsongofelysian.screen.SignetOfEgoScreen;
+import com.ovo.lastsongofelysian.util.ModText;
+
+import com.ovo.lastsongofelysian.client.ClientScreenHooks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -66,26 +68,28 @@ public class SignetOfEgoItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide()) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    net.minecraft.client.Minecraft.getInstance().setScreen(new SignetOfEgoScreen()));
+            DistExecutor.unsafeRunWhenOn(
+                    Dist.CLIENT,
+                    () -> ClientScreenHooks::openSignetOfEgoScreen
+            );
         }
-        return InteractionResultHolder.success(stack);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("「真我」 无瑕之人 爱莉希雅 II")
+        tooltip.add(ModText.literal("「真我」 无瑕之人 爱莉希雅 II")
                 .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
 
-        tooltip.add(Component.literal("但来访者，你的道路仍将延续，不是吗？").withStyle(LIGHT_PINK_I));
-        tooltip.add(Component.literal("那么，").withStyle(LIGHT_PINK_I));
-        tooltip.add(Component.literal("就听凭心意前进吧。").withStyle(LIGHT_PINK_I));
-        tooltip.add(Component.literal("沿着脚下的足迹，去见证那段逐火的征程。").withStyle(LIGHT_PINK_I));
-        tooltip.add(Component.literal("最后，跨越逝者们的终墓——去创造，").withStyle(LIGHT_PINK_I));
-        tooltip.add(Component.literal("「我们」所未能迎接的未来").withStyle(LIGHT_PINK_I));
+        tooltip.add(ModText.literal("但来访者，你的道路仍将延续，不是吗？").withStyle(LIGHT_PINK_I));
+        tooltip.add(ModText.literal("那么，").withStyle(LIGHT_PINK_I));
+        tooltip.add(ModText.literal("就听凭心意前进吧。").withStyle(LIGHT_PINK_I));
+        tooltip.add(ModText.literal("沿着脚下的足迹，去见证那段逐火的征程。").withStyle(LIGHT_PINK_I));
+        tooltip.add(ModText.literal("最后，跨越逝者们的终墓——去创造，").withStyle(LIGHT_PINK_I));
+        tooltip.add(ModText.literal("「我们」所未能迎接的未来").withStyle(LIGHT_PINK_I));
 
-        tooltip.add(Component.literal("右键查看全部祝福")
+        tooltip.add(ModText.literal("右键查看全部祝福")
                 .withStyle(ChatFormatting.GRAY));
 
         super.appendHoverText(stack, level, tooltip, flag);

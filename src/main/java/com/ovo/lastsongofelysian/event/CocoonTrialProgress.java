@@ -1,21 +1,24 @@
 package com.ovo.lastsongofelysian.event;
 
-import com.ovo.lastsongofelysian.entity.CorrosionMirrorEntity;
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import com.ovo.lastsongofelysian.util.CocoonTrialPalette;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
@@ -58,6 +61,8 @@ public final class CocoonTrialProgress {
     private static final String NBT_VOID_KILLS = "CocoonTrialVoidKills";
     private static final String NBT_THUNDER_STRIKES = "CocoonTrialThunderStrikes";
     private static final String NBT_THUNDER_KILLS = "CocoonTrialThunderKills";
+    private static final String NBT_THUNDER_PENDING = "CocoonTrialThunderPending";
+    private static final String NBT_THUNDER_PENDING_TICK = "CocoonTrialThunderPendingTick";
     private static final String NBT_WIND_HEAL = "CocoonTrialWindHeal";
     private static final String NBT_WIND_EXTERNAL_HEAL = "CocoonTrialWindExternalHeal";
     private static final String NBT_ICE_TICKS = "CocoonTrialIceTicks";
@@ -76,8 +81,7 @@ public final class CocoonTrialProgress {
     private static final String NBT_DOMINANCE_LEVELS_GAINED = "CocoonTrialDominanceLevelsGained";
     private static final String NBT_DOMINANCE_KILLS = "CocoonTrialDominanceKills";
     private static final String NBT_BINDING_BLOCKS = "CocoonTrialBindingBlocks";
-    private static final String NBT_CORROSION_HIGH = "CocoonTrialCorrosionHigh";
-    private static final String NBT_CORROSION_MIRROR = "CocoonTrialCorrosionMirror";
+    private static final String NBT_CORROSION_KILLS = "CocoonTrialCorrosionKills";
 
     private static final String[] NAMES = {
             "失序的真理", "虚空的漠视", "天罚的见证", "无风的嘶哑",
@@ -121,18 +125,38 @@ public final class CocoonTrialProgress {
         return Integer.bitCount(getCompletedMask(player));
     }
 
+    public static int getThunderStrikes(Player player) {
+        return getData(player).getInt(NBT_THUNDER_STRIKES);
+    }
+
+    public static int getThunderKills(Player player) {
+        return getData(player).getInt(NBT_THUNDER_KILLS);
+    }
+
+    public static int getEarthExplosions(Player player) {
+        return getData(player).getInt(NBT_EARTH_EXPLOSIONS);
+    }
+
+    public static void markThunderLightningPending(Player player) {
+        if (!canProgress(player, THUNDER)) return;
+        CompoundTag data = getData(player);
+        data.putBoolean(NBT_THUNDER_PENDING, true);
+        data.putLong(NBT_THUNDER_PENDING_TICK, player.level().getGameTime());
+    }
+
     public static void copy(Player original, Player target) {
         CompoundTag oldData = getData(original);
         CompoundTag newData = getData(target);
         String[] keys = {
                 NBT_UNLOCKED, NBT_COMPLETED, NBT_REASON_CRAFTS, NBT_REASON_ENCHANTS,
                 NBT_VOID_WINDOW, NBT_VOID_KILLS, NBT_THUNDER_STRIKES, NBT_THUNDER_KILLS,
+                NBT_THUNDER_PENDING, NBT_THUNDER_PENDING_TICK,
                 NBT_WIND_HEAL, NBT_WIND_EXTERNAL_HEAL, NBT_ICE_TICKS, NBT_ICE_KILLS, NBT_DEATH_TICKS,
                 NBT_DEATH_KILLS, NBT_FIRE_TICKS, NBT_FIRE_KILLS, NBT_SENTIENCE_KILLS,
                 NBT_EARTH_EXPLOSIONS, NBT_EARTH_LAST_TICK, NBT_DOMINANCE_STARTED,
                 NBT_DOMINANCE_LEVEL, NBT_DOMINANCE_INITIALIZED, NBT_DOMINANCE_LAST_LEVEL,
                 NBT_DOMINANCE_LEVELS_GAINED, NBT_DOMINANCE_KILLS, NBT_BINDING_BLOCKS,
-                NBT_CORROSION_HIGH, NBT_CORROSION_MIRROR
+                NBT_CORROSION_KILLS
         };
         for (String key : keys) {
             if (oldData.contains(key)) newData.put(key, oldData.get(key).copy());
@@ -143,6 +167,9 @@ public final class CocoonTrialProgress {
         return player != null && !player.level().isClientSide() && player.isAlive()
                 && !player.isCreative() && !player.isSpectator()
                 && isUnlocked(player) && !isComplete(player, trial)
+                && (trial != CORROSION || CocoonCoreProgress.hasAcquiredCore(
+                player, ModItems.CORE_OF_CORROSION.get()))
+                && !FenghuangDownSystem.isCocoonConnectionSevered(player)
                 && CuriosApi.getCuriosHelper().findFirstCurio(
                 player, stack -> stack.is(ModItems.COCOON_OF_FINALITY.get())).isPresent();
     }
@@ -153,7 +180,7 @@ public final class CocoonTrialProgress {
         int mask = getCompletedMask(player) | (1 << trial);
         data.putInt(NBT_COMPLETED, mask);
         player.displayClientMessage(
-                Component.literal("试炼完成：" + NAMES[trial])
+                ModText.literal("试炼完成：" + NAMES[trial])
                         .withStyle(CocoonTrialPalette.color(trial), ChatFormatting.BOLD), false);
 
         if (trial == CORROSION) {
@@ -165,10 +192,10 @@ public final class CocoonTrialProgress {
             CocoonCoreProgress.setReversed(player, true);
             SignetEffects.clearCorruption(player);
             player.displayClientMessage(
-                    Component.literal("以人类的意志，拥抱明天。")
+                    ModText.literal("以人类的意志，拥抱明天。")
                             .withStyle(ChatFormatting.LIGHT_PURPLE), false);
             player.displayClientMessage(
-                    Component.literal("终焉之茧诅咒均已反转")
+                    ModText.literal("终焉之茧诅咒均已反转")
                             .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD), false);
         }
         CocoonCoreProgress.syncToClient(player);
@@ -249,18 +276,16 @@ public final class CocoonTrialProgress {
         }
     }
 
-    public static void recordCorrosionMirrorKill(Player player) {
-        if (canProgress(player, CORROSION) && getData(player).getBoolean(NBT_CORROSION_HIGH)) {
-            getData(player).putBoolean(NBT_CORROSION_MIRROR, true);
-        }
-    }
-
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.side != LogicalSide.SERVER) return;
         Player player = event.player;
-        if (!isUnlocked(player) || player.isCreative() || player.isSpectator()) return;
         CompoundTag data = getData(player);
+        if (data.getBoolean(NBT_THUNDER_PENDING)
+                && player.level().getGameTime() - data.getLong(NBT_THUNDER_PENDING_TICK) > 3L) {
+            data.putBoolean(NBT_THUNDER_PENDING, false);
+        }
+        if (!isUnlocked(player) || player.isCreative() || player.isSpectator()) return;
 
         if (canProgress(player, ICE) && player.isUnderWater()
                 && !player.hasEffect(MobEffects.WATER_BREATHING)
@@ -287,6 +312,7 @@ public final class CocoonTrialProgress {
 
         if (canProgress(player, EARTH) && data.getInt(NBT_EARTH_EXPLOSIONS) > 0 && !hasFullArmor(player)) {
             data.putInt(NBT_EARTH_EXPLOSIONS, 0);
+            CocoonCoreProgress.syncToClient(player);
         }
 
         if (canProgress(player, DOMINANCE)) {
@@ -314,15 +340,6 @@ public final class CocoonTrialProgress {
                 complete(player, DOMINANCE);
             }
         }
-
-        if (canProgress(player, CORROSION)) {
-            float ratio = SignetEffects.getCorruptionRatio(player);
-            if (ratio >= 0.90F) data.putBoolean(NBT_CORROSION_HIGH, true);
-            if (data.getBoolean(NBT_CORROSION_HIGH)
-                    && data.getBoolean(NBT_CORROSION_MIRROR) && ratio < 0.10F) {
-                complete(player, CORROSION);
-            }
-        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -330,18 +347,16 @@ public final class CocoonTrialProgress {
         if (!(event.getEntity() instanceof Player player) || event.getAmount() <= 0.0F) return;
         CompoundTag data = getData(player);
 
-        if (canProgress(player, THUNDER)
-                && event.getSource().getDirectEntity() != null
-                && event.getSource().getDirectEntity().getPersistentData()
-                .getBoolean(CocoonCurseEvents.NBT_CURSE_LIGHTNING)
-                && event.getSource().getDirectEntity().getPersistentData()
-                .hasUUID(CocoonCurseEvents.NBT_CURSE_LIGHTNING_OWNER)
-                && event.getSource().getDirectEntity().getPersistentData()
-                .getUUID(CocoonCurseEvents.NBT_CURSE_LIGHTNING_OWNER).equals(player.getUUID())) {
-            if (player.getHealth() > event.getAmount()) {
+        if (canProgress(player, THUNDER) && isOwnedCurseLightning(event.getSource(), player, data)) {
+            data.putBoolean(NBT_THUNDER_PENDING, false);
+            if (player.getHealth() + player.getAbsorptionAmount() > event.getAmount()) {
                 int strikes = data.getInt(NBT_THUNDER_STRIKES) + 1;
                 data.putInt(NBT_THUNDER_STRIKES, strikes);
-                if (strikes >= 5 && data.getInt(NBT_THUNDER_KILLS) >= 20) complete(player, THUNDER);
+                if (strikes >= 5 && data.getInt(NBT_THUNDER_KILLS) >= 20) {
+                    complete(player, THUNDER);
+                } else {
+                    CocoonCoreProgress.syncToClient(player);
+                }
             }
         }
 
@@ -350,18 +365,16 @@ public final class CocoonTrialProgress {
             data.putLong(NBT_EARTH_LAST_TICK, player.level().getGameTime());
             int explosions = data.getInt(NBT_EARTH_EXPLOSIONS) + 1;
             data.putInt(NBT_EARTH_EXPLOSIONS, explosions);
-            if (explosions >= 10) complete(player, EARTH);
+            if (explosions >= 10) {
+                complete(player, EARTH);
+            } else {
+                CocoonCoreProgress.syncToClient(player);
+            }
         }
     }
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof Player dyingPlayer
-                && canProgress(dyingPlayer, CORROSION)) {
-            CompoundTag dyingData = getData(dyingPlayer);
-            dyingData.remove(NBT_CORROSION_HIGH);
-            dyingData.remove(NBT_CORROSION_MIRROR);
-        }
         if (!(event.getSource().getEntity() instanceof Player player)
                 || !(event.getEntity() instanceof Enemy)) return;
 
@@ -371,9 +384,12 @@ public final class CocoonTrialProgress {
 
         CompoundTag data = getData(player);
         if (canProgress(player, THUNDER) && player.level().isThundering()) {
-            data.putInt(NBT_THUNDER_KILLS, data.getInt(NBT_THUNDER_KILLS) + 1);
+            int kills = data.getInt(NBT_THUNDER_KILLS) + 1;
+            data.putInt(NBT_THUNDER_KILLS, kills);
             if (data.getInt(NBT_THUNDER_STRIKES) >= 5 && data.getInt(NBT_THUNDER_KILLS) >= 20) {
                 complete(player, THUNDER);
+            } else {
+                CocoonCoreProgress.syncToClient(player);
             }
         }
         if (canProgress(player, ICE) && event.getEntity() instanceof Drowned) {
@@ -394,6 +410,26 @@ public final class CocoonTrialProgress {
         if (canProgress(player, DOMINANCE)) {
             data.putInt(NBT_DOMINANCE_KILLS, data.getInt(NBT_DOMINANCE_KILLS) + 1);
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onCorrosionTrialDeath(LivingDeathEvent event) {
+        if (event.getEntity().level().isClientSide()) return;
+        if (event.getEntity() instanceof Player deadPlayer) {
+            if (!isComplete(deadPlayer, CORROSION)) {
+                getData(deadPlayer).putInt(NBT_CORROSION_KILLS, 0);
+            }
+            return;
+        }
+        if (!(event.getSource().getEntity() instanceof Player player)
+                || !(event.getEntity() instanceof Enemy)
+                || PlayerControlledAllies.isProtectedEffectTarget(player, event.getEntity())
+                || !canProgress(player, CORROSION)) return;
+
+        CompoundTag data = getData(player);
+        int kills = data.getInt(NBT_CORROSION_KILLS) + 1;
+        data.putInt(NBT_CORROSION_KILLS, kills);
+        if (kills >= 30) complete(player, CORROSION);
     }
 
     @SubscribeEvent
@@ -420,8 +456,30 @@ public final class CocoonTrialProgress {
         for (EquipmentSlot slot : new EquipmentSlot[]{
                 EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack stack = player.getItemBySlot(slot);
-            if (stack.isEmpty()) return false;
+            if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem armor)
+                    || armor.getEquipmentSlot() != slot) return false;
         }
         return true;
+    }
+
+    private static boolean isOwnedCurseLightning(DamageSource source, Player player, CompoundTag data) {
+        if (isOwnedCurseLightningEntity(source.getDirectEntity(), player)
+                || isOwnedCurseLightningEntity(source.getEntity(), player)) {
+            return true;
+        }
+        if (!source.is(DamageTypes.LIGHTNING_BOLT) || !data.getBoolean(NBT_THUNDER_PENDING)) {
+            return false;
+        }
+        long pendingTick = data.getLong(NBT_THUNDER_PENDING_TICK);
+        long age = player.level().getGameTime() - pendingTick;
+        return age >= 0L && age <= 3L;
+    }
+
+    private static boolean isOwnedCurseLightningEntity(net.minecraft.world.entity.Entity entity, Player player) {
+        if (entity == null) return false;
+        CompoundTag entityData = entity.getPersistentData();
+        return entityData.getBoolean(CocoonCurseEvents.NBT_CURSE_LIGHTNING)
+                && entityData.hasUUID(CocoonCurseEvents.NBT_CURSE_LIGHTNING_OWNER)
+                && entityData.getUUID(CocoonCurseEvents.NBT_CURSE_LIGHTNING_OWNER).equals(player.getUUID());
     }
 }

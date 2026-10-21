@@ -1,0 +1,13 @@
+{
+  "parent": "lastsongofelysian:enter_elysian_realm",
+  "display": {
+    "icon": { "item": "lastsongofelysian:signet_of_helix" },
+    "title": { "translate": "advancement.lastsongofelysian.upgrade_signet.title" },
+    "description": { "translate": "advancement.lastsongofelysian.upgrade_signet.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": { "upgraded": { "trigger": "minecraft:impossible" } }
+}

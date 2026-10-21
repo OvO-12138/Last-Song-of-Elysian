@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.util;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.event.FlawlessBenedictionLegacyEvents;
 import com.ovo.lastsongofelysian.event.FlawlessVisualEffects;
 import com.ovo.lastsongofelysian.event.CorrosionCurseEvents;
@@ -96,7 +98,7 @@ public final class FlawlessWeaponSkill {
         );
 
         player.displayClientMessage(
-                Component.literal(
+                ModText.literal(
                         "真我之境形态："
                                 + next.displayName()
                 ).withStyle(
@@ -125,10 +127,6 @@ public final class FlawlessWeaponSkill {
             return;
         }
 
-        if (hasHelix(player)) {
-            SignetEffects.onWeaponSkillActivated(player);
-        }
-
         Mode mode = getMode(weapon);
 
         switch (mode) {
@@ -136,8 +134,11 @@ public final class FlawlessWeaponSkill {
                     toggleWeather(player);
             case SUN_MOON_DAUGHTER ->
                     toggleTime(player);
-            case FLAWLESS ->
-                    useFlawlessBloom(player, weapon);
+            case FLAWLESS -> {
+                if (useFlawlessBloom(player, weapon)) {
+                    SignetEffects.onWeaponSkillActivated(player);
+                }
+            }
         }
     }
 
@@ -186,7 +187,7 @@ public final class FlawlessWeaponSkill {
                     );
 
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "无暇乐土尚在冷却："
                                     + remainingSeconds
                                     + "秒"
@@ -211,6 +212,7 @@ public final class FlawlessWeaponSkill {
         }
 
         CorrosionCurseEvents.onWeaponUltimate(player);
+        SignetEffects.onWeaponUltimateActivated(player, 400);
 
         if (hasDeliverance(player)) {
             AttributeInstance attackDamage =
@@ -325,7 +327,7 @@ public final class FlawlessWeaponSkill {
         }
     }
 
-    private static void useFlawlessBloom(
+    private static boolean useFlawlessBloom(
             Player player,
             ItemStack weapon
     ) {
@@ -334,12 +336,12 @@ public final class FlawlessWeaponSkill {
 
         if (target == null) {
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "视线中没有可释放无暇绽放的目标。"
                     ).withStyle(ChatFormatting.GRAY),
                     true
             );
-            return;
+            return false;
         }
 
         int stacks =
@@ -352,14 +354,14 @@ public final class FlawlessWeaponSkill {
                                 .MAX_BLOOM_STACKS
         ) {
             player.displayClientMessage(
-                    Component.literal(
+                    ModText.literal(
                             "真我之绽不足："
                                     + stacks
                                     + "/3"
                     ).withStyle(ChatFormatting.RED),
                     true
             );
-            return;
+            return false;
         }
 
         FlawlessBenedictionLegacyEvents
@@ -377,7 +379,7 @@ public final class FlawlessWeaponSkill {
                 )
         );
 
-        float damage = baseAttack * 131.4F;
+        float damage = baseAttack * 1314.0F;
 
         List<LivingEntity> victims =
                 player.level().getEntitiesOfClass(
@@ -386,16 +388,12 @@ public final class FlawlessWeaponSkill {
                                 .inflate(4.0D),
                         entity ->
                                 entity.isAlive()
-                                        && entity != player
-                                        && !entity.isAlliedTo(player)
+                                        && PlayerControlledAllies.isValidEnemy(player, entity)
                 );
 
         for (LivingEntity victim : victims) {
-            victim.hurt(
-                    player.damageSources()
-                            .playerAttack(player),
-                    damage
-            );
+            PlayerControlledAllies.hurt(player, victim,
+                    player.damageSources().playerAttack(player), damage);
         }
 
         target.setTicksFrozen(
@@ -415,6 +413,7 @@ public final class FlawlessWeaponSkill {
                 player,
                 "真我之花于此盛放"
         );
+        return true;
     }
 
     @Nullable
@@ -438,8 +437,7 @@ public final class FlawlessWeaponSkill {
                         player.getBoundingBox().inflate(range),
                         entity ->
                                 entity.isAlive()
-                                        && entity != player
-                                        && !entity.isAlliedTo(player)
+                                        && PlayerControlledAllies.isValidEnemy(player, entity)
                                         && player.hasLineOfSight(entity)
                                         && FlawlessBenedictionLegacyEvents.getBloomStacks(entity)
                                         >= FlawlessBenedictionLegacyEvents.MAX_BLOOM_STACKS
@@ -473,8 +471,7 @@ public final class FlawlessWeaponSkill {
                         searchBox,
                         entity ->
                                 entity.isAlive()
-                                        && entity != player
-                                        && !entity.isAlliedTo(player)
+                                        && PlayerControlledAllies.isValidEnemy(player, entity)
                                         && player.hasLineOfSight(entity)
                 )
                 .stream()
@@ -527,7 +524,7 @@ public final class FlawlessWeaponSkill {
             String text
     ) {
         player.displayClientMessage(
-                Component.literal(text)
+                ModText.literal(text)
                         .withStyle(
                                 ChatFormatting.LIGHT_PURPLE,
                                 ChatFormatting.BOLD

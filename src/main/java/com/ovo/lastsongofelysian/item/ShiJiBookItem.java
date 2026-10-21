@@ -1,5 +1,8 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+import com.ovo.lastsongofelysian.util.ModAdvancements;
+
 import com.ovo.lastsongofelysian.client.ClientScreenHooks;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import net.minecraft.ChatFormatting;
@@ -78,6 +81,8 @@ public class ShiJiBookItem extends Item {
                     net.minecraftforge.api.distmarker.Dist.CLIENT,
                     () -> ClientScreenHooks::openShiJiScreen
             );
+        } else {
+            ModAdvancements.award(player, "open_history_book");
         }
 
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
@@ -86,24 +91,24 @@ public class ShiJiBookItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("岁月史书")
+        tooltip.add(ModText.literal("岁月史书")
                 .withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
 
-        tooltip.add(Component.literal("by刑部尚书/钦天监首领/流光忆庭首领/无漏净子/司马迁/构史爵/浮黎/灰暗之手/遐蝶/虚构史学家")
+        tooltip.add(ModText.literal("by刑部尚书/钦天监首领/流光忆庭首领/无漏净子/司马迁/构史爵/浮黎/灰暗之手/遐蝶/虚构史学家")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 
-        tooltip.add(Component.literal("此书不可焚，不可毁，不可存，不可遗。")
+        tooltip.add(ModText.literal("此书不可焚，不可毁，不可存，不可遗。")
                 .withStyle(ChatFormatting.DARK_RED));
-        tooltip.add(Component.literal("")
+        tooltip.add(ModText.literal("")
                 .withStyle(ChatFormatting.DARK_RED));
 
-        tooltip.add(Component.literal("在此")
+        tooltip.add(ModText.literal("在此")
                 .withStyle(ChatFormatting.DARK_RED));
-        tooltip.add(Component.literal("我向他们许下承诺")
+        tooltip.add(ModText.literal("我向他们许下承诺")
                 .withStyle(ChatFormatting.DARK_RED));
-        tooltip.add(Component.literal("史")
+        tooltip.add(ModText.literal("史")
                 .withStyle(ChatFormatting.DARK_RED));
-        tooltip.add(Component.literal("一定会战胜人类")
+        tooltip.add(ModText.literal("一定会战胜人类")
                 .withStyle(ChatFormatting.DARK_RED));
         super.appendHoverText(stack, level, tooltip, flag);
     }

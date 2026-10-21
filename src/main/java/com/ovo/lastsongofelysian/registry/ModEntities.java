@@ -1,13 +1,9 @@
 package com.ovo.lastsongofelysian.registry;
 
 import com.ovo.lastsongofelysian.entity.CorrosionMirrorEntity;
+import com.ovo.lastsongofelysian.entity.EdenBlackHoleEntity;
 import com.ovo.lastsongofelysian.entity.ElysianHeroNpcEntity;
 import com.ovo.lastsongofelysian.entity.PardofelisMerchantEntity;
-import com.ovo.lastsongofelysian.entity.QuGeEntity;
-import com.ovo.lastsongofelysian.entity.QuGeSpitEntity;
-import com.ovo.lastsongofelysian.entity.YellowPurpleAxolotlEntity;
-import com.ovo.lastsongofelysian.entity.YellowPurpleBabyAxolotlEntity;
-import com.ovo.lastsongofelysian.entity.YellowPurpleFishEntity;
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -26,6 +22,18 @@ public class ModEntities {
                             .clientTrackingRange(10)
                             .updateInterval(2)
                             .build("corrosion_mirror"));
+
+    public static final RegistryObject<EntityType<EdenBlackHoleEntity>> EDEN_BLACK_HOLE =
+            ENTITY_TYPES.register("eden_black_hole",
+                    () -> EntityType.Builder.<EdenBlackHoleEntity>of(
+                                    EdenBlackHoleEntity::new,
+                                    MobCategory.MISC
+                            )
+                            .sized(1.0F, 1.0F)
+                            .clientTrackingRange(16)
+                            .updateInterval(1)
+                            .fireImmune()
+                            .build("eden_black_hole"));
 
     public static final RegistryObject<EntityType<PardofelisMerchantEntity>> PARDOFELIS_MERCHANT =
             ENTITY_TYPES.register("pardofelis_merchant",
@@ -48,53 +56,8 @@ public class ModEntities {
     public static final RegistryObject<EntityType<ElysianHeroNpcEntity>> EDEN_NPC =
             registerHero("eden_npc", ElysianHeroNpcEntity.HeroVariant.EDEN);
 
-    public static final RegistryObject<EntityType<QuGeEntity>> QU_GE =
-            ENTITY_TYPES.register("qu_ge",
-                    () -> EntityType.Builder.of(QuGeEntity::new, MobCategory.CREATURE)
-                            .sized(1.55F, 0.65F)
-                            .clientTrackingRange(10)
-                            .build("qu_ge"));
 
-    public static final RegistryObject<EntityType<QuGeSpitEntity>> QU_GE_SPIT =
-            ENTITY_TYPES.register("qu_ge_spit",
-                    () -> EntityType.Builder.<QuGeSpitEntity>of(QuGeSpitEntity::new, MobCategory.MISC)
-                            .sized(0.25F, 0.25F)
-                            .clientTrackingRange(8)
-                            .updateInterval(10)
-                            .build("qu_ge_spit"));
 
-    public static final RegistryObject<EntityType<YellowPurpleFishEntity>> YELLOW_PURPLE_LITTLE_FISH =
-            ENTITY_TYPES.register("yellow_purple_little_fish",
-                    () -> EntityType.Builder.of(
-                                    YellowPurpleFishEntity::new,
-                                    MobCategory.WATER_AMBIENT
-                            )
-                            .sized(0.7F, 0.4F)
-                            .clientTrackingRange(4)
-                            .updateInterval(3)
-                            .build("yellow_purple_little_fish"));
-
-    public static final RegistryObject<EntityType<YellowPurpleAxolotlEntity>> YELLOW_PURPLE_LITTLE_AXOLOTL =
-            ENTITY_TYPES.register("yellow_purple_little_axolotl",
-                    () -> EntityType.Builder.of(
-                                    YellowPurpleAxolotlEntity::new,
-                                    MobCategory.AXOLOTLS
-                            )
-                            .sized(0.75F, 0.42F)
-                            .clientTrackingRange(8)
-                            .updateInterval(3)
-                            .build("yellow_purple_little_axolotl"));
-
-    public static final RegistryObject<EntityType<YellowPurpleBabyAxolotlEntity>> YELLOW_PURPLE_LITTLE_AXOLOTL_BABY =
-            ENTITY_TYPES.register("yellow_purple_little_axolotl_baby",
-                    () -> EntityType.Builder.of(
-                                    YellowPurpleBabyAxolotlEntity::new,
-                                    MobCategory.AXOLOTLS
-                            )
-                            .sized(0.42F, 0.24F)
-                            .clientTrackingRange(8)
-                            .updateInterval(3)
-                            .build("yellow_purple_little_axolotl_baby"));
 
     private static RegistryObject<EntityType<ElysianHeroNpcEntity>> registerHero(
             String id,

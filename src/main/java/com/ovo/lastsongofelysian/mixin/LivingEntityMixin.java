@@ -1,7 +1,9 @@
 package com.ovo.lastsongofelysian.mixin;
 
 import com.ovo.lastsongofelysian.registry.ModItems;
+import com.ovo.lastsongofelysian.event.SignetEffects;
 import com.ovo.lastsongofelysian.util.SignetUpgradeData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,6 +16,28 @@ import top.theillusivec4.curios.api.CuriosApi;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+
+    @Inject(method = "getDamageAfterArmorAbsorb", at = @At("HEAD"), cancellable = true)
+    private void applyArmorPenetration(DamageSource source, float damage,
+                             CallbackInfoReturnable<Float> cir) {
+        LivingEntity target = (LivingEntity) (Object) this;
+        if (SignetEffects.hasActivePenetration(target, source)) {
+            cir.setReturnValue(SignetEffects.getDamageAfterArmorWithPenetration(
+                    target, source, damage
+            ));
+        }
+    }
+
+    @Inject(method = "getDamageAfterMagicAbsorb", at = @At("HEAD"), cancellable = true)
+    private void applyMagicPenetration(DamageSource source, float damage,
+                                   CallbackInfoReturnable<Float> cir) {
+        LivingEntity target = (LivingEntity) (Object) this;
+        if (SignetEffects.hasActivePenetration(target, source)) {
+            cir.setReturnValue(SignetEffects.getDamageAfterMagicWithPenetration(
+                    target, source, damage
+            ));
+        }
+    }
 
     @Inject(method = "addEffect", at = @At("HEAD"))
     private void onAddEffect(MobEffectInstance effect, CallbackInfoReturnable<Boolean> cir) {

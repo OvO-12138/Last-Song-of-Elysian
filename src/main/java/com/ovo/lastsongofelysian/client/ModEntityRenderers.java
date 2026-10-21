@@ -2,17 +2,12 @@ package com.ovo.lastsongofelysian.client;
 
 import com.ovo.lastsongofelysian.client.model.ElysianHeroModel;
 import com.ovo.lastsongofelysian.client.model.PardofelisMerchantModel;
-import com.ovo.lastsongofelysian.client.model.QuGeModel;
 import com.ovo.lastsongofelysian.client.renderer.CorrosionMirrorRenderer;
+import com.ovo.lastsongofelysian.client.renderer.EdenBlackHoleRenderer;
 import com.ovo.lastsongofelysian.client.renderer.ElysianHeroRenderer;
 import com.ovo.lastsongofelysian.client.renderer.PardofelisMerchantRenderer;
-import com.ovo.lastsongofelysian.client.renderer.QuGeRenderer;
-import com.ovo.lastsongofelysian.client.renderer.YellowPurpleAxolotlRenderer;
-import com.ovo.lastsongofelysian.client.renderer.YellowPurpleBabyAxolotlRenderer;
-import com.ovo.lastsongofelysian.client.renderer.YellowPurpleFishRenderer;
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModEntities;
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -35,10 +30,6 @@ public class ModEntityRenderers {
                 PardofelisMerchantModel.LAYER_LOCATION,
                 PardofelisMerchantModel::createBodyLayer
         );
-        event.registerLayerDefinition(
-                QuGeModel.LAYER_LOCATION,
-                QuGeModel::createBodyLayer
-        );
     }
 
     @SubscribeEvent
@@ -46,6 +37,10 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(
                 ModEntities.CORROSION_MIRROR.get(),
                 CorrosionMirrorRenderer::new
+        );
+        event.registerEntityRenderer(
+                ModEntities.EDEN_BLACK_HOLE.get(),
+                EdenBlackHoleRenderer::new
         );
         event.registerEntityRenderer(
                 ModEntities.APONIA_NPC.get(),
@@ -70,26 +65,6 @@ public class ModEntityRenderers {
         event.registerEntityRenderer(
                 ModEntities.PARDOFELIS_MERCHANT.get(),
                 PardofelisMerchantRenderer::new
-        );
-        event.registerEntityRenderer(
-                ModEntities.QU_GE.get(),
-                QuGeRenderer::new
-        );
-        event.registerEntityRenderer(
-                ModEntities.QU_GE_SPIT.get(),
-                ThrownItemRenderer::new
-        );
-        event.registerEntityRenderer(
-                ModEntities.YELLOW_PURPLE_LITTLE_FISH.get(),
-                YellowPurpleFishRenderer::new
-        );
-        event.registerEntityRenderer(
-                ModEntities.YELLOW_PURPLE_LITTLE_AXOLOTL.get(),
-                YellowPurpleAxolotlRenderer::new
-        );
-        event.registerEntityRenderer(
-                ModEntities.YELLOW_PURPLE_LITTLE_AXOLOTL_BABY.get(),
-                YellowPurpleBabyAxolotlRenderer::new
         );
     }
 }

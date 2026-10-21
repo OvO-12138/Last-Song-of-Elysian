@@ -1,0 +1,13 @@
+{
+  "name": "界面布局与能力开关",
+  "icon": "minecraft:painting",
+  "category": "lastsongofelysian:getting_started",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "调整 HUD",
+      "text": "打开 HUD 布局编辑器的当前按键是 $(k:key.lastsongofelysian.open_hud_editor)，可在按键绑定中修改。$(br2)选中左侧的一项后，拖动它的预览框调整位置；右侧按钮可以微调坐标、缩放、显示或隐藏，并重置该项。$(br2)可编辑崩坏能侵蚀度、武器能量、燃血解放、规诫、连击与闪避栏。"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "tag": "forge:ingots/iron" }
+  ],
+  "result": { "item": "lastsongofelysian:hyperion_log" }
+}

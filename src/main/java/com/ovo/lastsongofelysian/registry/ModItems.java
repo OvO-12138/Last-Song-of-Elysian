@@ -12,38 +12,199 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import com.ovo.lastsongofelysian.item.NamelessTownChestplateItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import com.ovo.lastsongofelysian.item.WhisperOfThePastItem;
 
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, lastsongofelysian.MODID);
-
     public static final RegistryObject<Item> SIGNET_OF_REVERIE = ITEMS.register("signet_of_reverie",
             () -> new SignetOfReverieItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> REVERIE_CAT_VERSE = registerExtensionAugment("reverie_cat_verse", SignetUpgradeData.Skill.REVERIE_CAT_VERSE);
+    public static final RegistryObject<Item> REVERIE_BLADE_TAIL = registerExtensionAugment("reverie_blade_tail", SignetUpgradeData.Skill.REVERIE_BLADE_TAIL);
+    public static final RegistryObject<Item> REVERIE_STREET_JOY = registerExtensionAugment("reverie_street_joy", SignetUpgradeData.Skill.REVERIE_STREET_JOY);
+    public static final RegistryObject<Item> REVERIE_PC = registerExtensionAugment("reverie_pc", SignetUpgradeData.Skill.REVERIE_PC);
+    public static final RegistryObject<Item> REVERIE_JOY = registerExtensionCore("reverie_joy", SignetUpgradeData.ExtensionCore.REVERIE_JOY);
+    public static final RegistryObject<Item> REVERIE_BOSS = registerExtensionAugment("reverie_boss", SignetUpgradeData.Skill.REVERIE_BOSS);
+    public static final RegistryObject<Item> REVERIE_CAT_PUNCH = registerExtensionAugment("reverie_cat_punch", SignetUpgradeData.Skill.REVERIE_CAT_PUNCH);
+    public static final RegistryObject<Item> REVERIE_LUCKY = registerExtensionAugment("reverie_lucky", SignetUpgradeData.Skill.REVERIE_LUCKY);
+    public static final RegistryObject<Item> REVERIE_DREAM = registerExtensionCore("reverie_dream", SignetUpgradeData.ExtensionCore.REVERIE_DREAM);
+    public static final RegistryObject<Item> REVERIE_ZERO = registerExtensionAugment("reverie_zero", SignetUpgradeData.Skill.REVERIE_ZERO);
+    public static final RegistryObject<Item> REVERIE_SNOW = registerExtensionAugment("reverie_snow", SignetUpgradeData.Skill.REVERIE_SNOW);
+    public static final RegistryObject<Item> REVERIE_DREAM_TRUE = registerExtensionAugment("reverie_dream_true", SignetUpgradeData.Skill.REVERIE_DREAM_TRUE);
     public static final RegistryObject<Item> SHINY_SILVER = ITEMS.register("shiny_silver",
-            () -> new ShinySilverItem(new Item.Properties().stacksTo(127)));
+            () -> new ShinySilverItem(new Item.Properties().stacksTo(64)));
     public static final RegistryObject<Item> SIGNET_OF_VICISSITUDE = ITEMS.register("signet_of_vicissitude",
             () -> new SignetOfVicissitudeItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> VICISSITUDE_TIME = registerExtensionAugment("vicissitude_time", SignetUpgradeData.Skill.VICISSITUDE_TIME);
+    public static final RegistryObject<Item> VICISSITUDE_ROBE = registerExtensionAugment("vicissitude_robe", SignetUpgradeData.Skill.VICISSITUDE_ROBE);
+    public static final RegistryObject<Item> VICISSITUDE_DREAM = registerExtensionAugment("vicissitude_dream", SignetUpgradeData.Skill.VICISSITUDE_DREAM);
+    public static final RegistryObject<Item> VICISSITUDE_WORDS = registerExtensionAugment("vicissitude_words", SignetUpgradeData.Skill.VICISSITUDE_WORDS);
+    public static final RegistryObject<Item> VICISSITUDE_RESOLVE = registerExtensionCore("vicissitude_resolve", SignetUpgradeData.ExtensionCore.VICISSITUDE_RESOLVE);
+    public static final RegistryObject<Item> VICISSITUDE_RED_DUST = registerExtensionAugment("vicissitude_red_dust", SignetUpgradeData.Skill.VICISSITUDE_RED_DUST);
+    public static final RegistryObject<Item> VICISSITUDE_PROSPERITY = registerExtensionAugment("vicissitude_prosperity", SignetUpgradeData.Skill.VICISSITUDE_PROSPERITY);
+    public static final RegistryObject<Item> VICISSITUDE_FAMILIAR = registerExtensionAugment("vicissitude_familiar", SignetUpgradeData.Skill.VICISSITUDE_FAMILIAR);
+    public static final RegistryObject<Item> VICISSITUDE_MEMORY = registerExtensionCore("vicissitude_memory", SignetUpgradeData.ExtensionCore.VICISSITUDE_MEMORY);
+    public static final RegistryObject<Item> VICISSITUDE_REED = registerExtensionAugment("vicissitude_reed", SignetUpgradeData.Skill.VICISSITUDE_REED);
+    public static final RegistryObject<Item> VICISSITUDE_FEATHER = registerExtensionAugment("vicissitude_feather", SignetUpgradeData.Skill.VICISSITUDE_FEATHER);
+    public static final RegistryObject<Item> VICISSITUDE_AWAKEN = registerExtensionAugment("vicissitude_awaken", SignetUpgradeData.Skill.VICISSITUDE_AWAKEN);
     public static final RegistryObject<Item> SILVER_POUCH = ITEMS.register("silver_pouch",
             () -> new SilverPouchItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SIGNET_OF_STARS = ITEMS.register("signet_of_stars",
             () -> new SignetOfStarsItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> STARS_YELLOW = registerExtensionAugment("stars_yellow", SignetUpgradeData.Skill.STARS_YELLOW);
+    public static final RegistryObject<Item> STARS_BLACK = registerExtensionAugment("stars_black", SignetUpgradeData.Skill.STARS_BLACK);
+    public static final RegistryObject<Item> STARS_WHITE = registerExtensionAugment("stars_white", SignetUpgradeData.Skill.STARS_WHITE);
+    public static final RegistryObject<Item> STARS_GRAY = registerExtensionAugment("stars_gray", SignetUpgradeData.Skill.STARS_GRAY);
+    public static final RegistryObject<Item> STARS_SHINING = registerExtensionCore("stars_shining", SignetUpgradeData.ExtensionCore.STARS_SHINING);
+    public static final RegistryObject<Item> STARS_WILDFLOWER_SHINING = registerExtensionAugment("stars_wildflower_shining", SignetUpgradeData.Skill.STARS_WILDFLOWER_SHINING);
+    public static final RegistryObject<Item> STARS_FLAME_SHINING = registerExtensionAugment("stars_flame_shining", SignetUpgradeData.Skill.STARS_FLAME_SHINING);
+    public static final RegistryObject<Item> STARS_LEAF_SHINING = registerExtensionAugment("stars_leaf_shining", SignetUpgradeData.Skill.STARS_LEAF_SHINING);
+    public static final RegistryObject<Item> STARS_DIM = registerExtensionCore("stars_dim", SignetUpgradeData.ExtensionCore.STARS_DIM);
+    public static final RegistryObject<Item> STARS_WILDFLOWER_DIM = registerExtensionAugment("stars_wildflower_dim", SignetUpgradeData.Skill.STARS_WILDFLOWER_DIM);
+    public static final RegistryObject<Item> STARS_LEAF_DIM = registerExtensionAugment("stars_leaf_dim", SignetUpgradeData.Skill.STARS_LEAF_DIM);
+    public static final RegistryObject<Item> STARS_FLAME_DIM = registerExtensionAugment("stars_flame_dim", SignetUpgradeData.Skill.STARS_FLAME_DIM);
     public static final RegistryObject<Item> PAINTBRUSH = ITEMS.register("paintbrush",
             () -> new PaintbrushItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SIGNET_OF_INFINITY = ITEMS.register("signet_of_infinity",
             () -> new SignetOfInfinityItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> INFINITY_P = registerExtensionAugment("infinity_p", SignetUpgradeData.Skill.INFINITY_P);
+    public static final RegistryObject<Item> INFINITY_B = registerExtensionAugment("infinity_b", SignetUpgradeData.Skill.INFINITY_B);
+    public static final RegistryObject<Item> INFINITY_E = registerExtensionAugment("infinity_e", SignetUpgradeData.Skill.INFINITY_E);
+    public static final RegistryObject<Item> INFINITY_X = registerExtensionCore("infinity_x", SignetUpgradeData.ExtensionCore.INFINITY_X);
+    public static final RegistryObject<Item> INFINITY_DEATH_X = registerExtensionAugment("infinity_death_x", SignetUpgradeData.Skill.INFINITY_DEATH_X);
+    public static final RegistryObject<Item> INFINITY_UNKNOWN_X = registerExtensionAugment("infinity_unknown_x", SignetUpgradeData.Skill.INFINITY_UNKNOWN_X);
+    public static final RegistryObject<Item> INFINITY_NEWBORN_X = registerExtensionAugment("infinity_newborn_x", SignetUpgradeData.Skill.INFINITY_NEWBORN_X);
+    public static final RegistryObject<Item> INFINITY_M = registerExtensionCore("infinity_m", SignetUpgradeData.ExtensionCore.INFINITY_M);
+    public static final RegistryObject<Item> INFINITY_SACRIFICE_M = registerExtensionAugment("infinity_sacrifice_m", SignetUpgradeData.Skill.INFINITY_SACRIFICE_M);
+    public static final RegistryObject<Item> INFINITY_IMMORTAL_M = registerExtensionAugment("infinity_immortal_m", SignetUpgradeData.Skill.INFINITY_IMMORTAL_M);
+    public static final RegistryObject<Item> INFINITY_COLLAPSE_M = registerExtensionAugment("infinity_collapse_m", SignetUpgradeData.Skill.INFINITY_COLLAPSE_M);
     public static final RegistryObject<Item> SIGNET_OF_DAYBREAK = ITEMS.register("signet_of_daybreak",
             () -> new SignetOfDaybreakItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DAYBREAK_WING = registerDaybreakAugment(
+            "daybreak_wing", SignetUpgradeData.Skill.DAYBREAK_WING);
+    public static final RegistryObject<Item> DAYBREAK_HORN = registerDaybreakAugment(
+            "daybreak_horn", SignetUpgradeData.Skill.DAYBREAK_HORN);
+    public static final RegistryObject<Item> DAYBREAK_BREATH = registerDaybreakAugment(
+            "daybreak_breath", SignetUpgradeData.Skill.DAYBREAK_BREATH);
+    public static final RegistryObject<Item> DAYBREAK_HEART = registerDaybreakAugment(
+            "daybreak_heart", SignetUpgradeData.Skill.DAYBREAK_HEART);
+    public static final RegistryObject<Item> DAYBREAK_UNFADING_LIGHT = registerDaybreakCore(
+            "daybreak_unfading_light", SignetUpgradeData.DaybreakCore.UNFADING_LIGHT);
+    public static final RegistryObject<Item> DAYBREAK_LIGHT_HERO = registerDaybreakAugment(
+            "daybreak_light_hero", SignetUpgradeData.Skill.DAYBREAK_LIGHT_HERO);
+    public static final RegistryObject<Item> DAYBREAK_LIGHT_GOOD_EVIL = registerDaybreakAugment(
+            "daybreak_light_good_evil", SignetUpgradeData.Skill.DAYBREAK_LIGHT_GOOD_EVIL);
+    public static final RegistryObject<Item> DAYBREAK_LIGHT_VOW = registerDaybreakAugment(
+            "daybreak_light_vow", SignetUpgradeData.Skill.DAYBREAK_LIGHT_VOW);
+    public static final RegistryObject<Item> DAYBREAK_LONELY_NIGHT = registerDaybreakCore(
+            "daybreak_lonely_night", SignetUpgradeData.DaybreakCore.LONELY_NIGHT);
+    public static final RegistryObject<Item> DAYBREAK_NIGHT_DAWN = registerDaybreakAugment(
+            "daybreak_night_dawn", SignetUpgradeData.Skill.DAYBREAK_NIGHT_DAWN);
+    public static final RegistryObject<Item> DAYBREAK_NIGHT_CHOICE = registerDaybreakAugment(
+            "daybreak_night_choice", SignetUpgradeData.Skill.DAYBREAK_NIGHT_CHOICE);
+    public static final RegistryObject<Item> DAYBREAK_NIGHT_INTENT = registerDaybreakAugment(
+            "daybreak_night_intent", SignetUpgradeData.Skill.DAYBREAK_NIGHT_INTENT);
     public static final RegistryObject<Item> SIGNET_OF_SETSURA = ITEMS.register("signet_of_setsura",
             () -> new SignetOfSetsuraItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SETSURA_RED_LEAVES = registerSetsuraAugment(
+            "setsura_red_leaves", SignetUpgradeData.Skill.SETSURA_RED_LEAVES);
+    public static final RegistryObject<Item> SETSURA_PEONY = registerSetsuraAugment(
+            "setsura_peony", SignetUpgradeData.Skill.SETSURA_PEONY);
+    public static final RegistryObject<Item> SETSURA_WISTERIA = registerSetsuraAugment(
+            "setsura_wisteria", SignetUpgradeData.Skill.SETSURA_WISTERIA);
+    public static final RegistryObject<Item> SETSURA_IRIS = registerSetsuraAugment(
+            "setsura_iris", SignetUpgradeData.Skill.SETSURA_IRIS);
+    public static final RegistryObject<Item> SETSURA_SAKURA_CURTAIN = registerSetsuraCore(
+            "setsura_sakura_curtain", SignetUpgradeData.SetsuraCore.SAKURA_CURTAIN);
+    public static final RegistryObject<Item> SETSURA_CURTAIN_RAIN_FOUR_LIGHTS = registerSetsuraAugment(
+            "setsura_curtain_rain_four_lights", SignetUpgradeData.Skill.SETSURA_CURTAIN_RAIN_FOUR_LIGHTS);
+    public static final RegistryObject<Item> SETSURA_CURTAIN_MOON_SAKE = registerSetsuraAugment(
+            "setsura_curtain_moon_sake", SignetUpgradeData.Skill.SETSURA_CURTAIN_MOON_SAKE);
+    public static final RegistryObject<Item> SETSURA_CURTAIN_BOAR_DEER_BUTTERFLY = registerSetsuraAugment(
+            "setsura_curtain_boar_deer_butterfly", SignetUpgradeData.Skill.SETSURA_CURTAIN_BOAR_DEER_BUTTERFLY);
+    public static final RegistryObject<Item> SETSURA_NIGHT_YAKSHA = registerSetsuraCore(
+            "setsura_night_yaksha", SignetUpgradeData.SetsuraCore.NIGHT_YAKSHA);
+    public static final RegistryObject<Item> SETSURA_YAKSHA_MOMENTARY_MYRIAD = registerSetsuraAugment(
+            "setsura_yaksha_momentary_myriad", SignetUpgradeData.Skill.SETSURA_YAKSHA_MOMENTARY_MYRIAD);
+    public static final RegistryObject<Item> SETSURA_YAKSHA_ENDLESS_EVIL = registerSetsuraAugment(
+            "setsura_yaksha_endless_evil", SignetUpgradeData.Skill.SETSURA_YAKSHA_ENDLESS_EVIL);
+    public static final RegistryObject<Item> SETSURA_YAKSHA_ALL_FORMS = registerSetsuraAugment(
+            "setsura_yaksha_all_forms", SignetUpgradeData.Skill.SETSURA_YAKSHA_ALL_FORMS);
     public static final RegistryObject<Item> SIGNET_OF_BODHI = ITEMS.register("signet_of_bodhi",
             () -> new SignetOfBodhiItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> BODHI_HEAVENLY_EYE = registerBodhiAugment(
+            "bodhi_heavenly_eye", SignetUpgradeData.Skill.BODHI_HEAVENLY_EYE);
+    public static final RegistryObject<Item> BODHI_MIND_READING = registerBodhiAugment(
+            "bodhi_mind_reading", SignetUpgradeData.Skill.BODHI_MIND_READING);
+    public static final RegistryObject<Item> BODHI_DIVINE_FOOT = registerBodhiAugment(
+            "bodhi_divine_foot", SignetUpgradeData.Skill.BODHI_DIVINE_FOOT);
+    public static final RegistryObject<Item> BODHI_EXHAUSTION = registerBodhiAugment(
+            "bodhi_exhaustion", SignetUpgradeData.Skill.BODHI_EXHAUSTION);
+    public static final RegistryObject<Item> BODHI_TRUE_WORD = registerBodhiCore(
+            "bodhi_true_word", SignetUpgradeData.BodhiCore.TRUE_WORD);
+    public static final RegistryObject<Item> BODHI_TRUE_SELFLESS = registerBodhiAugment(
+            "bodhi_true_selfless", SignetUpgradeData.Skill.BODHI_TRUE_SELFLESS);
+    public static final RegistryObject<Item> BODHI_TRUE_IMPERMANENCE = registerBodhiAugment(
+            "bodhi_true_impermanence", SignetUpgradeData.Skill.BODHI_TRUE_IMPERMANENCE);
+    public static final RegistryObject<Item> BODHI_TRUE_SILENCE = registerBodhiAugment(
+            "bodhi_true_silence", SignetUpgradeData.Skill.BODHI_TRUE_SILENCE);
+    public static final RegistryObject<Item> BODHI_SECRET_WORD = registerBodhiCore(
+            "bodhi_secret_word", SignetUpgradeData.BodhiCore.SECRET_WORD);
+    public static final RegistryObject<Item> BODHI_SECRET_IMPERMANENCE = registerBodhiAugment(
+            "bodhi_secret_impermanence", SignetUpgradeData.Skill.BODHI_SECRET_IMPERMANENCE);
+    public static final RegistryObject<Item> BODHI_SECRET_SELFLESS = registerBodhiAugment(
+            "bodhi_secret_selfless", SignetUpgradeData.Skill.BODHI_SECRET_SELFLESS);
+    public static final RegistryObject<Item> BODHI_SECRET_SILENCE = registerBodhiAugment(
+            "bodhi_secret_silence", SignetUpgradeData.Skill.BODHI_SECRET_SILENCE);
     public static final RegistryObject<Item> SIGNET_OF_DECIMATION = ITEMS.register("signet_of_decimation",
             () -> new SignetOfDecimationItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DECIMATION_BLADE = registerDecimationAugment(
+            "decimation_blade", SignetUpgradeData.Skill.DECIMATION_BLADE);
+    public static final RegistryObject<Item> DECIMATION_WUWANG = registerDecimationAugment(
+            "decimation_wuwang", SignetUpgradeData.Skill.DECIMATION_WUWANG);
+    public static final RegistryObject<Item> DECIMATION_WEISHEN = registerDecimationAugment(
+            "decimation_weishen", SignetUpgradeData.Skill.DECIMATION_WEISHEN);
+    public static final RegistryObject<Item> DECIMATION_BLOOD_RELEASE = registerDecimationCore(
+            "decimation_blood_release", SignetUpgradeData.DecimationCore.BLOOD_RELEASE);
+    public static final RegistryObject<Item> DECIMATION_RELEASE_NONHUMAN = registerDecimationAugment(
+            "decimation_release_nonhuman", SignetUpgradeData.Skill.DECIMATION_RELEASE_NONHUMAN);
+    public static final RegistryObject<Item> DECIMATION_RELEASE_ONE_PATH = registerDecimationAugment(
+            "decimation_release_one_path", SignetUpgradeData.Skill.DECIMATION_RELEASE_ONE_PATH);
+    public static final RegistryObject<Item> DECIMATION_RELEASE_KALPAS = registerDecimationAugment(
+            "decimation_release_kalpas", SignetUpgradeData.Skill.DECIMATION_RELEASE_KALPAS);
+    public static final RegistryObject<Item> DECIMATION_BLOOD_RAIMENT = registerDecimationCore(
+            "decimation_blood_raiment", SignetUpgradeData.DecimationCore.BLOOD_RAIMENT);
+    public static final RegistryObject<Item> DECIMATION_RAIMENT_UNDYING = registerDecimationAugment(
+            "decimation_raiment_undying", SignetUpgradeData.Skill.DECIMATION_RAIMENT_UNDYING);
+    public static final RegistryObject<Item> DECIMATION_RAIMENT_BURNING_SOUL = registerDecimationAugment(
+            "decimation_raiment_burning_soul", SignetUpgradeData.Skill.DECIMATION_RAIMENT_BURNING_SOUL);
+    public static final RegistryObject<Item> DECIMATION_RAIMENT_HOMELAND = registerDecimationAugment(
+            "decimation_raiment_homeland", SignetUpgradeData.Skill.DECIMATION_RAIMENT_HOMELAND);
     public static final RegistryObject<Item> SIGNET_OF_HELIX = ITEMS.register("signet_of_helix",
             () -> new SignetOfHelixItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> HELIX_SPOON = registerHelixAugment(
+            "helix_spoon", SignetUpgradeData.Skill.HELIX_SPOON);
+    public static final RegistryObject<Item> HELIX_COBWEB = registerHelixAugment(
+            "helix_cobweb", SignetUpgradeData.Skill.HELIX_COBWEB);
+    public static final RegistryObject<Item> HELIX_SNEER = registerHelixAugment(
+            "helix_sneer", SignetUpgradeData.Skill.HELIX_SNEER);
+    public static final RegistryObject<Item> HELIX_REVERSED_SPIRAL = registerHelixCore(
+            "helix_reversed_spiral", SignetUpgradeData.HelixCore.REVERSED_SPIRAL);
+    public static final RegistryObject<Item> HELIX_REVERSED_DOOR = registerHelixAugment(
+            "helix_reversed_door", SignetUpgradeData.Skill.HELIX_REVERSED_DOOR);
+    public static final RegistryObject<Item> HELIX_REVERSED_HALL = registerHelixAugment(
+            "helix_reversed_hall", SignetUpgradeData.Skill.HELIX_REVERSED_HALL);
+    public static final RegistryObject<Item> HELIX_REVERSED_TRUTH = registerHelixAugment(
+            "helix_reversed_truth", SignetUpgradeData.Skill.HELIX_REVERSED_TRUTH);
+    public static final RegistryObject<Item> HELIX_CONCLUSION_SPIRAL = registerHelixCore(
+            "helix_conclusion_spiral", SignetUpgradeData.HelixCore.CONCLUSION_SPIRAL);
+    public static final RegistryObject<Item> HELIX_CONCLUSION_PRISON = registerHelixAugment(
+            "helix_conclusion_prison", SignetUpgradeData.Skill.HELIX_CONCLUSION_PRISON);
+    public static final RegistryObject<Item> HELIX_CONCLUSION_ORIGIN = registerHelixAugment(
+            "helix_conclusion_origin", SignetUpgradeData.Skill.HELIX_CONCLUSION_ORIGIN);
+    public static final RegistryObject<Item> HELIX_CONCLUSION_POINTER = registerHelixAugment(
+            "helix_conclusion_pointer", SignetUpgradeData.Skill.HELIX_CONCLUSION_POINTER);
     public static final RegistryObject<Item> SIGNET_OF_GOLD = ITEMS.register("signet_of_gold",
             () -> new SignetOfGoldItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> SIGNET_OF_DISCIPLINE = ITEMS.register("signet_of_discipline",
@@ -116,6 +277,60 @@ public class ModItems {
                     new Item.Properties().stacksTo(1),
                     SignetUpgradeData.Skill.DELIVERANCE_LONE_TRIUMPH
             ));
+    public static final RegistryObject<Item> DISCIPLINE_ASCETICISM = ITEMS.register(
+            "discipline_asceticism",
+            () -> new DisciplineCoreSignetItem(
+                    new Item.Properties().stacksTo(1),
+                    SignetUpgradeData.DisciplineCore.ASCETICISM
+            ));
+    public static final RegistryObject<Item> DISCIPLINE_BLESSING = ITEMS.register(
+            "discipline_blessing",
+            () -> new DisciplineCoreSignetItem(
+                    new Item.Properties().stacksTo(1),
+                    SignetUpgradeData.DisciplineCore.BLESSING
+            ));
+    public static final RegistryObject<Item> DISCIPLINE_FOUR = registerDisciplineAugment(
+            "discipline_four", SignetUpgradeData.Skill.DISCIPLINE_FOUR);
+    public static final RegistryObject<Item> DISCIPLINE_FIVE = registerDisciplineAugment(
+            "discipline_five", SignetUpgradeData.Skill.DISCIPLINE_FIVE);
+    public static final RegistryObject<Item> DISCIPLINE_SIX = registerDisciplineAugment(
+            "discipline_six", SignetUpgradeData.Skill.DISCIPLINE_SIX);
+    public static final RegistryObject<Item> DISCIPLINE_ASCETIC_BODY = registerDisciplineAugment(
+            "discipline_ascetic_body", SignetUpgradeData.Skill.DISCIPLINE_ASCETIC_BODY);
+    public static final RegistryObject<Item> DISCIPLINE_ASCETIC_LIFE = registerDisciplineAugment(
+            "discipline_ascetic_life", SignetUpgradeData.Skill.DISCIPLINE_ASCETIC_LIFE);
+    public static final RegistryObject<Item> DISCIPLINE_ASCETIC_PROOF = registerDisciplineAugment(
+            "discipline_ascetic_proof", SignetUpgradeData.Skill.DISCIPLINE_ASCETIC_PROOF);
+    public static final RegistryObject<Item> DISCIPLINE_BLESSING_PUNISHMENT = registerDisciplineAugment(
+            "discipline_blessing_punishment", SignetUpgradeData.Skill.DISCIPLINE_BLESSING_PUNISHMENT);
+    public static final RegistryObject<Item> DISCIPLINE_BLESSING_VIRTUE = registerDisciplineAugment(
+            "discipline_blessing_virtue", SignetUpgradeData.Skill.DISCIPLINE_BLESSING_VIRTUE);
+    public static final RegistryObject<Item> DISCIPLINE_BLESSING_RETURN = registerDisciplineAugment(
+            "discipline_blessing_return", SignetUpgradeData.Skill.DISCIPLINE_BLESSING_RETURN);
+    public static final RegistryObject<Item> GOLD_BIRD = registerGoldAugment(
+            "gold_bird", SignetUpgradeData.Skill.GOLD_BIRD);
+    public static final RegistryObject<Item> GOLD_ORCHARD = registerGoldAugment(
+            "gold_orchard", SignetUpgradeData.Skill.GOLD_ORCHARD);
+    public static final RegistryObject<Item> GOLD_WINE = registerGoldAugment(
+            "gold_wine", SignetUpgradeData.Skill.GOLD_WINE);
+    public static final RegistryObject<Item> GOLD_JADE = registerGoldAugment(
+            "gold_jade", SignetUpgradeData.Skill.GOLD_JADE);
+    public static final RegistryObject<Item> GOLD_ARIA = registerGoldCore(
+            "gold_aria", SignetUpgradeData.GoldCore.ARIA);
+    public static final RegistryObject<Item> GOLD_ECHO = registerGoldCore(
+            "gold_echo", SignetUpgradeData.GoldCore.ECHO);
+    public static final RegistryObject<Item> GOLD_ARIA_FERTILE = registerGoldAugment(
+            "gold_aria_fertile", SignetUpgradeData.Skill.GOLD_ARIA_FERTILE);
+    public static final RegistryObject<Item> GOLD_ARIA_LIFE = registerGoldAugment(
+            "gold_aria_life", SignetUpgradeData.Skill.GOLD_ARIA_LIFE);
+    public static final RegistryObject<Item> GOLD_ARIA_DAWN = registerGoldAugment(
+            "gold_aria_dawn", SignetUpgradeData.Skill.GOLD_ARIA_DAWN);
+    public static final RegistryObject<Item> GOLD_ECHO_WITHERED = registerGoldAugment(
+            "gold_echo_withered", SignetUpgradeData.Skill.GOLD_ECHO_WITHERED);
+    public static final RegistryObject<Item> GOLD_ECHO_COLD_WIND = registerGoldAugment(
+            "gold_echo_cold_wind", SignetUpgradeData.Skill.GOLD_ECHO_COLD_WIND);
+    public static final RegistryObject<Item> GOLD_ECHO_SILENT_NIGHT = registerGoldAugment(
+            "gold_echo_silent_night", SignetUpgradeData.Skill.GOLD_ECHO_SILENT_NIGHT);
     public static final RegistryObject<Item> REVERIE_SIGNET_UPGRADE = registerSignetUpgrade(
             "reverie_signet_upgrade", SignetUpgradeData.Signet.REVERIE);
     public static final RegistryObject<Item> VICISSITUDE_SIGNET_UPGRADE = registerSignetUpgrade(
@@ -308,7 +523,7 @@ public class ModItems {
             () -> new CocoonOfFinalityItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> HYPERION_LOG =
             ITEMS.register("hyperion_log",
-                    () -> new Item(new Item.Properties().stacksTo(1)));
+                    () -> new HyperionLogItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> CYBER_CHARACTER_BIOGRAPHY =
             ITEMS.register("cyber_character_biography",
                     () -> new Item(new Item.Properties().stacksTo(1)));
@@ -317,6 +532,18 @@ public class ModItems {
     public static final RegistryObject<Item> SHI_JI =
             ITEMS.register("shi_ji",
                     () -> new ShiJiBookItem(new Item.Properties().stacksTo(1).fireResistant()));
+    public static final RegistryObject<Item> FENGHUANG_DOWN =
+            ITEMS.register("fenghuang_down",
+                    () -> new FenghuangDownItem(new Item.Properties().stacksTo(1).fireResistant()));
+    public static final RegistryObject<Item> ABYSS_FLOWER =
+            ITEMS.register("abyss_flower",
+                    () -> new AbyssFlowerItem(new Item.Properties().stacksTo(1).fireResistant()));
+    public static final RegistryObject<Item> SKYFIRE_GREATSWORD =
+            ITEMS.register("skyfire_greatsword",
+                    () -> new SkyfireGreatswordItem(new Item.Properties().fireResistant()));
+    public static final RegistryObject<Item> EDEN_STAR =
+            ITEMS.register("eden_star",
+                    () -> new EdenStarItem(new Item.Properties().stacksTo(1).fireResistant()));
     public static final RegistryObject<Item> SOUL_STEEL_INGOT =
             ITEMS.register("soul_steel_ingot",
                     () -> new Item(new Item.Properties().stacksTo(64)));
@@ -392,23 +619,12 @@ public class ModItems {
                             0.0F,
                             0.20F
                     ));
-    public static final RegistryObject<Item> NAMELESS_TOWN_CHESTPLATE =
-            ITEMS.register("nameless_town_chestplate",
-                    () -> new NamelessTownChestplateItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> PARDOFELIS_MERCHANT_SPAWN_EGG =
             ITEMS.register("pardofelis_merchant_spawn_egg",
                     () -> new ForgeSpawnEggItem(
                             ModEntities.PARDOFELIS_MERCHANT,
                             0xD9B17D,
                             0x6B4A2E,
-                            new Item.Properties()
-                    ));
-    public static final RegistryObject<Item> QU_GE_SPAWN_EGG =
-            ITEMS.register("qu_ge_spawn_egg",
-                    () -> new ForgeSpawnEggItem(
-                            ModEntities.QU_GE,
-                            0x7020A8,
-                            0xD796FF,
                             new Item.Properties()
                     ));
     public static final RegistryObject<Item> APONIA_NPC_SPAWN_EGG =
@@ -465,49 +681,6 @@ public class ModItems {
                             new Item.Properties()
                     )
             );
-    public static final RegistryObject<Item> YELLOW_PURPLE_LITTLE_FISH_SPAWN_EGG =
-            ITEMS.register(
-                    "yellow_purple_little_fish_spawn_egg",
-                    () -> new ForgeSpawnEggItem(
-                            ModEntities.YELLOW_PURPLE_LITTLE_FISH,
-                            0xF0EA19,
-                            0x8A13D4,
-                            new Item.Properties()
-                    )
-            );
-    public static final RegistryObject<Item> YELLOW_PURPLE_LITTLE_AXOLOTL_SPAWN_EGG =
-            ITEMS.register(
-                    "yellow_purple_little_axolotl_spawn_egg",
-                    () -> new ForgeSpawnEggItem(
-                            ModEntities.YELLOW_PURPLE_LITTLE_AXOLOTL,
-                            0xF0EA19,
-                            0x8A13D4,
-                            new Item.Properties()
-                    )
-            );
-    public static final RegistryObject<Item> YELLOW_PURPLE_LITTLE_AXOLOTL_BABY_SPAWN_EGG =
-            ITEMS.register(
-                    "yellow_purple_little_axolotl_baby_spawn_egg",
-                    () -> new ForgeSpawnEggItem(
-                            ModEntities.YELLOW_PURPLE_LITTLE_AXOLOTL_BABY,
-                            0x8A13D4,
-                            0xF0EA19,
-                            new Item.Properties()
-                    )
-            );
-    public static final RegistryObject<Item> YELLOW_PURPLE_DYE =
-            ITEMS.register(
-                    "yellow_purple_dye",
-                    () -> new Item(new Item.Properties().stacksTo(64))
-            );
-    public static final RegistryObject<Item> YELLOW_PURPLE_WOOL =
-            ITEMS.register(
-                    "yellow_purple_wool",
-                    () -> new BlockItem(
-                            ModBlock.YELLOW_PURPLE_WOOL.get(),
-                            new Item.Properties()
-                    )
-            );
     public static final RegistryObject<Item> ELYSIAN_REALM_ENTRANCE =
             ITEMS.register(
                     "elysian_realm_entrance",
@@ -518,23 +691,14 @@ public class ModItems {
                                     .fireResistant()
                     )
             );
-    public static final RegistryObject<Item> YELLOW_PURPLE_LITTLE_BED =
-            ITEMS.register(
-                    "yellow_purple_little_bed",
-                    () -> new YellowPurpleLittleBedItem(
-                            ModBlock.YELLOW_PURPLE_LITTLE_BED.get(),
-                            new Item.Properties().stacksTo(1)
-                    )
-            );
-    public static final RegistryObject<Item> QU_GE_SPIT =
-            ITEMS.register("qu_ge_spit",
-                    () -> new Item(
-                            new Item.Properties()
-                                    .stacksTo(1)
-                    ));
     public static final RegistryObject<Item> WHISPER_OF_THE_PAST =
             ITEMS.register("whisper_of_the_past",
-                    () -> new WhisperOfThePastItem(new Item.Properties().durability(768)));
+                    () -> new WhisperOfThePastItem(
+                            new Item.Properties()
+                                    .stacksTo(1)
+                                    .fireResistant()
+                    )
+            );
     public static final RegistryObject<Item> FLAWLESS_BENEDICTION_LEGACY =
             ITEMS.register(
                     "flawless_benediction_legacy",
@@ -551,12 +715,65 @@ public class ModItems {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, lastsongofelysian.MODID);
 
+    private static final java.util.List<RegistryObject<Item>> ADDITIONAL_SIGNETS = java.util.List.of(
+            REVERIE_CAT_VERSE, REVERIE_BLADE_TAIL, REVERIE_STREET_JOY, REVERIE_PC,
+            REVERIE_JOY, REVERIE_BOSS, REVERIE_CAT_PUNCH, REVERIE_LUCKY,
+            REVERIE_DREAM, REVERIE_ZERO, REVERIE_SNOW, REVERIE_DREAM_TRUE,
+            VICISSITUDE_TIME, VICISSITUDE_ROBE, VICISSITUDE_DREAM, VICISSITUDE_WORDS,
+            VICISSITUDE_RESOLVE, VICISSITUDE_RED_DUST, VICISSITUDE_PROSPERITY,
+            VICISSITUDE_FAMILIAR, VICISSITUDE_MEMORY, VICISSITUDE_REED,
+            VICISSITUDE_FEATHER, VICISSITUDE_AWAKEN,
+            STARS_YELLOW, STARS_BLACK, STARS_WHITE, STARS_GRAY, STARS_SHINING,
+            STARS_WILDFLOWER_SHINING, STARS_FLAME_SHINING, STARS_LEAF_SHINING,
+            STARS_DIM, STARS_WILDFLOWER_DIM, STARS_LEAF_DIM, STARS_FLAME_DIM,
+            INFINITY_P, INFINITY_B, INFINITY_E, INFINITY_X, INFINITY_DEATH_X,
+            INFINITY_UNKNOWN_X, INFINITY_NEWBORN_X, INFINITY_M,
+            INFINITY_SACRIFICE_M, INFINITY_IMMORTAL_M, INFINITY_COLLAPSE_M,
+            DAYBREAK_WING, DAYBREAK_HORN, DAYBREAK_BREATH, DAYBREAK_HEART,
+            DAYBREAK_UNFADING_LIGHT, DAYBREAK_LIGHT_HERO, DAYBREAK_LIGHT_GOOD_EVIL,
+            DAYBREAK_LIGHT_VOW, DAYBREAK_LONELY_NIGHT, DAYBREAK_NIGHT_DAWN,
+            DAYBREAK_NIGHT_CHOICE, DAYBREAK_NIGHT_INTENT,
+            SETSURA_RED_LEAVES, SETSURA_PEONY, SETSURA_WISTERIA, SETSURA_IRIS,
+            SETSURA_SAKURA_CURTAIN, SETSURA_CURTAIN_RAIN_FOUR_LIGHTS,
+            SETSURA_CURTAIN_MOON_SAKE, SETSURA_CURTAIN_BOAR_DEER_BUTTERFLY,
+            SETSURA_NIGHT_YAKSHA, SETSURA_YAKSHA_MOMENTARY_MYRIAD,
+            SETSURA_YAKSHA_ENDLESS_EVIL, SETSURA_YAKSHA_ALL_FORMS,
+            BODHI_HEAVENLY_EYE, BODHI_MIND_READING, BODHI_DIVINE_FOOT,
+            BODHI_EXHAUSTION, BODHI_TRUE_WORD, BODHI_TRUE_SELFLESS,
+            BODHI_TRUE_IMPERMANENCE, BODHI_TRUE_SILENCE, BODHI_SECRET_WORD,
+            BODHI_SECRET_IMPERMANENCE, BODHI_SECRET_SELFLESS, BODHI_SECRET_SILENCE,
+            DECIMATION_BLADE, DECIMATION_WUWANG, DECIMATION_WEISHEN,
+            DECIMATION_BLOOD_RELEASE, DECIMATION_RELEASE_NONHUMAN,
+            DECIMATION_RELEASE_ONE_PATH, DECIMATION_RELEASE_KALPAS,
+            DECIMATION_BLOOD_RAIMENT, DECIMATION_RAIMENT_UNDYING,
+            DECIMATION_RAIMENT_BURNING_SOUL, DECIMATION_RAIMENT_HOMELAND,
+            HELIX_SPOON, HELIX_COBWEB, HELIX_SNEER, HELIX_REVERSED_SPIRAL,
+            HELIX_REVERSED_DOOR, HELIX_REVERSED_HALL, HELIX_REVERSED_TRUTH,
+            HELIX_CONCLUSION_SPIRAL, HELIX_CONCLUSION_PRISON,
+            HELIX_CONCLUSION_ORIGIN, HELIX_CONCLUSION_POINTER,
+            GOLD_BIRD, GOLD_ORCHARD, GOLD_WINE, GOLD_JADE, GOLD_ARIA,
+            GOLD_ARIA_FERTILE, GOLD_ARIA_LIFE, GOLD_ARIA_DAWN, GOLD_ECHO,
+            GOLD_ECHO_WITHERED, GOLD_ECHO_COLD_WIND, GOLD_ECHO_SILENT_NIGHT,
+            DISCIPLINE_FOUR, DISCIPLINE_FIVE, DISCIPLINE_SIX,
+            DISCIPLINE_ASCETICISM, DISCIPLINE_ASCETIC_BODY,
+            DISCIPLINE_ASCETIC_LIFE, DISCIPLINE_ASCETIC_PROOF,
+            DISCIPLINE_BLESSING, DISCIPLINE_BLESSING_PUNISHMENT,
+            DISCIPLINE_BLESSING_VIRTUE, DISCIPLINE_BLESSING_RETURN,
+            DELIVERANCE_HUNTERS_MASK, DELIVERANCE_RESTRAINERS_RELIC,
+            DELIVERANCE_SEEKERS_ROBE, DELIVERANCE_KINGS_SWORD,
+            DELIVERANCE_KINGS_MUSTER, DELIVERANCE_KINGS_EXPEDITION,
+            DELIVERANCE_KINGS_ECHO, DELIVERANCE_LONE_SHADOW,
+            DELIVERANCE_LONE_RESIDUAL_DREAM, DELIVERANCE_LONE_DECISION,
+            DELIVERANCE_LONE_TRIUMPH
+    );
+
     public static final RegistryObject<CreativeModeTab> LSE_TAB = CREATIVE_MODE_TABS.register("lse_tab",
             () -> CreativeModeTab.builder()
                     .icon(() -> new ItemStack(TAB_ICON.get()))
                     .title(Component.translatable("itemGroup.lastsongofelysian"))
                     .displayItems((params, output) -> {
                         output.accept(COCOON_OF_FINALITY.get());
+                        output.accept(SIGNET_OF_EGO.get());
                         output.accept(SIGNET_OF_REVERIE.get());
                         output.accept(SIGNET_OF_VICISSITUDE.get());
                         output.accept(SIGNET_OF_STARS.get());
@@ -569,17 +786,6 @@ public class ModItems {
                         output.accept(SIGNET_OF_GOLD.get());
                         output.accept(SIGNET_OF_DISCIPLINE.get());
                         output.accept(SIGNET_OF_DELIVERANCE.get());
-                        output.accept(DELIVERANCE_HUNTERS_MASK.get());
-                        output.accept(DELIVERANCE_RESTRAINERS_RELIC.get());
-                        output.accept(DELIVERANCE_SEEKERS_ROBE.get());
-                        output.accept(DELIVERANCE_KINGS_SWORD.get());
-                        output.accept(DELIVERANCE_KINGS_MUSTER.get());
-                        output.accept(DELIVERANCE_KINGS_EXPEDITION.get());
-                        output.accept(DELIVERANCE_KINGS_ECHO.get());
-                        output.accept(DELIVERANCE_LONE_SHADOW.get());
-                        output.accept(DELIVERANCE_LONE_RESIDUAL_DREAM.get());
-                        output.accept(DELIVERANCE_LONE_DECISION.get());
-                        output.accept(DELIVERANCE_LONE_TRIUMPH.get());
                         output.accept(REVERIE_SIGNET_UPGRADE.get());
                         output.accept(VICISSITUDE_SIGNET_UPGRADE.get());
                         output.accept(STARS_SIGNET_UPGRADE.get());
@@ -592,7 +798,6 @@ public class ModItems {
                         output.accept(GOLD_SIGNET_UPGRADE.get());
                         output.accept(DISCIPLINE_SIGNET_UPGRADE.get());
                         output.accept(DELIVERANCE_SIGNET_UPGRADE.get());
-                        output.accept(SIGNET_OF_EGO.get());
                         output.accept(AWAKENING.get());
                         output.accept(NINE_LIVES.get());
                         output.accept(FEAST_OF_EMPTINESS.get());
@@ -668,7 +873,10 @@ public class ModItems {
                         output.accept(CORE_OF_ORIGIN.get());
                         output.accept(WHISPER_OF_THE_PAST.get());
                         output.accept(FLAWLESS_BENEDICTION_LEGACY.get());
-                        output.accept(PAINTBRUSH.get());
+                        output.accept(FENGHUANG_DOWN.get());
+                        output.accept(ABYSS_FLOWER.get());
+                        output.accept(SKYFIRE_GREATSWORD.get());
+                        output.accept(EDEN_STAR.get());
                         output.accept(SHINY_SILVER.get());
                         output.accept(SILVER_POUCH.get());
                         output.accept(BIOLOGICAL_RESIDUE.get());
@@ -685,23 +893,25 @@ public class ModItems {
                         output.accept(SOUL_STEEL_INGOT.get());
                         output.accept(SOUL_STEEL_BLOCK.get());
                         output.accept(PARDOFELIS_MERCHANT_SPAWN_EGG.get());
-                        output.accept(QU_GE_SPAWN_EGG.get());
                         output.accept(APONIA_NPC_SPAWN_EGG.get());
                         output.accept(ELYSIA_NPC_SPAWN_EGG.get());
                         output.accept(GRISEO_NPC_SPAWN_EGG.get());
                         output.accept(VILL_V_NPC_SPAWN_EGG.get());
                         output.accept(EDEN_NPC_SPAWN_EGG.get());
-                        output.accept(YELLOW_PURPLE_LITTLE_FISH_SPAWN_EGG.get());
-                        output.accept(YELLOW_PURPLE_LITTLE_AXOLOTL_SPAWN_EGG.get());
-                        output.accept(YELLOW_PURPLE_LITTLE_AXOLOTL_BABY_SPAWN_EGG.get());
-                        output.accept(YELLOW_PURPLE_DYE.get());
-                        output.accept(YELLOW_PURPLE_WOOL.get());
-                        output.accept(YELLOW_PURPLE_LITTLE_BED.get());
                         output.accept(ELYSIAN_REALM_ENTRANCE.get());
-                        output.accept(NAMELESS_TOWN_CHESTPLATE.get());
                     })
                     .build()
     );
+
+    public static final RegistryObject<CreativeModeTab> ADDITIONAL_SIGNETS_TAB =
+            CREATIVE_MODE_TABS.register("additional_signets_tab",
+                    () -> CreativeModeTab.builder()
+                            .icon(() -> new ItemStack(SIGNET_OF_EGO.get()))
+                            .title(Component.translatable(
+                                    "itemGroup.lastsongofelysian.additional_signets"))
+                            .displayItems((params, output) -> ADDITIONAL_SIGNETS.forEach(
+                                    item -> output.accept(item.get())))
+                            .build());
 
     private static RegistryObject<Item> registerSignetUpgrade(
             String id,
@@ -714,6 +924,121 @@ public class ModItems {
                         signet
                 )
         );
+    }
+
+    private static RegistryObject<Item> registerDisciplineAugment(
+            String id,
+            SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(
+                id,
+                () -> new DisciplineSecondarySignetItem(
+                        new Item.Properties().stacksTo(1),
+                        skill
+                )
+        );
+    }
+
+    private static RegistryObject<Item> registerGoldCore(
+            String id,
+            SignetUpgradeData.GoldCore core
+    ) {
+        return ITEMS.register(id, () -> new GoldFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerHelixCore(
+            String id,
+            SignetUpgradeData.HelixCore core
+    ) {
+        return ITEMS.register(id, () -> new HelixFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerDecimationCore(
+            String id, SignetUpgradeData.DecimationCore core
+    ) {
+        return ITEMS.register(id, () -> new DecimationFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerBodhiCore(
+            String id, SignetUpgradeData.BodhiCore core
+    ) {
+        return ITEMS.register(id, () -> new BodhiFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerSetsuraCore(
+            String id, SignetUpgradeData.SetsuraCore core
+    ) {
+        return ITEMS.register(id, () -> new SetsuraFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerDaybreakCore(
+            String id, SignetUpgradeData.DaybreakCore core
+    ) {
+        return ITEMS.register(id, () -> new DaybreakFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerDaybreakAugment(
+            String id, SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new DaybreakFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
+    }
+
+    private static RegistryObject<Item> registerExtensionCore(
+            String id, SignetUpgradeData.ExtensionCore core
+    ) {
+        return ITEMS.register(id, () -> new ExtensionFusionSignetItem(
+                new Item.Properties().stacksTo(1), core));
+    }
+
+    private static RegistryObject<Item> registerExtensionAugment(
+            String id, SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new ExtensionFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
+    }
+
+    private static RegistryObject<Item> registerSetsuraAugment(
+            String id, SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new SetsuraFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
+    }
+
+    private static RegistryObject<Item> registerBodhiAugment(
+            String id, SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new BodhiFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
+    }
+
+    private static RegistryObject<Item> registerDecimationAugment(
+            String id, SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new DecimationFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
+    }
+
+    private static RegistryObject<Item> registerHelixAugment(
+            String id,
+            SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new HelixFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
+    }
+
+    private static RegistryObject<Item> registerGoldAugment(
+            String id,
+            SignetUpgradeData.Skill skill
+    ) {
+        return ITEMS.register(id, () -> new GoldFusionSignetItem(
+                new Item.Properties().stacksTo(1), skill));
     }
 
     private static RegistryObject<Item> registerRemembranceSigil(

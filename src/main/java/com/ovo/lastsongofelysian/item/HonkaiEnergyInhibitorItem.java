@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import com.ovo.lastsongofelysian.event.SignetEffects;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -36,7 +38,7 @@ public class HonkaiEnergyInhibitorItem extends Item {
         if (!level.isClientSide()) {
             if (healthCost > 0.0F && player.getHealth() <= healthCost) {
                 player.displayClientMessage(
-                        Component.literal("生命值不足，无法使用" + tierName + "崩坏能抑制剂。")
+                        ModText.literal("生命值不足，无法使用" + tierName + "崩坏能抑制剂。")
                                 .withStyle(ChatFormatting.RED),
                         true
                 );
@@ -47,7 +49,7 @@ public class HonkaiEnergyInhibitorItem extends Item {
 
             if (!success) {
                 player.displayClientMessage(
-                        Component.literal("当前没有可抑制的崩坏能侵蚀。")
+                        ModText.literal("当前没有可抑制的崩坏能侵蚀。")
                                 .withStyle(ChatFormatting.GRAY),
                         true
                 );
@@ -68,7 +70,7 @@ public class HonkaiEnergyInhibitorItem extends Item {
             );
 
             player.displayClientMessage(
-                    Component.literal(tierName + "崩坏能抑制剂生效，崩坏能侵蚀降低 "
+                    ModText.literal(tierName + "崩坏能抑制剂生效，崩坏能侵蚀降低 "
                                     + Math.round(reducePercent * 100.0F) + "%。")
                             .withStyle(getTierColor()),
                     true
@@ -86,14 +88,14 @@ public class HonkaiEnergyInhibitorItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level,
                                 List<Component> tooltip, TooltipFlag flag) {
 
-        tooltip.add(Component.literal("使用后降低 " + Math.round(reducePercent * 100.0F) + "% 崩坏能侵蚀。")
+        tooltip.add(ModText.literal("使用后降低 " + Math.round(reducePercent * 100.0F) + "% 崩坏能侵蚀。")
                 .withStyle(ChatFormatting.AQUA));
 
         if (healthCost > 0.0F) {
-            tooltip.add(Component.literal("代价：消耗 " + Math.round(healthCost) + " 点生命值。")
+            tooltip.add(ModText.literal("代价：消耗 " + Math.round(healthCost) + " 点生命值。")
                     .withStyle(ChatFormatting.RED));
         } else {
-            tooltip.add(Component.literal("代价：无生命消耗。")
+            tooltip.add(ModText.literal("代价：无生命消耗。")
                     .withStyle(ChatFormatting.LIGHT_PURPLE));
         }
 

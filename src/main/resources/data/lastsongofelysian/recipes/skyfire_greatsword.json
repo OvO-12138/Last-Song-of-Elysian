@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "combat",
+  "pattern": [
+    " S ",
+    " F ",
+    " B "
+  ],
+  "key": {
+    "S": {
+      "item": "lastsongofelysian:soul_steel_ingot"
+    },
+    "F": {
+      "item": "lastsongofelysian:core_of_fire"
+    },
+    "B": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "result": {
+    "item": "lastsongofelysian:skyfire_greatsword"
+  },
+  "show_notification": true
+}

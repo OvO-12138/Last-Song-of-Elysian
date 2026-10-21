@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.screen;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,7 +33,7 @@ public class IVTVBookScreen extends Screen {
     private static final int LINE_HEIGHT = 12;
 
     public IVTVBookScreen() {
-        super(Component.literal("ivTV"));
+        super(ModText.literal("ivTV"));
         jokes = buildJokes();
     }
 
@@ -98,14 +100,14 @@ public class IVTVBookScreen extends Screen {
         contentTop = panelTop + 64;
         contentBottom = panelTop + panelHeight - 42;
 
-        previousButton = this.addRenderableWidget(Button.builder(Component.literal("<"), button -> {
+        previousButton = this.addRenderableWidget(Button.builder(ModText.literal("<"), button -> {
             if (currentPage > 0) {
                 currentPage--;
                 scrollOffset = 0;
             }
         }).bounds(this.width / 2 - 58, panelTop + panelHeight - 31, 24, 20).build());
 
-        nextButton = this.addRenderableWidget(Button.builder(Component.literal(">"), button -> {
+        nextButton = this.addRenderableWidget(Button.builder(ModText.literal(">"), button -> {
             if (currentPage < jokes.size() - 1) {
                 currentPage++;
                 scrollOffset = 0;
@@ -130,11 +132,11 @@ public class IVTVBookScreen extends Screen {
             guiGraphics.fill(panelLeft + 17, y, panelLeft + panelWidth - 17, y + 1, 0x1800FF66);
         }
 
-        guiGraphics.drawString(font, "ivTV", panelLeft + 17, panelTop + 18, 0xFF75FFAB, false);
-        guiGraphics.drawString(font, "SIGNAL: ARCHIVE", panelLeft + panelWidth - 103, panelTop + 18, 0xFF3DD67A, false);
-        guiGraphics.drawString(font, page.title(), panelLeft + 20, panelTop + 50, 0xFF72FFAA, false);
+        guiGraphics.drawString(font, ModText.display("ivTV"), panelLeft + 17, panelTop + 18, 0xFF75FFAB, false);
+        guiGraphics.drawString(font, ModText.display("SIGNAL: ARCHIVE"), panelLeft + panelWidth - 103, panelTop + 18, 0xFF3DD67A, false);
+        guiGraphics.drawString(font, ModText.display(page.title()), panelLeft + 20, panelTop + 50, 0xFF72FFAA, false);
 
-        List<FormattedCharSequence> wrapped = font.split(Component.literal(page.content()), panelWidth - 58);
+        List<FormattedCharSequence> wrapped = font.split(ModText.exact(page.content()), panelWidth - 58);
         int totalHeight = wrapped.size() * LINE_HEIGHT;
         int visibleHeight = contentBottom - contentTop;
         maxScroll = Math.max(0, totalHeight - visibleHeight);
@@ -143,13 +145,13 @@ public class IVTVBookScreen extends Screen {
         guiGraphics.enableScissor(panelLeft + 19, contentTop, panelLeft + panelWidth - 22, contentBottom);
         int y = contentTop - scrollOffset;
         for (FormattedCharSequence line : wrapped) {
-            guiGraphics.drawString(font, line, panelLeft + 20, y, 0xFF8CFFB7, false);
+            guiGraphics.drawString(font, ModText.display(line), panelLeft + 20, y, 0xFF8CFFB7, false);
             y += LINE_HEIGHT;
         }
         guiGraphics.disableScissor();
 
         String pageText = (currentPage + 1) + "/" + jokes.size();
-        guiGraphics.drawCenteredString(font, pageText, this.width / 2, panelTop + panelHeight - 24, 0xFF65F99D);
+        guiGraphics.drawCenteredString(font, ModText.display(pageText), this.width / 2, panelTop + panelHeight - 24, 0xFF65F99D);
 
         if (maxScroll > 0) {
             int barHeight = Math.max(12, (int) ((visibleHeight / (float) totalHeight) * visibleHeight));

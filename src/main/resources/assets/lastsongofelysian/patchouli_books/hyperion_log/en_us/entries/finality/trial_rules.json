@@ -1,0 +1,23 @@
+{
+  "name": "开启终焉试炼",
+  "icon": "lastsongofelysian:cocoon_of_finality",
+  "category": "lastsongofelysian:finality",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "核心齐备后",
+      "text": "集齐包括始源在内的全部核心后，十二项终焉试炼开启。此时仍保留尚未完成试炼对应的诅咒。$(br2)每完成一项试炼，就解除对应诅咒并启用对应祝福。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "计数条件",
+      "text": "试炼需要在生存或冒险模式进行，并佩戴终焉之茧。茧仅允许创造模式玩家主动卸下。"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "选择合适的环境",
+      "text": "乐土不会自然刷新怪物。需要击败敌方单位的试炼，可前往主世界、下界等适合战斗的维度。"
+    }
+  ]
+}

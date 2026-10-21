@@ -1,5 +1,8 @@
 package com.ovo.lastsongofelysian.event;
 
+import com.ovo.lastsongofelysian.util.ModText;
+import com.ovo.lastsongofelysian.util.ModAdvancements;
+
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.network.CocoonStageSyncPacket;
 import com.ovo.lastsongofelysian.network.ModNetwork;
@@ -40,6 +43,7 @@ public final class CocoonCoreProgress {
     private static final String NBT_ACQUIRED_SIGNET_MASK = "CocoonAcquiredSignetMask";
     private static final String NBT_CURSES_REVERSED = "CocoonCursesReversed";
     private static final String NBT_TRIAL_SYSTEM_MIGRATED = "CocoonTrialSystemMigrated";
+    private static final String NBT_CORROSION_CURSE_CLEARED = "CocoonCorrosionCurseCleared";
     private static final ResourceLocation[] ALL_CORE_IDS = {
             coreId("core_of_reason"), coreId("core_of_void"),
             coreId("core_of_thunder"), coreId("core_of_wind"),
@@ -61,6 +65,8 @@ public final class CocoonCoreProgress {
             itemId("signet_of_ego")
     };
     private static final int ALL_SIGNET_MASK = (1 << ALL_SIGNET_IDS.length) - 1;
+    private static final int EGO_SIGNET_BIT = 1 << (ALL_SIGNET_IDS.length - 1);
+    private static final int NON_EGO_SIGNET_MASK = EGO_SIGNET_BIT - 1;
 
     public static final int REASON_STAGE = 1;
     public static final int VOID_STAGE = 2;
@@ -240,6 +246,7 @@ public final class CocoonCoreProgress {
         }
         data.putInt(NBT_ACQUIRED_CORE_MASK, mask);
         data.putInt(NBT_CORE_STAGE, Integer.bitCount(mask & NON_ORIGIN_CORE_MASK));
+        clearCorrosionCurseIfNeeded(player, data, mask);
 
         int newlyAcquired = (mask & NON_ORIGIN_CORE_MASK) & ~previousMask;
         for (int index = 0; index < 12; index++) {
@@ -258,6 +265,19 @@ public final class CocoonCoreProgress {
             if (containsItemId(player, ALL_SIGNET_IDS[index])) {
                 signetMask |= 1 << index;
             }
+        }
+
+        if ((signetMask & NON_EGO_SIGNET_MASK) == NON_EGO_SIGNET_MASK
+                && (signetMask & EGO_SIGNET_BIT) == 0) {
+            ItemStack ego = new ItemStack(ModItems.SIGNET_OF_EGO.get());
+            if (!player.addItem(ego)) {
+                player.drop(ego, false);
+            }
+            signetMask |= EGO_SIGNET_BIT;
+        }
+
+        if ((signetMask & NON_EGO_SIGNET_MASK) == NON_EGO_SIGNET_MASK) {
+            ModAdvancements.award(player, "signet_ego");
         }
 
         data.putInt(NBT_ACQUIRED_SIGNET_MASK, signetMask);
@@ -281,14 +301,18 @@ public final class CocoonCoreProgress {
             }
         }
 
+        if ((mask & NON_ORIGIN_CORE_MASK) == NON_ORIGIN_CORE_MASK
+                && (signetMask & EGO_SIGNET_BIT) != 0) {
+            ModAdvancements.award(player, "core_origin");
+        }
+
         if (mask == ALL_CORE_MASK && !data.getBoolean(NBT_TRIAL_SYSTEM_MIGRATED)) {
             data.putBoolean(NBT_TRIAL_SYSTEM_MIGRATED, true);
             data.putBoolean(NBT_CURSES_REVERSED, false);
             CocoonTrialProgress.unlock(player);
-            CorrosionCurseEvents.restoreForTrials(player);
             syncToClient(player);
             player.displayClientMessage(
-                    Component.literal("终焉试炼已开启")
+                    ModText.literal("终焉试炼已开启")
                             .withStyle(ChatFormatting.LIGHT_PURPLE),
                     false
             );
@@ -347,6 +371,7 @@ public final class CocoonCoreProgress {
                     mask
             );
             data.putInt(NBT_CORE_STAGE, Integer.bitCount(mask & NON_ORIGIN_CORE_MASK));
+            clearCorrosionCurseIfNeeded(player, data, mask);
             if (mask != previousMask) {
                 announceCoreAcquired(player, CoreEntry.byStage(index + 1));
                 syncToClient(player);
@@ -361,10 +386,10 @@ public final class CocoonCoreProgress {
         }
 
         player.displayClientMessage(
-                Component.literal("已获得 ")
-                        .append(Component.literal(core.displayName)
+                ModText.literal("已获得 ")
+                        .append(ModText.literal(core.displayName)
                                 .withStyle(core.color, ChatFormatting.BOLD))
-                        .append(Component.literal(
+                        .append(ModText.literal(
                                 "：终焉强度提高至 ×"
                                         + String.format(Locale.ROOT, "%.1f", getMultiplier(player))
                         ).withStyle(ChatFormatting.RED)),
@@ -375,11 +400,26 @@ public final class CocoonCoreProgress {
             CorrosionCurseEvents.syncToClient(player);
         } else {
             player.displayClientMessage(
-                    Component.literal(core.displayName + "对应的诅咒已开启。")
+                    ModText.literal(core.displayName + "对应的诅咒已开启。")
                             .withStyle(ChatFormatting.DARK_RED),
                     false
             );
         }
+    }
+
+    private static void clearCorrosionCurseIfNeeded(
+            Player player,
+            CompoundTag data,
+            int coreMask
+    ) {
+        int corrosionBit = 1 << (CORROSION_STAGE - 1);
+        if ((coreMask & corrosionBit) == 0
+                || data.getBoolean(NBT_CORROSION_CURSE_CLEARED)) {
+            return;
+        }
+        data.putBoolean(NBT_CORROSION_CURSE_CLEARED, true);
+        SignetEffects.clearCorruption(player);
+        CorrosionCurseEvents.clearCurseAfterTrial(player);
     }
 
     private static boolean containsItemId(
@@ -429,7 +469,10 @@ public final class CocoonCoreProgress {
                         getAcquiredCoreMask(player),
                         isReversed(player),
                         CocoonTrialProgress.isUnlocked(player),
-                        CocoonTrialProgress.getCompletedMask(player)
+                        CocoonTrialProgress.getCompletedMask(player),
+                        CocoonTrialProgress.getThunderStrikes(player),
+                        CocoonTrialProgress.getThunderKills(player),
+                        CocoonTrialProgress.getEarthExplosions(player)
                 )
         );
     }
@@ -460,6 +503,10 @@ public final class CocoonCoreProgress {
             newData.putInt(NBT_ACQUIRED_SIGNET_MASK, oldData.getInt(NBT_ACQUIRED_SIGNET_MASK));
             newData.putBoolean(NBT_CURSES_REVERSED, oldData.getBoolean(NBT_CURSES_REVERSED));
             newData.putBoolean(NBT_TRIAL_SYSTEM_MIGRATED, oldData.getBoolean(NBT_TRIAL_SYSTEM_MIGRATED));
+            newData.putBoolean(
+                    NBT_CORROSION_CURSE_CLEARED,
+                    oldData.getBoolean(NBT_CORROSION_CURSE_CLEARED)
+            );
             CocoonTrialProgress.copy(event.getOriginal(), event.getEntity());
         } catch (Throwable throwable) {
             System.err.println(

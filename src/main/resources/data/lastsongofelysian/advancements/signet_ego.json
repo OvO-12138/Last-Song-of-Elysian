@@ -1,0 +1,32 @@
+{
+  "parent": "lastsongofelysian:signet_deliverance",
+  "display": { "icon": { "item": "lastsongofelysian:signet_of_ego" }, "title": { "translate": "advancement.lastsongofelysian.signet_ego.title" }, "description": { "translate": "advancement.lastsongofelysian.signet_ego.description" }, "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false },
+  "criteria": {
+    "reverie": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_reverie"] }] } },
+    "vicissitude": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_vicissitude"] }] } },
+    "stars": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_stars"] }] } },
+    "infinity": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_infinity"] }] } },
+    "daybreak": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_daybreak"] }] } },
+    "setsuna": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_setsura"] }] } },
+    "bodhi": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_bodhi"] }] } },
+    "decimation": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_decimation"] }] } },
+    "helix": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_helix"] }] } },
+    "gold": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_gold"] }] } },
+    "discipline": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_discipline"] }] } },
+    "deliverance": { "trigger": "minecraft:inventory_changed", "conditions": { "items": [{ "items": ["lastsongofelysian:signet_of_deliverance"] }] } }
+  },
+  "requirements": [
+    ["reverie"],
+    ["vicissitude"],
+    ["stars"],
+    ["infinity"],
+    ["daybreak"],
+    ["setsuna"],
+    ["bodhi"],
+    ["decimation"],
+    ["helix"],
+    ["gold"],
+    ["discipline"],
+    ["deliverance"]
+  ]
+}

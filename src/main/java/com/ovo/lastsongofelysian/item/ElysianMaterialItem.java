@@ -1,5 +1,6 @@
 package com.ovo.lastsongofelysian.item;
 
+import com.ovo.lastsongofelysian.util.ModText;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -23,7 +24,7 @@ public class ElysianMaterialItem extends Item {
         for (String line : lore) {
             tooltip.add(line.isEmpty()
                     ? Component.empty()
-                    : Component.literal(line).withStyle(ChatFormatting.GRAY));
+                    : ModText.literal(line).withStyle(ChatFormatting.GRAY));
         }
         super.appendHoverText(stack, level, tooltip, flag);
     }

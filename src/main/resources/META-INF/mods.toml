@@ -23,6 +23,16 @@ description='''
 “但来访者，你的道路仍将延续，不是吗？那么，就听凭心意前进吧。沿着脚下的足迹，去见证那段逐火的征程。最后，跨越逝者们的终墓——去创造，「我们」所未能迎接的未来。”
 
 -粉色妖精小姐
+
+Welcome, noble and innocent soul. You have come to explore the past, but the foundations of truth have long been buried beneath its dust. This is the final paradise of a dying world, and the destined last tomb of the Flame-Chasers. What remains here is merely a collection of stories that are still rather interesting: stories of that distant past, and of the thirteen people who never became heroes.
+
+“Reverie” “Vicissitude” “Stars” “Infinity” “Daybreak” “Setsuna” “Bodhi” “Decimation” “Helix” “Gold” “Discipline” “Deliverance”
+
+Collect all twelve Signets, obtain the Signet of “■■”, and witness their ending.
+
+“But visitor, your path will still continue, won't it? Then follow your heart and move forward. Follow the footprints beneath your feet and witness that journey of chasing the flame. Finally, cross the departed ones' final graves — and create the future that we could never welcome.”
+
+— Ms Pink Elf
 '''
 [[dependencies.${mod_id}]]
     modId="forge"
@@ -41,5 +51,12 @@ description='''
 modId="curios"
 mandatory=true
 versionRange="[5.0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="patchouli"
+mandatory=true
+versionRange="[1.20.1-84,)"
 ordering="AFTER"
 side="BOTH"

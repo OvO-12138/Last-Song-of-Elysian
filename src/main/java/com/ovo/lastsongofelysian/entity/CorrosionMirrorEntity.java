@@ -1,5 +1,7 @@
 package com.ovo.lastsongofelysian.entity;
 
+import com.ovo.lastsongofelysian.util.ModText;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -112,7 +114,7 @@ public class CorrosionMirrorEntity extends PathfinderMob {
         this.expireGameTime = expireGameTime;
 
         this.setCustomName(
-                Component.literal(friendly ? "协同镜像" : "侵蚀镜像")
+                ModText.literal(friendly ? "协同镜像" : "侵蚀镜像")
                         .withStyle(friendly
                                 ? ChatFormatting.AQUA
                                 : ChatFormatting.DARK_PURPLE)

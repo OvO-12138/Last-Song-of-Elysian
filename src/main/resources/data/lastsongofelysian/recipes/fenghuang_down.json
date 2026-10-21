@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "combat",
+  "pattern": [
+    "FFF",
+    "FCF",
+    "FFF"
+  ],
+  "key": {
+    "F": {
+      "item": "minecraft:feather"
+    },
+    "C": {
+      "item": "lastsongofelysian:core_of_sentience"
+    }
+  },
+  "result": {
+    "item": "lastsongofelysian:fenghuang_down"
+  },
+  "show_notification": true
+}
