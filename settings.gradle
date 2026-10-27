@@ -9,8 +9,6 @@ pluginManagement {
     }
 }
 
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
-}
+// foojay-resolver 已移除：本机固定使用 JDK 17，不需要自动下载工具链
 
 rootProject.name = 'forge-1.20.1-47.4.10-mdk'
