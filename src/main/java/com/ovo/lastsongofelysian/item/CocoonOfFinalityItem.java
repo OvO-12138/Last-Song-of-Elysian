@@ -57,7 +57,7 @@ public class CocoonOfFinalityItem extends Item implements ICurioItem {
             "祝福：受到的爆炸伤害降低20%",
             "祝福：攻击伤害和护甲提高10%",
             "祝福：获得急迫效果",
-            "祝福：经验获取提高30%，崩坏侵蚀度被消除"
+            "祝福：经验获取提高30%；佩戴终焉之茧时造成的伤害提高15%；完成全部12项终焉试炼后，崩坏能侵蚀度清零"
     };
 
     private static final String[][] PERMANENT_CORROSION_CURSE_TEXT = {

@@ -105,11 +105,6 @@ public class ModNetwork {
                 BodhiPassiveDamageTogglePacket::decode,
                 BodhiPassiveDamageTogglePacket::handle,
                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        CHANNEL.registerMessage(18, MissingShiJiBookCrashPacket.class,
-                MissingShiJiBookCrashPacket::encode,
-                MissingShiJiBookCrashPacket::decode,
-                MissingShiJiBookCrashPacket::handle,
-                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registered = true;
     }
 }

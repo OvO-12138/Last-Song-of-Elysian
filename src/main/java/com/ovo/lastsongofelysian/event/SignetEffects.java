@@ -514,12 +514,15 @@ public class SignetEffects {
 
     private static boolean hasCorrosionCocoonCurse(Player player) {
         return isWearingCocoon(player)
-                && !isCorrosionCleared(player);
+                && !isCorrosionCurseCleared(player);
     }
 
-    private static boolean isCorrosionCleared(Player player) {
-        return CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION)
-                || CocoonCoreProgress.hasAcquiredCore(player, ModItems.CORE_OF_CORROSION.get());
+    private static boolean isCorrosionCurseCleared(Player player) {
+        return CocoonTrialProgress.isComplete(player, CocoonTrialProgress.CORROSION);
+    }
+
+    private static boolean isCorruptionFullyCleansed(Player player) {
+        return !CocoonTrialProgress.hasAnyIncompleteTrial(player);
     }
 
     private static boolean hasItem(Player player, Item item) {
@@ -719,7 +722,7 @@ public class SignetEffects {
     }
 
     public static float getCorruptionEnergy(Player player) {
-        if (isCorrosionCleared(player)) return 0.0F;
+        if (isCorruptionFullyCleansed(player)) return 0.0F;
         return corruptionEnergy.computeIfAbsent(
                 player.getUUID(),
                 ignored -> loadCorruptionEnergy(player)
@@ -789,7 +792,7 @@ public class SignetEffects {
         if (
                 player.level().isClientSide() ||
                 basePercent <= 0.0F ||
-                isCorrosionCleared(player)
+                isCorruptionFullyCleansed(player)
         ) {
             return false;
         }
@@ -849,7 +852,7 @@ public class SignetEffects {
 
     public static boolean reduceCorruptionByPercent(Player player, float percentOfMax) {
         if (player.level().isClientSide()
-                || isCorrosionCleared(player)) return false;
+                || isCorruptionFullyCleansed(player)) return false;
 
         UUID uuid = player.getUUID();
         float maxCorruption = getCorruptionCapacity(player);
@@ -1533,7 +1536,7 @@ public class SignetEffects {
     private static void handleCorruptionSystem(Player player) {
         UUID uuid = player.getUUID();
 
-        if (isCorrosionCleared(player)) {
+        if (isCorruptionFullyCleansed(player)) {
             if (corruptionEnergy.getOrDefault(uuid, loadCorruptionEnergy(player)) > 0.0F) {
                 clearCorruption(player);
             }

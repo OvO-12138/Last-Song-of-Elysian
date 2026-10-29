@@ -418,7 +418,6 @@ public final class CocoonCoreProgress {
             return;
         }
         data.putBoolean(NBT_CORROSION_CURSE_CLEARED, true);
-        SignetEffects.clearCorruption(player);
         CorrosionCurseEvents.clearCurseAfterTrial(player);
     }
 

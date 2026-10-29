@@ -6,6 +6,7 @@ import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import com.ovo.lastsongofelysian.util.EgoSignetAmplification;
 import com.ovo.lastsongofelysian.util.ElysianHeroExplosionProtection;
+import com.ovo.lastsongofelysian.util.PlayerControlledAllies;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -677,6 +678,7 @@ public final class CocoonCurseEvents {
         if (event.getEntity().level().isClientSide()) {
             return;
         }
+
         if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
@@ -950,6 +952,14 @@ public final class CocoonCurseEvents {
         if (event.getEntity().level().isClientSide()) {
             return;
         }
+
+        if (event.getSource().getEntity() instanceof Player attacker
+                && isWearingCocoon(attacker)
+                && CocoonTrialProgress.isComplete(attacker, CocoonTrialProgress.CORROSION)
+                && PlayerControlledAllies.isValidEnemy(attacker, event.getEntity())) {
+            event.setAmount(event.getAmount() * 1.15F);
+        }
+
         if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }

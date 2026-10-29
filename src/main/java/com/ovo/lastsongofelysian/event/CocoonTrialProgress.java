@@ -184,7 +184,6 @@ public final class CocoonTrialProgress {
                         .withStyle(CocoonTrialPalette.color(trial), ChatFormatting.BOLD), false);
 
         if (trial == CORROSION) {
-            SignetEffects.clearCorruption(player);
             CorrosionCurseEvents.clearCurseAfterTrial(player);
         }
 

@@ -87,7 +87,7 @@ public class CoreOfVoidItem extends HerrscherCoreItem {
 
         tooltip.add(Component.empty());
 
-        tooltip.add(ModText.literal("「Ich Iiebe dich」")
+        tooltip.add(ModText.literal("「Ich liebe dich」")
                 .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
 
         super.appendHoverText(stack, level, tooltip, flag);

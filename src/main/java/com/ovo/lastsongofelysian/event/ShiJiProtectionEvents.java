@@ -2,8 +2,6 @@ package com.ovo.lastsongofelysian.event;
 
 import com.ovo.lastsongofelysian.lastsongofelysian;
 import com.ovo.lastsongofelysian.item.ShiJiBookItem;
-import com.ovo.lastsongofelysian.network.ModNetwork;
-import com.ovo.lastsongofelysian.network.MissingShiJiBookCrashPacket;
 import com.ovo.lastsongofelysian.registry.ModItems;
 import com.ovo.lastsongofelysian.util.ModText;
 import net.minecraft.nbt.CompoundTag;
@@ -19,7 +17,6 @@ import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -28,9 +25,7 @@ public class ShiJiProtectionEvents {
 
     private static final String NBT_GOT_SHI_JI = "GotShiJi";
     private static final String NBT_MISSING_TICKS = "ShiJiMissingTicks";
-    private static final String NBT_CRASH_SENT = "ShiJiCrashSent";
     private static final int REPLACEMENT_INTERVAL_TICKS = 100;
-    private static final int MISSING_GRACE_TICKS = 20 * 20;
 
     private static boolean isShiJi(ItemStack stack) {
         return stack.is(ModItems.SHI_JI.get());
@@ -85,30 +80,15 @@ public class ShiJiProtectionEvents {
 
         if (hasBook) {
             data.remove(NBT_MISSING_TICKS);
-            data.remove(NBT_CRASH_SENT);
             return;
         }
 
-        int missingTicks = Math.min(MISSING_GRACE_TICKS,
-                data.getInt(NBT_MISSING_TICKS) + 1);
-        data.putInt(NBT_MISSING_TICKS, missingTicks);
-
-        if (missingTicks < MISSING_GRACE_TICKS
-                && missingTicks % REPLACEMENT_INTERVAL_TICKS == 0) {
+        int missingTicks = data.getInt(NBT_MISSING_TICKS) + 1;
+        if (missingTicks >= REPLACEMENT_INTERVAL_TICKS) {
+            data.remove(NBT_MISSING_TICKS);
             giveShiJi(player);
-        }
-
-        if (missingTicks >= MISSING_GRACE_TICKS && !data.getBoolean(NBT_CRASH_SENT)) {
-            data.putBoolean(NBT_CRASH_SENT, true);
-            ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-                    new MissingShiJiBookCrashPacket());
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            player.getPersistentData().remove(NBT_CRASH_SENT);
+        } else {
+            data.putInt(NBT_MISSING_TICKS, missingTicks);
         }
     }
 
@@ -155,6 +135,5 @@ public class ShiJiProtectionEvents {
             event.getEntity().getPersistentData().putBoolean(NBT_GOT_SHI_JI, true);
         }
         event.getEntity().getPersistentData().remove(NBT_MISSING_TICKS);
-        event.getEntity().getPersistentData().remove(NBT_CRASH_SENT);
     }
 }
